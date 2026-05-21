@@ -6,27 +6,32 @@ export default withAuth({
   },
 
   callbacks: {
-    authorized: ({ token, req }) => {
+    authorized: ({
+      token,
+      req,
+    }) => {
       const pathname =
         req.nextUrl.pathname;
 
-      // NOT LOGGED IN
       if (!token) {
         return false;
       }
 
-      // ADMIN ROUTES
+      // ADMIN
+
       if (
         pathname.startsWith(
           "/admin"
         )
       ) {
         return (
-          token.role === "Admin"
+          token.role ===
+          "admin"
         );
       }
 
-      // MODERATOR ROUTES
+      // MODERATOR
+
       if (
         pathname.startsWith(
           "/moderator"
@@ -34,11 +39,12 @@ export default withAuth({
       ) {
         return (
           token.role ===
-          "Moderator"
+          "moderator"
         );
       }
 
-      // USER DASHBOARD
+      // USER
+
       if (
         pathname.startsWith(
           "/dashboard"
@@ -55,7 +61,9 @@ export default withAuth({
 export const config = {
   matcher: [
     "/dashboard/:path*",
+
     "/admin/:path*",
+
     "/moderator/:path*",
   ],
 };
