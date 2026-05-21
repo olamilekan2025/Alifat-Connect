@@ -10,18 +10,23 @@ export async function POST(
   try {
     const body = await req.json();
 
-    const email = body?.email
-      ?.trim()
-      ?.toLowerCase();
+    const email =
+      typeof body?.email === "string"
+        ? body.email
+            .trim()
+            .toLowerCase()
+        : "";
 
     const code =
-      body?.code?.trim();
+      typeof body?.code === "string"
+        ? body.code.trim()
+        : "";
 
     if (!email || !code) {
       return NextResponse.json(
         {
           error:
-            "Email and code are required",
+            "Email and verification code are required",
         },
         {
           status: 400,
@@ -30,8 +35,6 @@ export async function POST(
     }
 
     await connectToDatabase();
-
-    // FIND USER
 
     const user =
       await User.findOne({
@@ -49,7 +52,19 @@ export async function POST(
       );
     }
 
-    // CHECK CODE
+    if (
+      !user.loginVerificationCode
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "No verification code found",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     if (
       user.loginVerificationCode !==
@@ -66,12 +81,8 @@ export async function POST(
       );
     }
 
-    // CHECK EXPIRATION
-
     if (
-      !user.loginVerificationExpires ||
-      new Date() >
-        user.loginVerificationExpires
+      !user.loginVerificationExpires
     ) {
       return NextResponse.json(
         {
@@ -84,7 +95,22 @@ export async function POST(
       );
     }
 
-    // VERIFY USER
+    const isExpired =
+      new Date(
+        user.loginVerificationExpires
+      ).getTime() < Date.now();
+
+    if (isExpired) {
+      return NextResponse.json(
+        {
+          error:
+            "Verification code expired",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     user.emailVerified = true;
 
@@ -98,7 +124,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        ok: true,
+        success: true,
 
         message:
           "Email verified successfully",
