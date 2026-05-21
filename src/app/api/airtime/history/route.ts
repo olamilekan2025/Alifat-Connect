@@ -6,8 +6,6 @@ import { authOptions } from "@/lib/auth";
 
 import { connectToDatabase } from "@/lib/mongodb";
 
-import User from "@/models/User";
-
 import Transaction from "@/models/transaction";
 
 export async function GET() {
@@ -16,78 +14,48 @@ export async function GET() {
 
     const session =
       await getServerSession(
-        authOptions,
+        authOptions
       );
 
     if (!session?.user?.email) {
       return NextResponse.json(
         {
-          message: "Unauthorized",
+          error: "Unauthorized",
         },
         {
           status: 401,
-        },
+        }
       );
     }
 
-    const user =
-      await User.findOne({
+    const transactions =
+      await Transaction.find({
         email:
           session.user.email,
-      });
+      })
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          message:
-            "User not found",
-        },
-        {
-          status: 404,
-        },
-      );
-    }
-
-   const transactions =
-  await Transaction.find({
-    userId:
-      user._id.toString(),
-
-    description: {
-      $regex: "airtime",
-      $options: "i",
-    },
-  })
-    .sort({
-      createdAt: -1,
-    })
-    .limit(20)
-    .lean();
-
-return NextResponse.json(
-  {
-    success: true,
-    transactions,
-  },
-  {
-    status: 200,
-  },
-);
+    return NextResponse.json({
+      ok: true,
+      transactions,
+    });
   } catch (error) {
     console.error(
-      "Airtime History Error:",
-      error,
+      "AIRTIME HISTORY ERROR:",
+      error
     );
 
     return NextResponse.json(
       {
-        success: false,
-        message:
-          "Something went wrong",
+        error:
+          "Failed to fetch history",
       },
       {
         status: 500,
-      },
+      }
     );
   }
 }
