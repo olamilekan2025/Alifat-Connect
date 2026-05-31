@@ -1,25 +1,37 @@
-// app/api/data/purchase/route.ts
-
 import { NextResponse } from "next/server";
-
 import { getServerSession } from "next-auth";
-
 import bcrypt from "bcryptjs";
 
 import { authOptions } from "@/lib/auth";
-
 import { connectToDatabase } from "@/lib/mongodb";
 
 import User from "@/models/User";
-
 import Transaction from "@/models/transaction";
 
 export async function POST(
   request: Request,
 ) {
   try {
-    await connectToDatabase();
+    const mongoose =
+      await connectToDatabase();
 
+    const db =
+      mongoose.connection.db;
+
+    if (!db) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Database connection failed",
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
+    // SESSION
     const session =
       await getServerSession(
         authOptions,
@@ -29,8 +41,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Unauthorized",
+          message: "Unauthorized",
         },
         {
           status: 401,
@@ -38,23 +49,36 @@ export async function POST(
       );
     }
 
+    // BODY
     const body =
       await request.json();
 
-    const {
-      network,
-      phone,
-      amount,
-      plan,
-      pin,
-    } = body;
+    const network =
+      String(
+        body.network || "",
+      ).trim();
+
+    const phone = String(
+      body.phone || "",
+    ).trim();
+
+    const planName = String(
+      body.planName || "",
+    ).trim();
+
+    const pin = String(
+      body.pin || "",
+    ).trim();
+
+    const amount = Number(
+      body.amount,
+    );
 
     // VALIDATION
     if (
       !network ||
       !phone ||
-      !amount ||
-      !plan ||
+      !planName ||
       !pin
     ) {
       return NextResponse.json(
@@ -69,14 +93,9 @@ export async function POST(
       );
     }
 
-    const parsedAmount =
-      Number(amount);
-
     if (
-      isNaN(
-        parsedAmount,
-      ) ||
-      parsedAmount < 50
+      isNaN(amount) ||
+      amount <= 0
     ) {
       return NextResponse.json(
         {
@@ -90,12 +109,7 @@ export async function POST(
       );
     }
 
-    // VALIDATE PHONE
-    if (
-      !/^0\d{10}$/.test(
-        String(phone),
-      )
-    ) {
+    if (!/^0\d{10}$/.test(phone)) {
       return NextResponse.json(
         {
           success: false,
@@ -108,12 +122,7 @@ export async function POST(
       );
     }
 
-    // VALIDATE PIN
-    if (
-      !/^\d{4}$/.test(
-        String(pin),
-      )
-    ) {
+    if (!/^\d{4}$/.test(pin)) {
       return NextResponse.json(
         {
           success: false,
@@ -126,7 +135,7 @@ export async function POST(
       );
     }
 
-    // FIND USER
+    // USER
     const user =
       await User.findOne({
         email:
@@ -146,13 +155,13 @@ export async function POST(
       );
     }
 
-    // CHECK PAYMENT PIN
+    // PIN CHECK
     if (!user.paymentPin) {
       return NextResponse.json(
         {
           success: false,
           message:
-            "Please set payment PIN in settings",
+            "Set payment PIN first",
         },
         {
           status: 400,
@@ -160,10 +169,9 @@ export async function POST(
       );
     }
 
-    // VERIFY PIN
     const isPinCorrect =
       await bcrypt.compare(
-        String(pin),
+        pin,
         user.paymentPin,
       );
 
@@ -180,22 +188,23 @@ export async function POST(
       );
     }
 
-    // CHECK BALANCE
+    // SAFE BALANCE
     const currentBalance =
-      Number(
-        user.walletBalance || 0,
+      Math.max(
+        0,
+        Number(
+          user.walletBalance,
+        ) || 0,
       );
 
-    // FIXED BUG HERE
+    // CHECK BALANCE
     if (
-      currentBalance <
-      parsedAmount
+      currentBalance < amount
     ) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Insufficient wallet balance",
+          message: `Insufficient balance. Wallet: ₦${currentBalance}`,
         },
         {
           status: 400,
@@ -203,49 +212,71 @@ export async function POST(
       );
     }
 
-    // DEDUCT BALANCE
+    // NEW BALANCE
+    const newBalance =
+      currentBalance - amount;
+
+    // FINAL SAFETY
+    if (newBalance < 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Invalid balance calculation",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    // UPDATE USER BALANCE
     user.walletBalance =
-      currentBalance -
-      parsedAmount;
+      newBalance;
 
     await user.save();
 
-    // SAVE TRANSACTION
-    await Transaction.create({
-      userId:
-        user._id.toString(),
+    // UPDATE WALLET COLLECTION
+    await db
+      .collection("wallets")
+      .updateOne(
+        {
+          userId:
+            user._id.toString(),
+        },
+        {
+          $set: {
+            balance:
+              newBalance,
 
-      type: "debit",
+            updatedAt:
+              new Date(),
+          },
+        },
+      );
 
-      category: "data",
+    // TRANSACTION
+    const transaction =
+      await Transaction.create({
+        userId:
+          user._id.toString(),
 
-      network,
+        type: "debit",
 
-      phone,
+        category: "data",
 
-      plan,
+        network,
 
-      amount:
-        parsedAmount,
+        phone,
 
-      status: "success",
+        amount,
 
-      description: `${network} ${plan} data purchase`,
-    });
+        status: "success",
 
-    // READY FOR REAL API INTEGRATION
-    /*
-      CONNECT VTU API HERE
+        description: `${network} ${planName} data purchase`,
+      });
 
-      Example:
-
-      const apiResponse = await fetch(...)
-
-      if failed:
-        refund user
-        update transaction status
-    */
-
+    // RESPONSE
     return NextResponse.json(
       {
         success: true,
@@ -254,7 +285,9 @@ export async function POST(
           "Data purchase successful",
 
         balance:
-          user.walletBalance,
+          newBalance,
+
+        transaction,
       },
       {
         status: 200,

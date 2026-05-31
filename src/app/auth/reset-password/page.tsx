@@ -378,8 +378,163 @@ function ResetPasswordContent() {
         </CardHeader>
 
         <CardContent>
-          {/* KEEP YOUR EXISTING FORM JSX HERE */}
-        </CardContent>
+  <form
+    onSubmit={onSubmit}
+    className="space-y-6"
+  >
+    <div className="space-y-3">
+      {/* <label className="text-sm font-medium">
+        Verification Code
+      </label> */}
+
+      <div className="flex justify-center gap-2">
+        {codes.map(
+          (digit, index) => (
+            <Input
+              key={index}
+              ref={(el) => {
+                inputsRef.current[
+                  index
+                ] = el;
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) =>
+                handleChange(
+                  e.target.value,
+                  index
+                )
+              }
+              onKeyDown={(e) =>
+                handleKeyDown(
+                  e,
+                  index
+                )
+              }
+              onPaste={
+                handlePaste
+              }
+              className="h-12 w-12 text-center text-lg font-bold"
+            />
+          )
+        )}
+      </div>
+    </div>
+
+    <div className="space-y-3">
+      <label className="text-sm font-medium">
+        New Password
+      </label>
+
+      <div className="relative">
+        <Input
+          type={
+            showPassword
+              ? "text"
+              : "password"
+          }
+          value={newPassword}
+          onChange={(e) =>
+            setNewPassword(
+              e.target.value
+            )
+          }
+          placeholder="Enter new password"
+          className="pr-10"
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowPassword(
+              !showPassword
+            )
+          }
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        >
+          {showPassword ? (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
+      </div>
+
+      <div className="space-y-1 text-xs">
+        <p
+          className={
+            passwordChecks.length
+              ? "text-green-500"
+              : "text-red-500"
+          }
+        >
+          ✓ At least 6 characters
+        </p>
+
+        <p
+          className={
+            passwordChecks.uppercase
+              ? "text-green-500"
+              : "text-red-500"
+          }
+        >
+          ✓ One uppercase letter
+        </p>
+
+        <p
+          className={
+            passwordChecks.number
+              ? "text-green-500"
+              : "text-red-500"
+          }
+        >
+          ✓ One number
+        </p>
+
+        <p
+          className={
+            passwordChecks.symbol
+              ? "text-green-500"
+              : "text-red-500"
+          }
+        >
+          ✓ One special character
+        </p>
+      </div>
+    </div>
+
+    <Button
+      type="submit"
+      className="w-full"
+      disabled={loading}
+    >
+      {loading
+        ? "Resetting..."
+        : "Reset Password"}
+    </Button>
+
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full"
+      disabled={
+        resending ||
+        countdown > 0
+      }
+      onClick={
+        handleResendCode
+      }
+    >
+      {resending
+        ? "Sending..."
+        : countdown > 0
+        ? `Resend in ${countdown}s`
+        : "Resend Code"}
+    </Button>
+  </form>
+</CardContent>
       </Card>
     </div>
   );

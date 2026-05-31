@@ -931,6 +931,7 @@ export default function WalletPage() {
       await fetchWallet();
     } catch (error) {
       console.error("PAYSTACK VERIFY ERROR:", error);
+      
 
       toast.error("Verification failed");
     } finally {
@@ -1104,7 +1105,7 @@ export default function WalletPage() {
               <p className="text-sm text-black dark:text-white">Available Balance</p>
 
               <h2 className="mt-3 text-black dark:text-white text-5xl font-bold">
-                ₦{wallet.balance.toLocaleString()}
+                ₦{Number(wallet?.balance || 0).toLocaleString()}
               </h2>
             </div>
 

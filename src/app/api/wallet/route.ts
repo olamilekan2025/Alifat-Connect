@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-
 import { connectToDatabase } from "@/lib/mongodb";
 
 import User from "@/models/User";
@@ -11,7 +9,7 @@ import User from "@/models/User";
 function generateAccountNumber() {
   return Math.floor(
     1000000000 +
-      Math.random() * 9000000000,
+      Math.random() * 9000000000
   ).toString();
 }
 
@@ -19,10 +17,9 @@ export async function GET() {
   try {
     const session =
       await getServerSession(
-        authOptions,
+        authOptions
       );
 
-    // CHECK AUTH
     if (!session?.user?.email) {
       return NextResponse.json(
         {
@@ -31,27 +28,19 @@ export async function GET() {
         },
         {
           status: 401,
-        },
+        }
       );
     }
 
-    // CONNECT DATABASE
-    const mongooseConnection =
+    const mongoose =
       await connectToDatabase();
 
     const db =
-      mongooseConnection.connection.db;
+      mongoose.connection.db;
 
     if (!db) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Database connection failed",
-        },
-        {
-          status: 500,
-        },
+      throw new Error(
+        "Database connection failed"
       );
     }
 
@@ -71,8 +60,34 @@ export async function GET() {
         },
         {
           status: 404,
-        },
+        }
       );
+    }
+
+    // FIX INVALID BALANCE
+    if (
+      typeof user.walletBalance !==
+      "number"
+    ) {
+      user.walletBalance = 0;
+
+      await user.save();
+    }
+
+    // SAFE BALANCE
+    const currentBalance =
+      Math.max(
+        0,
+        Number(
+          user.walletBalance
+        ) || 0
+      );
+
+    // FIX NEGATIVE BALANCE
+    if (currentBalance < 0) {
+      user.walletBalance = 0;
+
+      await user.save();
     }
 
     // FIND WALLET
@@ -84,37 +99,36 @@ export async function GET() {
             user._id.toString(),
         });
 
-    // CREATE WALLET IF NOT EXIST
+    // CREATE WALLET
     if (!wallet) {
-      let accountNumber = "";
+      let accountNumber =
+        "";
 
-      let existingWallet =
-        null;
+      let exists = true;
 
-      // GENERATE UNIQUE ACCOUNT NUMBER
-      do {
+      while (exists) {
         accountNumber =
           generateAccountNumber();
 
-        existingWallet =
+        const existingWallet =
           await db
             .collection(
-              "wallets",
+              "wallets"
             )
             .findOne({
               accountNumber,
             });
-      } while (
-        existingWallet
-      );
+
+        exists =
+          !!existingWallet;
+      }
 
       const newWallet = {
         userId:
           user._id.toString(),
 
         balance:
-          user.walletBalance ||
-          0,
+          currentBalance,
 
         accountNumber,
 
@@ -131,10 +145,10 @@ export async function GET() {
       const insertedWallet =
         await db
           .collection(
-            "wallets",
+            "wallets"
           )
           .insertOne(
-            newWallet,
+            newWallet
           );
 
       wallet = {
@@ -143,13 +157,43 @@ export async function GET() {
 
         ...newWallet,
       };
+    } else {
+      // SYNC WALLET BALANCE
+      await db
+        .collection("wallets")
+        .updateOne(
+          {
+            userId:
+              user._id.toString(),
+          },
+          {
+            $set: {
+              balance:
+                currentBalance,
+
+              updatedAt:
+                new Date(),
+            },
+          }
+        );
+
+      // REFETCH UPDATED WALLET
+      wallet =
+        await db
+          .collection(
+            "wallets"
+          )
+          .findOne({
+            userId:
+              user._id.toString(),
+          });
     }
 
-    // GET RECENT TRANSACTIONS
+    // GET TRANSACTIONS
     const transactions =
       await db
         .collection(
-          "transactions",
+          "transactions"
         )
         .find({
           userId:
@@ -166,19 +210,32 @@ export async function GET() {
         success: true,
 
         wallet: {
-          ...wallet,
-
           balance:
-            wallet.balance ||
-            0,
+            Number(
+              wallet?.balance
+            ) || 0,
+
+          accountNumber:
+            wallet?.accountNumber ||
+            "",
+
+          bankName:
+            wallet?.bankName ||
+            "",
         },
 
         user: {
+          id:
+            user._id,
+
           name:
             user.name || "",
 
           email:
             user.email || "",
+
+          walletBalance:
+            currentBalance,
 
           hasPaymentPin:
             !!user.paymentPin,
@@ -188,12 +245,12 @@ export async function GET() {
       },
       {
         status: 200,
-      },
+      }
     );
   } catch (error) {
     console.error(
       "GET WALLET ERROR:",
-      error,
+      error
     );
 
     return NextResponse.json(
@@ -204,7 +261,7 @@ export async function GET() {
       },
       {
         status: 500,
-      },
+      }
     );
   }
 }

@@ -1,13 +1,9 @@
-
-
 import { NextResponse } from "next/server";
-
 import bcrypt from "bcryptjs";
 
 import { connectToDatabase } from "@/lib/mongodb";
 
 import User from "@/models/User";
-
 import PasswordResetCode from "@/models/password-reset-code";
 
 export async function POST(
@@ -21,8 +17,7 @@ export async function POST(
     } catch {
       return NextResponse.json(
         {
-          error:
-            "Invalid request body",
+          error: "Invalid request body",
         },
         {
           status: 400,
@@ -31,15 +26,19 @@ export async function POST(
     }
 
     const email =
-      body?.email
-        ?.trim()
-        ?.toLowerCase();
+      typeof body?.email === "string"
+        ? body.email.trim().toLowerCase()
+        : "";
 
     const code =
-      body?.code?.trim();
+      typeof body?.code === "string"
+        ? body.code.trim()
+        : "";
 
     const password =
-      body?.password;
+      typeof body?.password === "string"
+        ? body.password
+        : "";
 
     if (
       !email ||
@@ -48,8 +47,25 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
+          error: "All fields are required",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // Password validation
+    if (
+      password.length < 6 ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[\W_]/.test(password)
+    ) {
+      return NextResponse.json(
+        {
           error:
-            "All fields are required",
+            "Password must contain at least 6 characters, one uppercase letter, one number and one special character",
         },
         {
           status: 400,
@@ -58,6 +74,22 @@ export async function POST(
     }
 
     await connectToDatabase();
+
+    const user =
+      await User.findOne({
+        email,
+      });
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "User not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
 
     const resetCode =
       await PasswordResetCode.findOne(
@@ -83,15 +115,16 @@ export async function POST(
     }
 
     if (
+      resetCode.expiresAt &&
       new Date() >
-      new Date(
-        resetCode.expiresAt
-      )
+        new Date(
+          resetCode.expiresAt
+        )
     ) {
       return NextResponse.json(
         {
           error:
-            "Reset code expired",
+            "Reset code has expired",
         },
         {
           status: 400,
@@ -105,24 +138,36 @@ export async function POST(
         10
       );
 
-    await User.updateOne(
-      { email },
+    user.password =
+      hashedPassword;
+
+    await user.save();
+
+    // Mark all reset codes as used
+    await PasswordResetCode.updateMany(
+      {
+        email,
+        purpose:
+          "reset-password",
+        usedAt: null,
+      },
       {
         $set: {
-          password:
-            hashedPassword,
+          usedAt: new Date(),
         },
       }
     );
 
-    resetCode.usedAt =
-      new Date();
-
-    await resetCode.save();
-
-    return NextResponse.json({
-      ok: true,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message:
+          "Password reset successful",
+      },
+      {
+        status: 200,
+      }
+    );
   } catch (error) {
     console.error(
       "RESET PASSWORD ERROR:",
@@ -132,7 +177,7 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          "Reset failed",
+          "Internal server error",
       },
       {
         status: 500,
