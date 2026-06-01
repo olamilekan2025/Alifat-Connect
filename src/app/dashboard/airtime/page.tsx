@@ -7,11 +7,11 @@ import { useSession } from "next-auth/react";
 import {
   Loader2,
   RefreshCw,
-  Smartphone,
   ChevronDown,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { Smartphone, ShieldCheck } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -82,6 +82,16 @@ const networkPrefixes = {
   Glo: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"],
 
   "9mobile": ["0809", "0817", "0818", "0908", "0909"],
+};
+
+const networkColors: Record<string, string> = {
+  MTN: "from-yellow-400 to-yellow-600",
+
+  Airtel: "from-red-500 to-red-700",
+
+  Glo: "from-green-500 to-green-700",
+
+  "9mobile": "from-emerald-400 to-emerald-700",
 };
 
 export default function AirtimePage() {
@@ -162,15 +172,15 @@ export default function AirtimePage() {
   }
 
   function detectNetwork(phoneNumber: string) {
-    const cleanedNumber = phoneNumber.replace(/\D/g, "");
+    const cleaned = phoneNumber.replace(/\D/g, "");
 
-    if (cleanedNumber.length < 4) {
+    if (cleaned.length < 4) {
       setNetwork("");
 
       return;
     }
 
-    const prefix = cleanedNumber.slice(0, 4);
+    const prefix = cleaned.slice(0, 4);
 
     let detected = "";
 
@@ -182,7 +192,6 @@ export default function AirtimePage() {
 
     setNetwork(detected);
   }
-
   async function handlePurchase() {
     try {
       if (!network || !phone || !amount) {
@@ -244,14 +253,17 @@ export default function AirtimePage() {
 
       toast.success("Airtime purchase successful");
 
+      setWallet({
+        balance: Number(data.balance || 0),
+      });
+
       setPhone("");
       setAmount("");
       setNetwork("");
       setPin("");
 
       setOpenPin(false);
-
-      await fetchWallet();
+      setOpenSummary(false);
 
       await fetchTransactions();
     } catch (error) {
@@ -266,7 +278,7 @@ export default function AirtimePage() {
   if (loading && transactions.length === 0) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-white" />
+        <div className="custom-loader" />
       </div>
     );
   }
@@ -274,37 +286,55 @@ export default function AirtimePage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* HEADER */}
-      <div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-          Airtime
-        </h1>
-
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Buy airtime instantly
-        </p>
+      <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-5 text-white md:p-8">
+        {" "}
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />{" "}
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          {" "}
+          <div className="max-w-xl">
+            {" "}
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur-xl">
+              {" "}
+              <Smartphone className="h-4 w-4 text-emerald-400" /> Instant
+              Airtime Top-up{" "}
+            </div>{" "}
+            <h1 className="text-4xl font-black tracking-tight md:text-5xl">
+              {" "}
+              Buy Airtime{" "}
+            </h1>{" "}
+            <p className="mt-4 text-zinc-300">
+              {" "}
+              Purchase airtime instantly for all Nigerian networks with fast and
+              secure delivery.{" "}
+            </p>{" "}
+          </div>{" "}
+          <div className="w-full rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur-2xl md:max-w-sm">
+            {" "}
+            <div className="flex items-start justify-between">
+              {" "}
+              <div>
+                {" "}
+                <p className="text-sm text-zinc-400"> Wallet Balance </p>{" "}
+                <h2 className="mt-2 text-3xl font-black md:text-4xl">
+                  {" "}
+                  ₦{wallet.balance.toLocaleString()}{" "}
+                </h2>{" "}
+              </div>{" "}
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-black">
+                {" "}
+                <Smartphone className="h-6 w-6" />{" "}
+              </div>{" "}
+            </div>{" "}
+            <div className="mt-5 flex items-center gap-2 rounded-2xl bg-emerald-500/10 p-3 text-sm text-emerald-400">
+              {" "}
+              <ShieldCheck className="h-4 w-4" /> Instant & Secure Airtime
+              Purchase{" "}
+            </div>{" "}
+          </div>{" "}
+        </div>{" "}
       </div>
-
-      {/* WALLET */}
-      <Card className="overflow-hidden rounded-[35px] border-0 bg-white rounded-md dark:bg-gradient-to-br from-black via-zinc-900 to-zinc-800 text-white shadow-2xl">
-        <CardContent className="flex items-center justify-between p-8">
-          <div>
-            <p className="text-sm text-black dark:text-zinc-400">
-              Wallet Balance
-            </p>
-
-            <h2 className="mt-3 text-black text-5xl font-bold">
-              ₦{wallet.balance.toLocaleString()}
-            </h2>
-          </div>
-
-          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-black dark: dark:bg-white/10">
-            <Smartphone className="h-8 w-8" />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* MAIN */}
-      <div className="grid gap-6 xl:grid-col-[1fr_0.9fr]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         {/* LEFT */}
         <Card className="overflow-hidden rounded-[35px] rounded-md  border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
           <div className="dark:bg-gradient-to-br from-black via-zinc-900 to-zinc-800 p-8 text-white">
@@ -320,105 +350,52 @@ export default function AirtimePage() {
                 Recipient Number
               </label>
 
-              <div className="rounded-[28px] border border-zinc-200  bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="flex items-center gap-3">
-                  {/* NETWORK */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold">Phone Number</label>
+
+                <div className="flex items-center gap-2 rounded-[24px] border border-zinc-200 bg-[#f7f8fa] p-2 dark:border-white/10 dark:bg-zinc-900">
                   <div
-                    className={`flex h-14 min-w-[160px] items-center justify-between rounded-2xl border px-4 transition-all ${
+                    className={`flex h-12 min-w-[90px] items-center justify-center rounded-[18px] bg-gradient-to-br ${
                       network
-                        ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30"
-                        : "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800"
+                        ? networkColors[network]
+                        : "from-zinc-300 to-zinc-400 dark:from-zinc-700 dark:to-zinc-800"
                     }`}
                   >
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                        Network
-                      </span>
-
-                      <span
-                        className={`text-sm font-bold ${
-                          network
-                            ? "text-green-700 dark:text-green-400"
-                            : "text-zinc-400 dark:text-zinc-500"
-                        }`}
-                      >
-                        {phone.length >= 4
-                          ? network || "Unknown"
-                          : "Detecting..."}
-                      </span>
-                    </div>
-
-                    <ChevronDown className="h-4 w-4 text-zinc-400" />
+                    <span className="text-sm font-black text-white">
+                      {network || "AUTO"}
+                    </span>
                   </div>
 
-                  {/* INPUT */}
-                  <div className="flex-1">
-                    <Input
-                      type="tel"
-                      maxLength={11}
-                      placeholder="08012345678"
-                      value={phone}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
+                  <Input
+                    type="tel"
+                    maxLength={11}
+                    value={phone}
+                    placeholder="08123456789"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
 
-                        setPhone(value);
+                      setPhone(value);
 
-                        detectNetwork(value);
-                      }}
-                      className="h-14 border-0 bg-zinc-50 text-base shadow-none focus-visible:ring-0 dark:bg-zinc-800 dark:text-white"
-                    />
-                  </div>
+                      detectNetwork(value);
+                    }}
+                    className="h-12 border-0 bg-transparent text-lg font-bold shadow-none focus-visible:ring-0"
+                  />
                 </div>
 
-                {/* STATUS */}
                 {phone.length === 11 && (
-                  <div className="mt-4 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800">
+                  <>
                     {network ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
-                            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                          </div>
-
-                          <div>
-                            <h3 className="font-semibold text-zinc-900 dark:text-white">
-                              {network} Number
-                            </h3>
-
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                              {phone}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-950 dark:text-green-400">
-                          Valid
-                        </div>
+                      <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {network} number detected
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-950">
-                            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                          </div>
-
-                          <div>
-                            <h3 className="font-semibold text-red-600 dark:text-red-400">
-                              Unknown Network
-                            </h3>
-
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                              Please check the number
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950 dark:text-red-400">
-                          Invalid
-                        </div>
+                      <div className="flex items-center gap-2 text-sm font-medium text-red-500">
+                        <AlertCircle className="h-4 w-4" />
+                        Invalid network
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -513,7 +490,7 @@ export default function AirtimePage() {
             </Button>
           </div>
 
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-6 max-h-[500px] overflow-y-auto">
             {transactions.length === 0 ? (
               <div className="flex h-[300px] items-center justify-center rounded-3xl border border-dashed border-zinc-300 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
                 No transactions yet
@@ -623,7 +600,7 @@ export default function AirtimePage() {
               maxLength={4}
               placeholder="****"
               value={pin}
-              onChange={(e) => setPin(e.target.value)}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
               className="h-16 rounded-2xl text-center text-2xl tracking-[10px] dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
             />
 

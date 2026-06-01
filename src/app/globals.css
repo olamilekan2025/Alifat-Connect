@@ -49,6 +49,48 @@ body {
 }
 
 
+
+.custom-loader {
+  width: 100px;
+  height: 100px;
+  display: grid;
+  animation: loader-rotate 8s infinite;
+}
+
+.custom-loader::before,
+.custom-loader::after {
+  content: "";
+  grid-area: 1/1;
+  border: 16px solid;
+  border-radius: 50%;
+  border-color: #766df4 #766df4 transparent transparent;
+  mix-blend-mode: darken;
+  animation: loader-spin 2s infinite linear;
+}
+
+.custom-loader::after {
+  border-color: transparent transparent #e4e4ed #e4e4ed;
+  animation-direction: reverse;
+}
+
+@keyframes loader-rotate {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes loader-spin {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+
+.dark .custom-loader::after {
+  border-color: transparent transparent #3f3f46 #3f3f46;
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -82,7 +82,7 @@ export function DashboardNavbar() {
 
   return (
     <>
-      <header className="   flex w-[66rem] items-center justify-between gap-6 border-b border-zinc-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/90 md:px-6 ">
+      <header className="fixed left-0 right-0 top-0 mx-auto flex w-full max-w-5xl items-center justify-between gap-6 border-b border-zinc-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/90 md:px-6">
         {/* LEFT */}
         <div className="flex min-w-0 h-15 w-400 flex-col">
           {/* <div className="flex items-center gap-2">

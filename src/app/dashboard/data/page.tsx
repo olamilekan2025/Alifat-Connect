@@ -443,38 +443,31 @@ export default function DataPage() {
       }
 
       if (!response.ok) {
-  toast.error(
-    data.message ||
-      "Purchase failed",
-  );
+        toast.error(data.message || "Purchase failed");
 
-  return;
-}
+        return;
+      }
 
-toast.success(
-  "Data purchase successful",
-);
+      toast.success("Data purchase successful");
 
-// UPDATE WALLET IMMEDIATELY
-setWallet({
-  balance: Number(
-    data.balance || 0,
-  ),
-});
+      // UPDATE WALLET IMMEDIATELY
+      setWallet({
+        balance: Number(data.balance || 0),
+      });
 
-// RESET FORM
-setPhone("");
-setNetwork("");
-setSelectedPlan(null);
-setPin("");
-setPlanType("Daily");
+      // RESET FORM
+      setPhone("");
+      setNetwork("");
+      setSelectedPlan(null);
+      setPin("");
+      setPlanType("Daily");
 
-// CLOSE MODALS
-setOpenPin(false);
-setOpenSummary(false);
+      // CLOSE MODALS
+      setOpenPin(false);
+      setOpenSummary(false);
 
-// REFRESH TRANSACTIONS
-await fetchTransactions();
+      // REFRESH TRANSACTIONS
+      await fetchTransactions();
     } catch (error) {
       console.error(error);
 
@@ -750,38 +743,40 @@ await fetchTransactions();
               </Button>
             </div>
 
-            <CardContent className="space-y-4 p-5">
+            <CardContent className="p-5">
               {transactions.length === 0 ? (
                 <div className="flex h-[300px] items-center justify-center text-zinc-500">
                   No transactions yet
                 </div>
               ) : (
-                transactions.map((item) => (
-                  <div
-                    key={item._id}
-                    className="rounded-[20px] bg-[#f7f8fa] p-4 dark:bg-zinc-900"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-bold">{item.planName}</h3>
+                <div className="max-h-[400px] overflow-y-auto space-y-3">
+                  {transactions.map((item) => (
+                    <div
+                      key={item._id}
+                      className="rounded-[20px] bg-[#f7f8fa] p-4 dark:bg-zinc-900"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-bold">{item.planName}</h3>
 
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {item.phone}
-                        </p>
-                      </div>
+                          <p className="mt-1 text-sm text-zinc-500">
+                            {item.phone}
+                          </p>
+                        </div>
 
-                      <div className="text-right">
-                        <h2 className="font-black">
-                          ₦{item.amount.toLocaleString()}
-                        </h2>
+                        <div className="text-right">
+                          <h2 className="font-black">
+                            ₦{Number(item.amount).toLocaleString()}
+                          </h2>
 
-                        <span className="text-xs font-bold text-emerald-600">
-                          {item.status}
-                        </span>
+                          <span className="text-xs font-bold text-emerald-600">
+                            {item.status}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>

@@ -199,93 +199,151 @@ export async function POST(
     }
 
     // FIND WALLET
-    const wallet =
-      await db
-        .collection("wallets")
-        .findOne({
-          userId:
-            user._id.toString(),
-        });
+let wallet =
+  await db
+    .collection("wallets")
+    .findOne({
+      userId:
+        user._id.toString(),
+    });
 
-    if (!wallet) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Wallet not found",
-        },
-        {
-          status: 404,
-        },
-      );
-    }
+// CREATE WALLET IF MISSING
+if (!wallet) {
+  const accountNumber =
+    Math.floor(
+      1000000000 +
+        Math.random() *
+          9000000000,
+    ).toString();
 
-    const currentBalance =
-      Number(
-        wallet.balance || 0,
-      );
+  const initialBalance =
+    Number(
+      user.walletBalance || 0,
+    );
 
-    // FIXED BUG HERE
-    if (
-      currentBalance <
-      parsedAmount
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Insufficient balance",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    // NEW BALANCE
-    const newBalance =
-      currentBalance -
-      parsedAmount;
-
-    // UPDATE WALLET
-    await db
-      .collection("wallets")
-      .updateOne(
-        {
-          _id: wallet._id,
-        },
-        {
-          $set: {
-            balance:
-              newBalance,
-            updatedAt:
-              new Date(),
-          },
-        },
-      );
-
-    // SAVE TRANSACTION
-    await Transaction.create({
+  await db
+    .collection("wallets")
+    .insertOne({
       userId:
         user._id.toString(),
 
-      type: "debit",
+      balance:
+        initialBalance,
 
-      amount:
-        parsedAmount,
+      accountNumber,
 
-      status: "success",
-
-      description: `${network} airtime purchase`,
-
-      network,
-
-      phone,
+      bankName:
+        "Alifat Connect Pay",
 
       createdAt:
         new Date(),
+
+      updatedAt:
+        new Date(),
     });
 
+  wallet =
+    await db
+      .collection("wallets")
+      .findOne({
+        userId:
+          user._id.toString(),
+      });
+}
+
+const currentBalance =
+  Math.max(
+    0,
+    Number(
+      wallet?.balance ??
+        user.walletBalance ??
+        0,
+    ),
+  );
+
+// CHECK BALANCE
+if (
+  currentBalance <
+  parsedAmount
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: `Insufficient balance. Wallet: ₦${currentBalance}`,
+    },
+    {
+      status: 400,
+    },
+  );
+}
+
+// CALCULATE NEW BALANCE
+const newBalance =
+  currentBalance -
+  parsedAmount;
+
+if (newBalance < 0) {
+  return NextResponse.json(
+    {
+      success: false,
+      message:
+        "Invalid balance calculation",
+    },
+    {
+      status: 400,
+    },
+  );
+}
+
+// UPDATE USER BALANCE
+user.walletBalance =
+  newBalance;
+
+await user.save();
+
+// UPDATE WALLET BALANCE
+await db
+  .collection("wallets")
+  .updateOne(
+    {
+      userId:
+        user._id.toString(),
+    },
+    {
+      $set: {
+        balance:
+          newBalance,
+
+        updatedAt:
+          new Date(),
+      },
+    },
+  );
+    await Transaction.create({
+  userId:
+    user._id.toString(),
+
+  type: "debit",
+
+  category:
+    "airtime",
+
+  amount:
+    parsedAmount,
+
+  status:
+    "success",
+
+  description:
+    `${network} airtime purchase`,
+
+  network,
+
+  phone,
+
+  createdAt:
+    new Date(),
+});
     return NextResponse.json(
       {
         success: true,
