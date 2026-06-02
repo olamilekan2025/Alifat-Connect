@@ -284,9 +284,9 @@ export default function AirtimePage() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6 p-1 md:p-6">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-5 text-white md:p-8">
+      <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-2 text-white md:p-8">
         {" "}
         <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />{" "}
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
