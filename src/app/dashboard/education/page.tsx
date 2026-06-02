@@ -54,6 +54,9 @@ export default function EducationBillPage() {
     } finally {
       setIsLoading(false);
     }
+
+
+    
   };
 
   return (

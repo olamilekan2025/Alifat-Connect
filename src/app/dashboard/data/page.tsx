@@ -485,8 +485,8 @@ export default function DataPage() {
 
   if (loading && transactions.length === 0) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-black">
-        <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="custom-loader" />
       </div>
     );
   }

@@ -405,10 +405,10 @@ export default function WalletPage() {
     bank.name.toLowerCase().includes(bankSearch.toLowerCase()),
   );
 
-  if (sessionStatus === "loading" || loading) {
+ if (loading && transactions.length === 0) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="custom-loader" />
       </div>
     );
   }

@@ -114,10 +114,10 @@ export default function DashboardPage() {
     dashboardData?.transactions ||
     [];
 
-  if (loading) {
+   if (loading && transactions.length === 0) {
     return (
-      <div className="p-6">
-        Loading dashboard...
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="custom-loader" />
       </div>
     );
   }
