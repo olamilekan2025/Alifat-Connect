@@ -99,7 +99,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-black">
+<nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-2xl dark:bg-black/80">
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -186,7 +186,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="border-t border-gray-200 px-2 py-6 dark:border-white/10 md:hidden">
+          <div className="border-t h-screen border-gray-200 px-2 py-6 dark:border-white/10 md:hidden ">
             <div className="flex flex-col gap-5">
               {navLinks.map(
                 (link) => (
