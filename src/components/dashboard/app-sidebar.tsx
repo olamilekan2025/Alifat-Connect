@@ -41,10 +41,17 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+
+  const handleLinkClick = () => {
+  setOpenMobile(false);
+};
 
   const isMobileGroupActive =
     pathname ===
@@ -96,40 +103,37 @@ export function AppSidebar() {
     }
   }, [isBillsGroupActive]);
 
-  const menuClass = (
-    active: boolean,
-  ) =>
-    `group relative flex h-11 w-full items-center gap-3 rounded-2xl px-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 ${
-      active
-        ? "bg-gradient-to-r from-[#D4AF37]/18 to-[#D4AF37]/8 text-[#D4AF37] shadow-sm shadow-[#D4AF37]/10 dark:from-[#D4AF37]/15 dark:to-[#D4AF37]/5 dark:text-[#F3D86B]"
-        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-    }`;
+const menuClass = (active: boolean) =>
+  `group relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 transition-all duration-200 ${
+    active
+      ? "bg-gradient-to-r from-[#D4AF37]/18 to-[#D4AF37]/8 text-[#D4AF37]"
+      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+  }`;
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-zinc-200 bg-white/95 backdrop-blur-xl dark:border-zinc-800 dark:bg-black"
-    >
+   <Sidebar
+  collapsible="icon"
+  className="w-[280px] border-r border-zinc-200 bg-white/95 backdrop-blur-xl dark:border-zinc-800 dark:bg-black md:w-[300px] group-data-[collapsible=icon]:w-[80px]"
+>
       {/* HEADER */}
-      <SidebarHeader className="border-b border-zinc-200 px-4 py-5 dark:border-zinc-800">
+      <SidebarHeader className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 px-4 py-5 backdrop-blur-xl dark:border-zinc-800 dark:bg-black">
         <div className="flex items-center gap-3">
-          <div className="relative h-12 w-full shrink-0 overflow-hidden rounded-2xl">
+         <div className="relative h-12 w-[130px] shrink-0 overflow-hidden rounded-2xl transition-all duration-300 group-data-[collapsible=icon]:w-12">
             <Image
               src="/logo.png"
               fill
               alt="Logo"
               sizes="(max-width: 768px) 100px, 120px"
               priority
-              className="object-cover object-left transition-all duration-300 group-data-[collapsible=icon]:object-center"
+   className="object-contain object-left transition-all duration-300 group-data-[collapsible=icon]:object-center"
             />
           </div>
         </div>
       </SidebarHeader>
-
-      <SidebarContent className="px-3 py-5">
+<SidebarContent className="overflow-y-auto px-3 py-5">
         {/* NAVIGATION */}
         <SidebarGroup>
-          <SidebarGroupLabel>
+         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
 
@@ -142,6 +146,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard",
@@ -149,7 +154,7 @@ export function AppSidebar() {
                   >
                     <LayoutDashboard className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
+                    <span className="truncate text-sm">
                       Dashboard
                     </span>
                   </Link>
@@ -163,6 +168,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/wallet"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/wallet",
@@ -170,7 +176,7 @@ export function AppSidebar() {
                   >
                     <Wallet className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
+                    <span className="truncate text-sm">
                       Wallet
                     </span>
                   </Link>
@@ -184,6 +190,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/become-seller"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/become-seller",
@@ -191,7 +198,7 @@ export function AppSidebar() {
                   >
                     <Store className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
+                    <span className="truncate text-sm">
                       Become Seller
                     </span>
                   </Link>
@@ -203,7 +210,7 @@ export function AppSidebar() {
 
         {/* SERVICES */}
         <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
+         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Services
           </SidebarGroupLabel>
 
@@ -249,6 +256,7 @@ export function AppSidebar() {
                   <div className="ml-6 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-800">
                     <Link
                       href="/dashboard/airtime"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/airtime",
@@ -263,6 +271,7 @@ export function AppSidebar() {
 
                     <Link
                       href="/dashboard/data"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/data",
@@ -318,6 +327,7 @@ export function AppSidebar() {
                   <div className="ml-6 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-800">
                     <Link
                       href="/dashboard/subscription"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/subscription",
@@ -332,6 +342,7 @@ export function AppSidebar() {
 
                     <Link
                       href="/dashboard/electricity"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/electricity",
@@ -346,6 +357,7 @@ export function AppSidebar() {
 
                     <Link
                       href="/dashboard/recharge-card"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/recharge-card",
@@ -398,9 +410,10 @@ export function AppSidebar() {
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="ml-6 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-800">
+                 <div className="ml-4 space-y-1 border-l border-zinc-200 pl-3 dark:border-zinc-800 md:ml-6 md:pl-4">
                     <Link
                       href="/dashboard/education"
+                       onClick={handleLinkClick}
                       className={menuClass(
                         pathname ===
                           "/dashboard/education",
@@ -421,7 +434,7 @@ export function AppSidebar() {
 
         {/* TRANSACTIONS */}
         <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
+         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Transactions
           </SidebarGroupLabel>
 
@@ -434,6 +447,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/recharge-history"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/recharge-history",
@@ -455,6 +469,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/manage-wallet"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/manage-wallet",
@@ -476,6 +491,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/reports"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/reports",
@@ -495,7 +511,7 @@ export function AppSidebar() {
 
         {/* MANAGEMENT */}
         <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Management
           </SidebarGroupLabel>
 
@@ -508,6 +524,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/settings"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/settings",
@@ -527,7 +544,7 @@ export function AppSidebar() {
 
         {/* OTHERS */}
         <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
+        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Others
           </SidebarGroupLabel>
 
@@ -540,6 +557,7 @@ export function AppSidebar() {
                 >
                   <Link
                     href="/dashboard/referral"
+                     onClick={handleLinkClick}
                     className={menuClass(
                       pathname ===
                         "/dashboard/referral",
@@ -563,7 +581,7 @@ export function AppSidebar() {
                         "/auth/login",
                     })
                   }
-                  className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30"
+                  className="flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
 
