@@ -139,7 +139,7 @@ export default function RechargeCardPage() {
   return (
     <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
       {/* Top Navigation Bar */}
-      <header className="relative overflow-hidden border-b border-border bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white print:hidden">
+<header className="relative overflow-hidden border-b border-border bg-gradient-to-r from-orange-500 to-orange-500 text-white print:hidden">
         <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 px-1 py-1 md:px-10 md:py-3">
           <div className="flex items-center justify-between">
@@ -205,7 +205,7 @@ export default function RechargeCardPage() {
                             onClick={() => setNetwork(net)}
                             className={`h-12 rounded-xl font-bold border capitalize transition-all text-xs flex flex-col items-center justify-center gap-1 ${
                               network === net
-                                ? "border-primary bg-primary/5 ring-1 ring-primary text-foreground"
+                                ? "border-primary  bg-primary/5 ring-1 ring-primary text-foreground"
                                 : "border-border bg-background text-muted-foreground hover:bg-muted"
                             }`}
                           >
@@ -292,7 +292,7 @@ export default function RechargeCardPage() {
                     <div className="mt-4 border-t pt-3 flex justify-between">
                       <span className="font-semibold">Total</span>
 
-                      <span className="text-lg font-black text-emerald-600">
+                      <span className="text-lg font-black text-orange-600">
                         ₦{totalCostEstimate.toLocaleString()}
                       </span>
                     </div>
@@ -322,7 +322,7 @@ export default function RechargeCardPage() {
                 <p className="text-xs text-muted-foreground">
                   Total Batch Cost
                 </p>
-                <p className="text-2xl font-black text-primary">
+                <p className="text-2xl font-black ">
                   ₦{totalCostEstimate.toLocaleString()}
                 </p>
               </div>
@@ -335,7 +335,7 @@ export default function RechargeCardPage() {
               type="submit"
               form="recharge-form"
               disabled={isLoading}
-              className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base shadow-lg"
+className="w-full h-14 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-500 hover:bg-emerald-700 text-white font-black text-base shadow-lg"
             >
               {isLoading ? (
                 <>
@@ -359,14 +359,14 @@ export default function RechargeCardPage() {
 
   <div className="relative z-10 w-full max-w-md">
     <div className="mb-4 text-center">
-      <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">
         Live Voucher Preview
       </span>
     </div>
 
     <Card className="relative overflow-hidden rounded-[32px] border border-dashed border-0 bg-white  dark:bg-zinc-900">
       {/* Decorative Glow */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-90" />
+
 
       {/* Ticket Cutouts */}
       <div className="absolute left-0 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
@@ -411,7 +411,7 @@ export default function RechargeCardPage() {
           </div>
 
           {/* PIN Area */}
-          <div className="rounded-3xl border-2 border-dashed border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 text-center">
+          <div className="rounded-3xl border-2 border-dashed border-orange-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 text-center">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Recharge PIN
             </p>
@@ -453,7 +453,7 @@ export default function RechargeCardPage() {
               Batch Reference Code
             </p>
 
-            <div className="flex items-center justify-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center justify-center gap-2 text-sm font-semibold text-orange-600 dark:text-orange-400">
               <ShieldCheck className="h-4 w-4" />
               Secured by VTU Engine
             </div>
