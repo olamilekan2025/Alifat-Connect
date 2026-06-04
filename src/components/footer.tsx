@@ -62,6 +62,7 @@ export default function Footer() {
     pathname === "/dashboard/airtime" ||
     pathname === "/dashboard/data" ||
     pathname === "/dashboard/education" ||
+    pathname === "/dashboard/recharge-card" ||
     pathname === "/auth/forgot-password";
 
 
