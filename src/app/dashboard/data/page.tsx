@@ -493,7 +493,7 @@ export default function DataPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] dark:bg-black">
-      <div className="mx-auto max-w-7xl space-y-4  px-1 pb-24 md:space-y-6 md:p-6">
+      <div className="mx-auto max-w-7xl space-y-4  px-1 pb-24 md:space-y-6 md:pl-12">
         {/* HERO */}
         <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-5 text-white md:p-8">
           <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />

@@ -414,7 +414,7 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="space-y-6 p-1 md:p-6">
+    <div className="space-y-6 p-1 md:pl-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Wallet</h1>
 

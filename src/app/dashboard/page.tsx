@@ -123,7 +123,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-1 md:p-6">
+    <div className="space-y-6 p-1 md:pl-12">
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>

@@ -249,7 +249,7 @@ export default function ElectricityPage() {
   return (
   <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
     {/* Top Application System Bar Navigation */}
-    <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white print:hidden px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-orange-600">
+    <header className="bg-gradient-to-r from-black-400 via-black-400 to-black-600 text-white print:hidden px-10 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#FFD700]">
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="h-10 w-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center md:h-14 md:w-14 flex-shrink-0">
           <Zap className="h-5 w-5 md:h-7 md:w-7 text-white fill-white animate-pulse" />
@@ -266,7 +266,7 @@ export default function ElectricityPage() {
         <p className="text-[10px] uppercase font-bold tracking-wider text-white/80 md:text-xs">
           Wallet Balance
         </p>
-        <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/20 px-3 py-1">
+        <div className="rounded-xl border border-[#FFD700]/30 bg-black px-3 py-1">
           <p className="text-sm font-black md:text-lg font-mono">
             {walletBalance === null ? (
               <span className="text-xs font-normal text-white/70 animate-pulse">
@@ -443,7 +443,7 @@ export default function ElectricityPage() {
             type="submit"
             form="electricity-form"
             disabled={isMinting || !isVerified}
-            className="w-full h-11 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2"
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-white font-bold shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2"
           >
             {isMinting ? (
               <>
@@ -470,7 +470,7 @@ export default function ElectricityPage() {
           </span>
 
           <Card className="w-full overflow-hidden rounded-[24px] border border-border bg-card shadow-2xl transition-all duration-300">
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white relative">
+            <div className="bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 p-6 text-white relative">
               <div className="absolute right-4 top-4 opacity-15">
                 <Zap className="w-16 h-16 fill-white" />
               </div>
@@ -534,7 +534,7 @@ export default function ElectricityPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl p-4 bg-gradient-to-br from-orange-500/15 to-orange-500/5 border border-orange-500/10">
+              <div className="rounded-2xl p-4 bg-gradient-to-br from-yellow-500/15 to-yellow-500/5 border border-orange-500/10">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">
                   Purchase Consideration Amount
                 </p>
