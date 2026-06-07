@@ -139,35 +139,49 @@ export default function RechargeCardPage() {
   return (
     <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
       {/* Top Navigation Bar */}
-<header className="relative overflow-hidden border-b border-border bg-gradient-to-r from-orange-500 to-orange-500 text-white print:hidden">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative z-10 px-1 py-1 md:px-10 md:py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center md:h-16 md:w-16">
-                <Ticket className="h-4 w-4 md:h-8 md:w-8" />
-              </div>
+      <header className="relative overflow-hidden border-b border-[#FFD700]/30 bg-white text-black dark:bg-gradient-to-r dark:from-zinc-950 dark:via-zinc-900 dark:to-black dark:text-white print:hidden">
+  <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700]/5 via-transparent to-[#FFD700]/5 dark:bg-black/10" />
 
-              <div>
-                <h1 className="text-xs font-black md:text-lg">Recharge Card Studio</h1>
-                <p className="text-xs text-white/80">Generate & Print E-Pins</p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white/15 backdrop-blur px-4 justify-center items-center py-1 text-right md:px-4 md:py-3">
-              <p className="text-[8px] uppercase tracking-wider text-white/70 md:text-[11px]">
-                Wallet Balance
-              </p>
-
-              <p className="text-xs font-black md:text-xl">
-                {walletBalance === null
-                  ? "Loading..."
-                  : `₦${walletBalance.toLocaleString()}`}
-              </p>
-            </div>
-          </div>
+  <div className="relative z-10 px-3 py-3 md:px-10 md:py-4">
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFD700]/15 backdrop-blur md:h-16 md:w-16">
+          <Ticket className="h-4 w-4 text-[#FFD700] md:h-8 md:w-8" />
         </div>
-      </header>
+
+        <div>
+          <h1 className="text-xs font-black md:text-lg">
+            Recharge Card Studio
+          </h1>
+
+          <p className="text-xs text-muted-foreground">
+            Generate & Print E-Pins
+          </p>
+        </div>
+      </div>
+
+      <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/5 px-4 py-2 backdrop-blur sm:w-auto sm:justify-end">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:text-xs">
+          Wallet Balance
+        </p>
+
+        <div className="rounded-xl border border-[#FFD700]/30 bg-background px-3 py-1 shadow-sm">
+          <p className="font-mono text-sm font-black md:text-lg">
+            {walletBalance === null ? (
+              <span className="animate-pulse text-xs font-normal text-muted-foreground">
+                Checking...
+              </span>
+            ) : (
+              `₦${walletBalance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}`
+            )}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
       {/* Workspace Area Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-4rem)] print:hidden">
@@ -292,7 +306,7 @@ export default function RechargeCardPage() {
                     <div className="mt-4 border-t pt-3 flex justify-between">
                       <span className="font-semibold">Total</span>
 
-                      <span className="text-lg font-black text-orange-600">
+                      <span className="text-lg font-black text-[#FFD700]">
                         ₦{totalCostEstimate.toLocaleString()}
                       </span>
                     </div>
@@ -335,7 +349,7 @@ export default function RechargeCardPage() {
               type="submit"
               form="recharge-form"
               disabled={isLoading}
-className="w-full h-14 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-500 hover:bg-emerald-700 text-white font-black text-base shadow-lg"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 hover:bg-emerald-700 text-white font-black text-base shadow-lg"
             >
               {isLoading ? (
                 <>
@@ -354,115 +368,114 @@ className="w-full h-14 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-50
 
         {/* Right Side Card Preview Layout Frame */}
         <section className="relative lg:col-span-7 flex items-start justify-center p-3 md:p-12 overflow-hidden via-background to-cyan-50 dark:from-zinc-950 dark:via-background dark:to-zinc-900">
-  {/* Background Pattern */}
-  <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,#10b98115_1px,transparent_1px)] [background-size:18px_18px]" />
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,#10b98115_1px,transparent_1px)] [background-size:18px_18px]" />
 
-  <div className="relative z-10 w-full max-w-md">
-    <div className="mb-4 text-center">
-      <span className="inline-flex items-center rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">
-        Live Voucher Preview
-      </span>
-    </div>
-
-    <Card className="relative overflow-hidden rounded-[32px] border border-dashed border-0 bg-white  dark:bg-zinc-900">
-      {/* Decorative Glow */}
-
-
-      {/* Ticket Cutouts */}
-      <div className="absolute left-0 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
-      <div className="absolute right-0 top-1/2 h-10 w-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
-
-      <CardContent className="relative p-0 border border-dashed">
-        {/* Header */}
-        <div className="px-6 pt-6 pb-5 text-center text-white">
-          <h3 className="truncate text-xl font-black uppercase tracking-wide">
-            {businessName?.trim() || "ALIFAT CONNECT"}
-          </h3>
-
-          <p className="mt-1 text-xs text-white/80">
-            Electronic Recharge Voucher
-          </p>
-        </div>
-
-        {/* Body */}
-        <div className="space-y-5 px-3 pb-6 md:px-6 md:pb-8">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border bg-muted/40 p-3 text-center">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Network
-              </p>
-
-              <div
-                className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase ${networkColors[network].bg} ${networkColors[network].text}`}
-              >
-                {networkColors[network].label}
-              </div>
+          <div className="relative z-10 w-full max-w-md">
+            <div className="mb-4 text-center">
+              <span className="inline-flex items-center rounded-full border border-[#FFD700] bg-orange-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#FFD700] dark:text-[#FFD700]">
+                Live Voucher Preview
+              </span>
             </div>
 
-            <div className="rounded-2xl border bg-muted/40 p-3 text-center">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Amount
-              </p>
+            <Card className="relative overflow-hidden rounded-[32px] border border-dashed border-0 bg-white  dark:bg-zinc-900">
+              {/* Decorative Glow */}
 
-              <p className="mt-2 text-lg font-black">
-                ₦{Number(amount).toLocaleString()}
-              </p>
-            </div>
+              {/* Ticket Cutouts */}
+              <div className="absolute left-0 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
+              <div className="absolute right-0 top-1/2 h-10 w-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
+
+              <CardContent className="relative p-0 border border-dashed">
+                {/* Header */}
+                <div className="px-6 pt-6 pb-5 text-center text-white">
+                  <h3 className="truncate text-xl font-black uppercase tracking-wide">
+                    {businessName?.trim() || "ALIFAT CONNECT"}
+                  </h3>
+
+                  <p className="mt-1 text-xs text-white/80">
+                    Electronic Recharge Voucher
+                  </p>
+                </div>
+
+                {/* Body */}
+                <div className="space-y-5 px-3 pb-6 md:px-6 md:pb-8">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border bg-muted/40 p-3 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Network
+                      </p>
+
+                      <div
+                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase ${networkColors[network].bg} ${networkColors[network].text}`}
+                      >
+                        {networkColors[network].label}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border bg-muted/40 p-3 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Amount
+                      </p>
+
+                      <p className="mt-2 text-lg font-black">
+                        ₦{Number(amount).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* PIN Area */}
+                  <div className="rounded-3xl border-2 border-dashed border-orange-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 text-center">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Recharge PIN
+                    </p>
+
+                    <div className="text-xs font-black tracking-[0.3em] text-foreground/40 md:text-xl">
+                      XXXX XXXX XXXX
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="rounded-2xl border bg-muted/30 p-4">
+                    <p className="mb-2 text-center text-xs font-bold">
+                      Load Instructions
+                    </p>
+
+                    <p className="text-center text-xs text-muted-foreground">
+                      Dial *311*PIN# and press Call
+                    </p>
+                  </div>
+
+                  {/* Barcode */}
+                  <div className="space-y-3 border-t pt-4">
+                    <div className="flex h-12 items-end justify-center gap-[2px]">
+                      {[...Array(28)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`bg-foreground ${
+                            i % 4 === 0
+                              ? "h-11 w-[4px]"
+                              : i % 2 === 0
+                                ? "h-8 w-[3px]"
+                                : "h-9 w-[1.7px]"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <p className="text-center text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                      Batch Reference Code
+                    </p>
+
+                    <div className="flex items-center justify-center gap-2 text-sm font-semibold text-[#FFD700] dark:text-[#FFD700]">
+                      <ShieldCheck className="h-4 w-4 text-[#FFD700]" />
+                      Secured by VTU Engine
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-
-          {/* PIN Area */}
-          <div className="rounded-3xl border-2 border-dashed border-orange-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 text-center">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Recharge PIN
-            </p>
-
-            <div className="text-xs font-black tracking-[0.3em] text-foreground/40 md:text-xl">
-              XXXX XXXX XXXX
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div className="rounded-2xl border bg-muted/30 p-4">
-            <p className="mb-2 text-center text-xs font-bold">
-              Load Instructions
-            </p>
-
-            <p className="text-center text-xs text-muted-foreground">
-              Dial *311*PIN# and press Call
-            </p>
-          </div>
-
-          {/* Barcode */}
-          <div className="space-y-3 border-t pt-4">
-            <div className="flex h-12 items-end justify-center gap-[2px]">
-              {[...Array(28)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`bg-foreground ${
-                    i % 4 === 0
-                      ? "h-11 w-[4px]"
-                      : i % 2 === 0
-                        ? "h-8 w-[3px]"
-                        : "h-9 w-[1.7px]"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <p className="text-center text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-              Batch Reference Code
-            </p>
-
-            <div className="flex items-center justify-center gap-2 text-sm font-semibold text-orange-600 dark:text-orange-400">
-              <ShieldCheck className="h-4 w-4" />
-              Secured by VTU Engine
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-</section>
+        </section>
       </div>
 
       {/* Modal Ticket Layer Layout */}

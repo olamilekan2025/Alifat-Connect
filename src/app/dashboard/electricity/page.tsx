@@ -249,36 +249,49 @@ export default function ElectricityPage() {
   return (
   <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
     {/* Top Application System Bar Navigation */}
-    <header className="bg-gradient-to-r from-black-400 via-black-400 to-black-600 text-white print:hidden px-10 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#FFD700]">
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        <div className="h-10 w-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center md:h-14 md:w-14 flex-shrink-0">
-          <Zap className="h-5 w-5 md:h-7 md:w-7 text-white fill-white animate-pulse" />
+   <header className="relative overflow-hidden border-b border-[#FFD700]/30 bg-white text-black dark:bg-gradient-to-r dark:from-zinc-950 dark:via-zinc-900 dark:to-black dark:text-white print:hidden">
+  <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700]/5 via-transparent to-[#FFD700]/5 dark:bg-black/10" />
+
+  <div className="relative z-10 px-3 py-3 md:px-10 md:py-4">
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFD700]/15 backdrop-blur md:h-16 md:w-16">
+          <Zap className="h-4 w-4 text-[#FFD700] md:h-8 md:w-8" />
         </div>
+
         <div>
-          <h1 className="text-sm font-black md:text-xl tracking-tight">
-            Grid Token Portal
+          <h1 className="text-xs font-black md:text-lg">
+            Recharge Card Studio
           </h1>
-          <p className="text-xs text-white/80">Electricity Utility Node</p>
+
+          <p className="text-xs text-muted-foreground">
+            Generate & Print E-Pins
+          </p>
         </div>
       </div>
-      
-      <div className="rounded-2xl bg-white/15 backdrop-blur px-4 py-2 w-full sm:w-auto flex items-center justify-between sm:justify-end gap-4 border border-white/10">
-        <p className="text-[10px] uppercase font-bold tracking-wider text-white/80 md:text-xs">
+
+      <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/5 px-4 py-2 backdrop-blur sm:w-auto sm:justify-end">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:text-xs">
           Wallet Balance
         </p>
-        <div className="rounded-xl border border-[#FFD700]/30 bg-black px-3 py-1">
-          <p className="text-sm font-black md:text-lg font-mono">
+
+        <div className="rounded-xl border border-[#FFD700]/30 bg-background px-3 py-1 shadow-sm">
+          <p className="font-mono text-sm font-black md:text-lg">
             {walletBalance === null ? (
-              <span className="text-xs font-normal text-white/70 animate-pulse">
+              <span className="animate-pulse text-xs font-normal text-muted-foreground">
                 Checking...
               </span>
             ) : (
-              `₦${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+              `₦${walletBalance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}`
             )}
           </p>
         </div>
       </div>
-    </header>
+    </div>
+  </div>
+</header>
 
     {/* Main Terminal Grid Workspace */}
     <div className="grid grid-cols-1 xl:grid-cols-12 min-h-[calc(100vh-5rem)] print:hidden gap-6 p-4 sm:p-8 lg:p-10">
@@ -461,7 +474,7 @@ export default function ElectricityPage() {
       </section>
 
       {/* Right Hand Side: Telemetry Interface */}
-      <section className="xl:col-span-7 flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 relative overflow-hidden rounded-[32px] border border-border/40">
+      <section className="xl:col-span-7 flex flex-col items-center justify-center p-4 md:p-2 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 relative overflow-hidden rounded-[32px] border border-border/40">
         <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#d97706_0.5px,transparent_0.5px)] [background-size:24px_24px] opacity-10" />
 
         <div className="relative z-10 w-full max-w-md">

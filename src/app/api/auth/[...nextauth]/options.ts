@@ -34,9 +34,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials");
         }
 
-        const  db  = await connectToDatabase();
+        const db = await connectToDatabase();
 
-        const user = await db.collection("users").findOne({
+        const user = await db.connection.db!.collection("users").findOne({
           email: credentials.email,
         });
 

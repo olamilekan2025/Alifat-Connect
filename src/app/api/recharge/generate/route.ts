@@ -4,7 +4,10 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
+
 import User from "@/models/User";
+import Transaction from "@/models/transaction";
+import RechargeCardHistory from "@/models/RechargeCardHistory";
 
 interface GeneratedPin {
   id: string;
@@ -17,27 +20,27 @@ function generatePinsArray(
   network: string,
   quantity: number
 ): GeneratedPin[] {
-  const pinsList: GeneratedPin[] = [];
+  const pins: GeneratedPin[] = [];
 
   for (let i = 0; i < quantity; i++) {
     const length = network === "mtn" ? 17 : 15;
 
-    let pinNumber = "";
+    let pin = "";
 
-    while (pinNumber.length < length) {
-      pinNumber += crypto.randomInt(0, 10).toString();
+    while (pin.length < length) {
+      pin += crypto.randomInt(0, 10).toString();
     }
 
-    pinsList.push({
+    pins.push({
       id: `PIN-${crypto
-        .randomBytes(3)
+        .randomBytes(4)
         .toString("hex")
         .toUpperCase()}`,
-      pin: pinNumber,
+      pin,
       serial: `SN-${crypto.randomInt(
         100000,
         999999
-      )}-${crypto.randomInt(10, 99)}`,
+      )}`,
       expiryDate: new Date(
         Date.now() +
           365 * 24 * 60 * 60 * 1000
@@ -45,7 +48,7 @@ function generatePinsArray(
     });
   }
 
-  return pinsList;
+  return pins;
 }
 
 export async function POST(
@@ -76,29 +79,16 @@ export async function POST(
       businessName,
     } = body;
 
-    if (!network || !amount || !quantity) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Missing required fields",
-        },
-        { status: 400 }
-      );
-    }
-
-    const numericAmount = Number(amount);
-    const numericQuantity =
-      Number(quantity);
-
     if (
-      !Number.isFinite(numericAmount) ||
-      !Number.isFinite(numericQuantity)
+      !network ||
+      !amount ||
+      !quantity
     ) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Amount and quantity must be numbers",
+            "Missing required fields",
         },
         { status: 400 }
       );
@@ -111,13 +101,44 @@ export async function POST(
       "9mobile",
     ];
 
+    const allowedAmounts = [
+      100,
+      200,
+      500,
+      1000,
+    ];
+
+    const numericAmount =
+      Number(amount);
+
+    const numericQuantity =
+      Number(quantity);
+
     if (
-      !allowedNetworks.includes(network)
+      !allowedNetworks.includes(
+        network
+      )
     ) {
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid network selected",
+          error:
+            "Invalid network selected",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !allowedAmounts.includes(
+        numericAmount
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Invalid recharge amount",
         },
         { status: 400 }
       );
@@ -137,25 +158,6 @@ export async function POST(
       );
     }
 
-    const allowedAmounts = [
-      100, 200, 500, 1000,
-    ];
-
-    if (
-      !allowedAmounts.includes(
-        numericAmount
-      )
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Invalid recharge amount",
-        },
-        { status: 400 }
-      );
-    }
-
     const user = await User.findOne({
       email: session.user.email,
     });
@@ -170,14 +172,18 @@ export async function POST(
       );
     }
 
-    const walletBalance = Number(
-      user.walletBalance || 0
-    );
-
     const totalCost =
-      numericAmount * numericQuantity;
+      numericAmount *
+      numericQuantity;
 
-    if (totalCost > walletBalance) {
+    const balanceBefore =
+      Number(
+        user.walletBalance || 0
+      );
+
+    if (
+      balanceBefore < totalCost
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -188,54 +194,115 @@ export async function POST(
       );
     }
 
-    const items = generatePinsArray(
-      network,
-      numericQuantity
-    );
+    const balanceAfter =
+      balanceBefore - totalCost;
 
-    user.walletBalance =
-      walletBalance - totalCost;
+    const generatedPins =
+      generatePinsArray(
+        network,
+        numericQuantity
+      );
 
-    await user.save();
-
-    const batchId = `BCH-${crypto
+    const batchId = `BCH-${Date.now()}-${crypto
       .randomBytes(4)
       .toString("hex")
       .toUpperCase()}`;
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          batchId,
-          network,
-          amount: numericAmount,
-          quantity: numericQuantity,
-          businessName:
-            businessName?.trim() ||
-            "COMMERCIAL VENDOR",
-          items,
-          totalCost,
-          newBalance:
-            user.walletBalance,
-          timestamp:
-            new Date().toISOString(),
-        },
+    user.walletBalance =
+      balanceAfter;
+
+    await user.save();
+
+    await RechargeCardHistory.create({
+      userId:
+        user._id.toString(),
+
+      batchId,
+
+      network,
+
+      amount:
+        numericAmount,
+
+      quantity:
+        numericQuantity,
+
+      totalCost,
+
+      businessName:
+        businessName?.trim() ||
+        "COMMERCIAL VENDOR",
+
+      status: "success",
+
+      pins: generatedPins,
+    });
+
+    try {
+      await Transaction.create({
+        userId:
+          user._id.toString(),
+
+        type: "debit",
+
+        amount: totalCost,
+
+        status: "success",
+
+        description: `${network.toUpperCase()} Recharge Card Purchase`,
+
+        reference: batchId,
+      });
+    } catch (transactionError) {
+      console.error(
+        "Transaction Save Error:",
+        transactionError
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+
+      data: {
+        batchId,
+
+        network,
+
+        amount:
+          numericAmount,
+
+        quantity:
+          numericQuantity,
+
+        totalCost,
+
+        items:
+          generatedPins,
+
+        newBalance:
+          balanceAfter,
+
+        timestamp:
+          new Date().toISOString(),
       },
-      { status: 200 }
-    );
+    });
   } catch (error) {
     console.error(
-      "Recharge generation error:",
+      "Recharge Card Error:",
       error
     );
 
     return NextResponse.json(
       {
         success: false,
-        error: "Internal server error",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate recharge cards",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
