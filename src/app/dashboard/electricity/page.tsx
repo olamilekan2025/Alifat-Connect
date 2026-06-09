@@ -495,7 +495,7 @@ export default function ElectricityPage() {
               </p>
             </div>
 
-            <CardContent className="p-6 space-y-4 text-xs">
+            <CardContent className="p-2 space-y-4 text-xs md:p-6">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-border/80 p-3.5 bg-muted/30">
                   <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider mb-1">

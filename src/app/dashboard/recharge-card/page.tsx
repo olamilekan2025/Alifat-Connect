@@ -14,6 +14,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Loader2, ShieldCheck, Ticket, X } from "lucide-react";
 import { toast } from "sonner";
 
+
+
 interface GeneratedPinItem {
   id: string;
   pin: string;

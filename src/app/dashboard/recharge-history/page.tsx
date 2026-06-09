@@ -25,6 +25,8 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface BatchHistoryStructure {
   id: string;
   batchReference: string;
@@ -113,6 +115,97 @@ export default function RechargeCardHistoryPage() {
       default: return "bg-muted text-muted-foreground";
     }
   };
+
+  if (loading) {
+  return (
+    <main className="min-h-screen w-full bg-background text-foreground pb-16">
+
+      {/* HEADER SKELETON */}
+      <section className="py-10 px-4 sm:px-8 border-b">
+        <div className="max-w-7xl mx-auto space-y-3">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-8 w-72" />
+          <Skeleton className="h-3 w-96" />
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        {/* LEFT SIDE TABLE SKELETON */}
+        <div className="lg:col-span-8 space-y-4">
+
+          {/* FILTER BAR */}
+          <div className="flex gap-3 p-3 border rounded-2xl">
+            <Skeleton className="h-10 flex-1 rounded-xl" />
+            <Skeleton className="h-10 w-40 rounded-xl" />
+          </div>
+
+          {/* TABLE CARD */}
+          <div className="border rounded-[24px] p-4 space-y-4">
+
+            {/* TABLE HEADER */}
+            <div className="grid grid-cols-6 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-4 w-full" />
+              ))}
+            </div>
+
+            {/* ROWS */}
+            <div className="space-y-3 mt-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-6 gap-4 items-center"
+                >
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-10" />
+                  <Skeleton className="h-4 w-10" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* PAGINATION */}
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-4 w-48" />
+            <div className="flex gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-8 rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE DETAIL PANEL */}
+        <div className="lg:col-span-4">
+          <div className="border rounded-[28px] p-5 space-y-4">
+
+            <div className="flex justify-between">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+
+            <Skeleton className="h-20 w-full rounded-xl" />
+
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex justify-between">
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ))}
+            </div>
+
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground pb-16">
