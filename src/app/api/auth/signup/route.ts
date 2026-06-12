@@ -10,6 +10,7 @@ import { createReservedAccount } from "@/lib/monnify";
 
 import User from "@/models/User";
 import VirtualAccount from "@/models/VirtualAccount";
+import { generateReferralCode } from "@/lib/referral";
 
 const EMAIL_CODE_TTL_MS =
   10 * 60 * 1000;
@@ -134,36 +135,36 @@ export async function POST(
     // CREATE USER
 
     const user = new User({
-      name: `${firstname} ${lastname}`,
+  name: `${firstname} ${lastname}`,
 
-      firstname,
+  firstname,
 
-      lastname,
+  lastname,
 
-      address,
+  address,
 
-      phone,
+  phone,
 
-      email,
+  email,
 
-      password:
-        hashedPassword,
+  password: hashedPassword,
 
-      role: "user",
+  role: "user",
 
-      walletBalance: 0,
+  walletBalance: 0,
 
-      emailVerified: false,
+  emailVerified: false,
 
-      loginVerificationCode:
-        code,
+  referralCode: generateReferralCode(
+    `${firstname}${lastname}`
+  ),
 
-      loginVerificationExpires:
-        new Date(
-          Date.now() +
-            EMAIL_CODE_TTL_MS
-        ),
-    });
+  loginVerificationCode: code,
+
+  loginVerificationExpires: new Date(
+    Date.now() + EMAIL_CODE_TTL_MS
+  ),
+});
 
     await user.save();
 

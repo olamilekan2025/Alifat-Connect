@@ -212,7 +212,7 @@ export default function RechargeCardHistoryPage() {
       <section className="bg-gradient-to-b from-orange-500/10 via-orange-500/0 to-transparent border-b border-border/40 py-10 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider">
               <History className="w-3.5 h-3.5" />
               Audit Telemetry Nodes
             </div>
@@ -244,7 +244,7 @@ export default function RechargeCardHistoryPage() {
                   onClick={() => setStatusFilter(filter)}
                   className={`px-3 h-9 rounded-xl text-xs font-bold capitalize transition-all border shrink-0 ${
                     statusFilter === filter
-                      ? "border-orange-500 bg-orange-500/5 ring-1 ring-orange-500 text-foreground"
+                      ? "border-[#D4AF37] bg-orange-500/5 ring-1 ring-orange-500 text-foreground"
                       : "border-border bg-background text-muted-foreground hover:bg-muted"
                   }`}
                 >

@@ -145,12 +145,12 @@ export default function BecomeSellerPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 pl-10">
+      <div className="mx-auto max-w-8xl px-0 py-10 md:pl-10 ">
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Benefits */}
           <div className="lg:col-span-2">
             <Card className="overflow-hidden rounded-[32px] border-0 shadow-xl">
-              <CardContent className="p-8">
+              <CardContent className="p-1 md:p-8">
                 <div className="mb-8 flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500/10">
                     <Sparkles className="h-6 w-6 text-yellow-500" />

@@ -1,9 +1,556 @@
+// "use client";
+
+// import { useEffect, useMemo, useState } from "react";
+
+// import { useSession } from "next-auth/react";
+
+// import {
+//   Loader2,
+//   RefreshCw,
+//   Database,
+//   CheckCircle2,
+//   AlertCircle,
+//   Sparkles,
+//   ShieldCheck,
+// } from "lucide-react";
+
+// import { toast } from "sonner";
+
+// import { Button } from "@/components/ui/button";
+
+// import { Card, CardContent } from "@/components/ui/card";
+
+// import { Input } from "@/components/ui/input";
+
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogTitle,
+// } from "@/components/ui/dialog";
+
+// interface DataTransaction {
+//   _id: string;
+//   network: string;
+//   phone: string;
+//   amount: number;
+//   planName: string;
+//   status: string;
+//   createdAt: string;
+// }
+
+// interface WalletData {
+//   balance: number;
+// }
+
+// interface PlanItem {
+//   plan: string;
+//   amount: number;
+//   validity?: string;
+//   cashback?: string;
+// }
+
+// const networkPrefixes: Record<string, string[]> = {
+//   MTN: [
+//     "0803",
+//     "0806",
+//     "0703",
+//     "0704",
+//     "0706",
+//     "0810",
+//     "0813",
+//     "0814",
+//     "0816",
+//     "0903",
+//     "0906",
+//     "0913",
+//     "0916",
+//     "0707",
+//   ],
+
+//   Airtel: [
+//     "0802",
+//     "0808",
+//     "0701",
+//     "0708",
+//     "0812",
+//     "0901",
+//     "0902",
+//     "0904",
+//     "0907",
+//     "0912",
+//   ],
+
+//   Glo: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"],
+
+//   "9mobile": ["0809", "0817", "0818", "0908", "0909"],
+// };
+
+// const networkColors: Record<string, string> = {
+//   MTN: "from-yellow-400 to-yellow-600",
+//   Airtel: "from-red-500 to-red-700",
+//   Glo: "from-green-500 to-green-700",
+//   "9mobile": "from-emerald-400 to-emerald-700",
+// };
+
+// const dataPlans: Record<string, Record<string, PlanItem[]>> = {
+//   MTN: {
+//     Daily: [
+//       {
+//         plan: "110MB",
+//         validity: "1 Day",
+//         amount: 100,
+//         cashback: "₦3.5 Cashback",
+//       },
+
+//       {
+//         plan: "500MB",
+//         validity: "1 Day",
+//         amount: 350,
+//         cashback: "₦12.25 Cashback",
+//       },
+
+//       {
+//         plan: "2.5GB",
+//         validity: "1 Day",
+//         amount: 730,
+//         cashback: "₦100 Cashback",
+//       },
+
+//       {
+//         plan: "3.5GB",
+//         validity: "1 Day",
+//         amount: 980,
+//         cashback: "₦100 Cashback",
+//       },
+//     ],
+
+//     Weekly: [
+//       {
+//         plan: "1GB",
+//         validity: "7 Days",
+//         amount: 780,
+//         cashback: "₦100 Cashback",
+//       },
+
+//       {
+//         plan: "3.5GB",
+//         validity: "7 Days",
+//         amount: 1480,
+//         cashback: "₦100 Cashback",
+//       },
+//     ],
+
+//     Monthly: [
+//       {
+//         plan: "7GB",
+//         validity: "30 Days",
+//         amount: 3480,
+//         cashback: "₦200 Cashback",
+//       },
+
+//       {
+//         plan: "20GB",
+//         validity: "30 Days",
+//         amount: 7480,
+//         cashback: "₦500 Cashback",
+//       },
+//     ],
+
+//     Yearly: [
+//       {
+//         plan: "800GB",
+//         amount: 125000,
+//         validity: "365 Days",
+//         cashback: "₦2,000 Cashback",
+//       },
+//     ],
+//   },
+
+//   Airtel: {
+//     Daily: [
+//       {
+//         plan: "500MB",
+//         amount: 200,
+//         validity: "1 Day",
+//         cashback: "₦10 Cashback",
+//       },
+//     ],
+
+//     Weekly: [
+//       {
+//         plan: "6GB",
+//         amount: 2000,
+//         validity: "7 Days",
+//         cashback: "₦100 Cashback",
+//       },
+//     ],
+
+//     Monthly: [
+//       {
+//         plan: "15GB",
+//         amount: 5000,
+//         validity: "30 Days",
+//         cashback: "₦200 Cashback",
+//       },
+//     ],
+
+//     Yearly: [
+//       {
+//         plan: "100GB",
+//         amount: 45000,
+//         validity: "365 Days",
+//         cashback: "₦1,500 Cashback",
+//       },
+//     ],
+//   },
+
+//   Glo: {
+//     Daily: [
+//       {
+//         plan: "500MB",
+//         amount: 150,
+//         validity: "1 Day",
+//         cashback: "₦5 Cashback",
+//       },
+//     ],
+
+//     Weekly: [
+//       {
+//         plan: "7GB",
+//         amount: 2500,
+//         validity: "7 Days",
+//         cashback: "₦100 Cashback",
+//       },
+//     ],
+
+//     Monthly: [
+//       {
+//         plan: "20GB",
+//         amount: 5000,
+//         validity: "30 Days",
+//         cashback: "₦200 Cashback",
+//       },
+//     ],
+
+//     Yearly: [
+//       {
+//         plan: "90GB",
+//         amount: 40000,
+//         validity: "365 Days",
+//         cashback: "₦1,500 Cashback",
+//       },
+//     ],
+//   },
+
+//   "9mobile": {
+//     Daily: [
+//       {
+//         plan: "100MB",
+//         amount: 100,
+//         validity: "1 Day",
+//         cashback: "₦5 Cashback",
+//       },
+//     ],
+
+//     Weekly: [
+//       {
+//         plan: "5GB",
+//         amount: 2000,
+//         validity: "7 Days",
+//         cashback: "₦100 Cashback",
+//       },
+//     ],
+
+//     Monthly: [
+//       {
+//         plan: "15GB",
+//         amount: 5000,
+//         validity: "30 Days",
+//         cashback: "₦200 Cashback",
+//       },
+//     ],
+
+//     Yearly: [
+//       {
+//         plan: "120GB",
+//         amount: 60000,
+//         validity: "365 Days",
+//         cashback: "₦2,000 Cashback",
+//       },
+//     ],
+//   },
+// };
+
+// export default function DataPage() {
+//   const { status } = useSession();
+
+//   const [loading, setLoading] = useState(true);
+
+//   const [buying, setBuying] = useState(false);
+
+//   const [wallet, setWallet] = useState<WalletData>({
+//     balance: 0,
+//   });
+
+//   const [transactions, setTransactions] = useState<DataTransaction[]>([]);
+
+//   const [network, setNetwork] = useState("");
+
+//   const [phone, setPhone] = useState("");
+
+//   const [planType, setPlanType] = useState("Daily");
+
+//   const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
+
+//   const [pin, setPin] = useState("");
+
+//   const [openSummary, setOpenSummary] = useState(false);
+
+//   const [openPin, setOpenPin] = useState(false);
+
+//   const [hasPaymentPin, setHasPaymentPin] = useState(false);
+//   const [defaultPhone, setDefaultPhone] = useState("");
+
+//   useEffect(() => {
+//     if (status === "authenticated") {
+//       fetchWallet();
+
+//       fetchTransactions();
+//     }
+//   }, [status]);
+
+//   async function fetchWallet() {
+//     try {
+//       const response = await fetch("/api/wallet", {
+//         cache: "no-store",
+//       });
+
+//       const data = await response.json();
+
+//       setWallet({
+//         balance: data.wallet?.balance || 0,
+//       });
+
+//       setHasPaymentPin(data.user?.hasPaymentPin || false);
+//     } catch (error) {
+//       console.error(error);
+
+//       toast.error("Failed to load wallet");
+//     }
+//   }
+
+//   async function fetchUserProfile() {
+//   try {
+//     const res = await fetch("/api/user/profile");
+//     const data = await res.json();
+
+//     const savedPhone = data.user?.phone || "";
+
+//     setDefaultPhone(savedPhone);
+//     setPhone(savedPhone); // 👈 auto-fill input
+//   } catch (err) {
+//     console.error(err);
+//   }
+// }
+
+
+// useEffect(() => {
+//   if (status === "authenticated") {
+//     fetchWallet();
+//     fetchTransactions();
+//     fetchUserProfile(); // 👈 add this
+//   }
+// }, [status]);
+
+//   async function fetchTransactions() {
+//     try {
+//       setLoading(true);
+
+//       const response = await fetch("/api/data/history", {
+//         cache: "no-store",
+//       });
+
+//       const data = await response.json();
+
+//       setTransactions(
+//         Array.isArray(data.transactions) ? data.transactions : [],
+//       );
+//     } catch (error) {
+//       console.error(error);
+
+//       toast.error("Failed to load transactions");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   // function detectNetwork(phoneNumber: string) {
+//   //   const cleaned = phoneNumber.replace(/\D/g, "");
+
+//   //   if (cleaned.length < 4) {
+//   //     setNetwork("");
+
+//   //     return;
+//   //   }
+
+//   //   const prefix = cleaned.slice(0, 4);
+
+//   //   let detected = "";
+
+//   //   Object.entries(networkPrefixes).forEach(([networkName, prefixes]) => {
+//   //     if (prefixes.includes(prefix)) {
+//   //       detected = networkName;
+//   //     }
+//   //   });
+
+//   //   setNetwork(detected);
+//   // }
+
+
+//   function detectNetwork(phoneNumber: string) {
+//   let cleaned = phoneNumber.replace(/\D/g, "");
+
+//   // remove Nigeria country code if present
+//   if (cleaned.startsWith("234")) {
+//     cleaned = "0" + cleaned.slice(3);
+//   }
+
+//   if (cleaned.length < 4) {
+//     setNetwork("");
+//     return;
+//   }
+
+//   const prefix = cleaned.slice(0, 4);
+
+//   let detected = "";
+
+//   for (const [networkName, prefixes] of Object.entries(networkPrefixes)) {
+//     if (prefixes.includes(prefix)) {
+//       detected = networkName;
+//       break;
+//     }
+//   }
+
+//   setNetwork(detected);
+// }
+
+//   async function handlePurchase() {
+//     try {
+//       if (!network || !phone || !selectedPlan) {
+//         toast.error("Complete all fields");
+
+//         return;
+//       }
+
+//       if (phone.length !== 11) {
+//         toast.error("Invalid phone number");
+
+//         return;
+//       }
+
+//       if (pin.trim().length !== 4) {
+//         toast.error("Enter valid payment PIN");
+
+//         return;
+//       }
+
+//       const walletBalance = Number(wallet.balance || 0);
+
+//       const planAmount = Number(selectedPlan.amount || 0);
+
+//       if (walletBalance < planAmount) {
+//         toast.error(`Insufficient balance. Wallet: ₦${walletBalance}`);
+
+//         return;
+//       }
+
+//       setBuying(true);
+
+//       const response = await fetch("/api/data/purchase", {
+//         method: "POST",
+
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+
+//         body: JSON.stringify({
+//           network: String(network),
+//           phone: String(phone),
+//           amount: Number(selectedPlan.amount),
+//           planName: String(selectedPlan.plan),
+//           pin: String(pin),
+//         }),
+//       });
+//       let data;
+
+//       try {
+//         data = await response.json();
+//       } catch (error) {
+//         console.error(error);
+
+//         toast.error("Invalid server response");
+
+//         return;
+//       }
+
+//       if (!response.ok) {
+//         toast.error(data.message || "Purchase failed");
+
+//         return;
+//       }
+
+//       toast.success("Data purchase successful");
+
+//       // UPDATE WALLET IMMEDIATELY
+//       setWallet({
+//         balance: Number(data.balance || 0),
+//       });
+
+//       // RESET FORM
+//       setPhone("");
+//       setNetwork("");
+//       setSelectedPlan(null);
+//       setPin("");
+//       setPlanType("Daily");
+
+//       // CLOSE MODALS
+//       setOpenPin(false);
+//       setOpenSummary(false);
+
+//       // REFRESH TRANSACTIONS
+//       await fetchTransactions();
+//     } catch (error) {
+//       console.error(error);
+
+//       toast.error("Something went wrong");
+//     } finally {
+//       setBuying(false);
+//     }
+//   }
+
+//   const plans = useMemo(() => {
+//     if (!network) return [];
+
+//     return dataPlans[network]?.[planType] || [];
+//   }, [network, planType]);
+
+//   if (loading && transactions.length === 0) {
+//     return (
+//       <div className="flex h-[70vh] items-center justify-center">
+//         <div className="custom-loader" />
+//       </div>
+//     );
+//   }
+
+
+
+
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
 import { useSession } from "next-auth/react";
-
 import {
   Loader2,
   RefreshCw,
@@ -13,21 +560,19 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
-
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
-
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+/* ================= TYPES ================= */
 
 interface DataTransaction {
   _id: string;
@@ -50,40 +595,13 @@ interface PlanItem {
   cashback?: string;
 }
 
+/* ================= NETWORK DATA ================= */
+
 const networkPrefixes: Record<string, string[]> = {
-  MTN: [
-    "0803",
-    "0806",
-    "0703",
-    "0704",
-    "0706",
-    "0810",
-    "0813",
-    "0814",
-    "0816",
-    "0903",
-    "0906",
-    "0913",
-    "0916",
-    "0707",
-  ],
-
-  Airtel: [
-    "0802",
-    "0808",
-    "0701",
-    "0708",
-    "0812",
-    "0901",
-    "0902",
-    "0904",
-    "0907",
-    "0912",
-  ],
-
-  Glo: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"],
-
-  "9mobile": ["0809", "0817", "0818", "0908", "0909"],
+  MTN: ["0803","0806","0703","0704","0706","0810","0813","0814","0816","0903","0906","0913","0916","0707"],
+  Airtel: ["0802","0808","0701","0708","0812","0901","0902","0904","0907","0912"],
+  Glo: ["0805","0807","0705","0811","0815","0905","0915"],
+  "9mobile": ["0809","0817","0818","0908","0909"],
 };
 
 const networkColors: Record<string, string> = {
@@ -96,245 +614,147 @@ const networkColors: Record<string, string> = {
 const dataPlans: Record<string, Record<string, PlanItem[]>> = {
   MTN: {
     Daily: [
-      {
-        plan: "110MB",
-        validity: "1 Day",
-        amount: 100,
-        cashback: "₦3.5 Cashback",
-      },
-
-      {
-        plan: "500MB",
-        validity: "1 Day",
-        amount: 350,
-        cashback: "₦12.25 Cashback",
-      },
-
-      {
-        plan: "2.5GB",
-        validity: "1 Day",
-        amount: 730,
-        cashback: "₦100 Cashback",
-      },
-
-      {
-        plan: "3.5GB",
-        validity: "1 Day",
-        amount: 980,
-        cashback: "₦100 Cashback",
-      },
+      { plan: "110MB", validity: "1 Day", amount: 100, cashback: "₦3.5 Cashback" },
+      { plan: "500MB", validity: "1 Day", amount: 350, cashback: "₦12.25 Cashback" },
+      { plan: "2.5GB", validity: "1 Day", amount: 730, cashback: "₦100 Cashback" },
+      { plan: "3.5GB", validity: "1 Day", amount: 980, cashback: "₦100 Cashback" },
     ],
-
     Weekly: [
-      {
-        plan: "1GB",
-        validity: "7 Days",
-        amount: 780,
-        cashback: "₦100 Cashback",
-      },
-
-      {
-        plan: "3.5GB",
-        validity: "7 Days",
-        amount: 1480,
-        cashback: "₦100 Cashback",
-      },
+      { plan: "1GB", validity: "7 Days", amount: 780, cashback: "₦100 Cashback" },
+      { plan: "3.5GB", validity: "7 Days", amount: 1480, cashback: "₦100 Cashback" },
     ],
-
     Monthly: [
-      {
-        plan: "7GB",
-        validity: "30 Days",
-        amount: 3480,
-        cashback: "₦200 Cashback",
-      },
-
-      {
-        plan: "20GB",
-        validity: "30 Days",
-        amount: 7480,
-        cashback: "₦500 Cashback",
-      },
+      { plan: "7GB", validity: "30 Days", amount: 3480, cashback: "₦200 Cashback" },
+      { plan: "20GB", validity: "30 Days", amount: 7480, cashback: "₦500 Cashback" },
     ],
-
     Yearly: [
-      {
-        plan: "800GB",
-        amount: 125000,
-        validity: "365 Days",
-        cashback: "₦2,000 Cashback",
-      },
+      { plan: "800GB", amount: 125000, validity: "365 Days", cashback: "₦2,000 Cashback" },
     ],
   },
-
   Airtel: {
     Daily: [
-      {
-        plan: "500MB",
-        amount: 200,
-        validity: "1 Day",
-        cashback: "₦10 Cashback",
-      },
+      { plan: "500MB", amount: 200, validity: "1 Day", cashback: "₦10 Cashback" },
     ],
-
     Weekly: [
-      {
-        plan: "6GB",
-        amount: 2000,
-        validity: "7 Days",
-        cashback: "₦100 Cashback",
-      },
+      { plan: "6GB", amount: 2000, validity: "7 Days", cashback: "₦100 Cashback" },
     ],
-
     Monthly: [
-      {
-        plan: "15GB",
-        amount: 5000,
-        validity: "30 Days",
-        cashback: "₦200 Cashback",
-      },
+      { plan: "15GB", amount: 5000, validity: "30 Days", cashback: "₦200 Cashback" },
     ],
-
     Yearly: [
-      {
-        plan: "100GB",
-        amount: 45000,
-        validity: "365 Days",
-        cashback: "₦1,500 Cashback",
-      },
+      { plan: "100GB", amount: 45000, validity: "365 Days", cashback: "₦1,500 Cashback" },
     ],
   },
-
   Glo: {
     Daily: [
-      {
-        plan: "500MB",
-        amount: 150,
-        validity: "1 Day",
-        cashback: "₦5 Cashback",
-      },
+      { plan: "500MB", amount: 150, validity: "1 Day", cashback: "₦5 Cashback" },
     ],
-
     Weekly: [
-      {
-        plan: "7GB",
-        amount: 2500,
-        validity: "7 Days",
-        cashback: "₦100 Cashback",
-      },
+      { plan: "7GB", amount: 2500, validity: "7 Days", cashback: "₦100 Cashback" },
     ],
-
     Monthly: [
-      {
-        plan: "20GB",
-        amount: 5000,
-        validity: "30 Days",
-        cashback: "₦200 Cashback",
-      },
+      { plan: "20GB", amount: 5000, validity: "30 Days", cashback: "₦200 Cashback" },
     ],
-
     Yearly: [
-      {
-        plan: "90GB",
-        amount: 40000,
-        validity: "365 Days",
-        cashback: "₦1,500 Cashback",
-      },
+      { plan: "90GB", amount: 40000, validity: "365 Days", cashback: "₦1,500 Cashback" },
     ],
   },
-
   "9mobile": {
     Daily: [
-      {
-        plan: "100MB",
-        amount: 100,
-        validity: "1 Day",
-        cashback: "₦5 Cashback",
-      },
+      { plan: "100MB", amount: 100, validity: "1 Day", cashback: "₦5 Cashback" },
     ],
-
     Weekly: [
-      {
-        plan: "5GB",
-        amount: 2000,
-        validity: "7 Days",
-        cashback: "₦100 Cashback",
-      },
+      { plan: "5GB", amount: 2000, validity: "7 Days", cashback: "₦100 Cashback" },
     ],
-
     Monthly: [
-      {
-        plan: "15GB",
-        amount: 5000,
-        validity: "30 Days",
-        cashback: "₦200 Cashback",
-      },
+      { plan: "15GB", amount: 5000, validity: "30 Days", cashback: "₦200 Cashback" },
     ],
-
     Yearly: [
-      {
-        plan: "120GB",
-        amount: 60000,
-        validity: "365 Days",
-        cashback: "₦2,000 Cashback",
-      },
+      { plan: "120GB", amount: 60000, validity: "365 Days", cashback: "₦2,000 Cashback" },
     ],
   },
 };
+
+/* ================= COMPONENT ================= */
 
 export default function DataPage() {
   const { status } = useSession();
 
   const [loading, setLoading] = useState(true);
-
   const [buying, setBuying] = useState(false);
 
-  const [wallet, setWallet] = useState<WalletData>({
-    balance: 0,
-  });
-
+  const [wallet, setWallet] = useState<WalletData>({ balance: 0 });
   const [transactions, setTransactions] = useState<DataTransaction[]>([]);
 
+  const [phone, setPhone] = useState("");
   const [network, setNetwork] = useState("");
 
-  const [phone, setPhone] = useState("");
-
   const [planType, setPlanType] = useState("Daily");
-
   const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
 
   const [pin, setPin] = useState("");
-
   const [openSummary, setOpenSummary] = useState(false);
-
   const [openPin, setOpenPin] = useState(false);
-
   const [hasPaymentPin, setHasPaymentPin] = useState(false);
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchWallet();
+  const [defaultPhone, setDefaultPhone] = useState("");
 
-      fetchTransactions();
+  /* ================= HELPERS ================= */
+
+  function detectNetwork(phoneNumber: string) {
+    let cleaned = phoneNumber.replace(/\D/g, "");
+
+    if (cleaned.startsWith("234")) {
+      cleaned = "0" + cleaned.slice(3);
     }
-  }, [status]);
+
+    if (cleaned.length < 4) {
+      setNetwork("");
+      return;
+    }
+
+    const prefix = cleaned.slice(0, 4);
+
+    let detected = "";
+
+    for (const [name, prefixes] of Object.entries(networkPrefixes)) {
+      if (prefixes.includes(prefix)) {
+        detected = name;
+        break;
+      }
+    }
+
+    setNetwork(detected);
+  }
+
+  /* ================= FETCH USER ================= */
+
+  async function fetchUserProfile() {
+    try {
+      const res = await fetch("/api/user/profile");
+      const data = await res.json();
+
+      const savedPhone = data.user?.phone || "";
+
+      setDefaultPhone(savedPhone);
+
+      if (savedPhone) {
+        setPhone(savedPhone);
+        detectNetwork(savedPhone); // 🔥 FIX: sync network immediately
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async function fetchWallet() {
     try {
-      const response = await fetch("/api/wallet", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/wallet", { cache: "no-store" });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      setWallet({
-        balance: data.wallet?.balance || 0,
-      });
-
+      setWallet({ balance: data.wallet?.balance || 0 });
       setHasPaymentPin(data.user?.hasPaymentPin || false);
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       toast.error("Failed to load wallet");
     }
   }
@@ -343,134 +763,90 @@ export default function DataPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/data/history", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/data/history", { cache: "no-store" });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      setTransactions(
-        Array.isArray(data.transactions) ? data.transactions : [],
-      );
-    } catch (error) {
-      console.error(error);
-
+      setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
+    } catch {
       toast.error("Failed to load transactions");
     } finally {
       setLoading(false);
     }
   }
 
-  function detectNetwork(phoneNumber: string) {
-    const cleaned = phoneNumber.replace(/\D/g, "");
+  /* ================= INIT ================= */
 
-    if (cleaned.length < 4) {
-      setNetwork("");
-
-      return;
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchWallet();
+      fetchTransactions();
+      fetchUserProfile();
     }
+  }, [status]);
 
-    const prefix = cleaned.slice(0, 4);
-
-    let detected = "";
-
-    Object.entries(networkPrefixes).forEach(([networkName, prefixes]) => {
-      if (prefixes.includes(prefix)) {
-        detected = networkName;
-      }
-    });
-
-    setNetwork(detected);
-  }
+  /* ================= PURCHASE ================= */
 
   async function handlePurchase() {
     try {
       if (!network || !phone || !selectedPlan) {
         toast.error("Complete all fields");
-
         return;
       }
 
       if (phone.length !== 11) {
         toast.error("Invalid phone number");
-
         return;
       }
 
       if (pin.trim().length !== 4) {
         toast.error("Enter valid payment PIN");
-
         return;
       }
 
-      const walletBalance = Number(wallet.balance || 0);
-
-      const planAmount = Number(selectedPlan.amount || 0);
+      const walletBalance = Number(wallet.balance);
+      const planAmount = Number(selectedPlan.amount);
 
       if (walletBalance < planAmount) {
-        toast.error(`Insufficient balance. Wallet: ₦${walletBalance}`);
-
+        toast.error("Insufficient balance");
         return;
       }
 
       setBuying(true);
 
-      const response = await fetch("/api/data/purchase", {
+      const res = await fetch("/api/data/purchase", {
         method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          network: String(network),
-          phone: String(phone),
-          amount: Number(selectedPlan.amount),
-          planName: String(selectedPlan.plan),
-          pin: String(pin),
+          network,
+          phone,
+          amount: selectedPlan.amount,
+          planName: selectedPlan.plan,
+          pin,
         }),
       });
-      let data;
 
-      try {
-        data = await response.json();
-      } catch (error) {
-        console.error(error);
+      const data = await res.json();
 
-        toast.error("Invalid server response");
-
-        return;
-      }
-
-      if (!response.ok) {
+      if (!res.ok) {
         toast.error(data.message || "Purchase failed");
-
         return;
       }
 
       toast.success("Data purchase successful");
 
-      // UPDATE WALLET IMMEDIATELY
-      setWallet({
-        balance: Number(data.balance || 0),
-      });
+      setWallet({ balance: Number(data.balance || 0) });
 
-      // RESET FORM
       setPhone("");
       setNetwork("");
       setSelectedPlan(null);
       setPin("");
       setPlanType("Daily");
 
-      // CLOSE MODALS
       setOpenPin(false);
       setOpenSummary(false);
 
-      // REFRESH TRANSACTIONS
       await fetchTransactions();
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setBuying(false);
@@ -478,10 +854,12 @@ export default function DataPage() {
   }
 
   const plans = useMemo(() => {
-    if (!network) return [];
+  if (!network) return [];
 
-    return dataPlans[network]?.[planType] || [];
-  }, [network, planType]);
+  return dataPlans?.[network]?.[planType] || [];
+}, [network, planType]);
+
+  /* ================= UI ================= */
 
   if (loading && transactions.length === 0) {
     return (
@@ -490,7 +868,6 @@ export default function DataPage() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-[#f5f7fb] dark:bg-black">
       <div className="mx-auto max-w-7xl space-y-4  px-1 pb-24 md:space-y-6 md:pl-12">
@@ -574,34 +951,33 @@ export default function DataPage() {
                   <Input
                     type="tel"
                     maxLength={11}
-                    value={phone}
-                    placeholder="08123456789"
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
+                     value={phone}
+        onChange={(e) => {
+          const value = e.target.value.replace(/\D/g, "");
+          setPhone(value);
 
-                      setPhone(value);
-
-                      detectNetwork(value);
-                    }}
+          if (value.length >= 4) {
+            detectNetwork(value);
+          } else {
+            setNetwork("");
+          }
+        }}
                     className="h-12 border-0 bg-transparent text-lg font-bold shadow-none focus-visible:ring-0"
                   />
                 </div>
 
-                {phone.length === 11 && (
-                  <>
-                    {network ? (
-                      <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
-                        <CheckCircle2 className="h-4 w-4" />
-                        {network} number detected
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-sm font-medium text-red-500">
-                        <AlertCircle className="h-4 w-4" />
-                        Invalid network
-                      </div>
-                    )}
-                  </>
-                )}
+      {phone.length >= 4 && phone.length === 11 && (
+        network ? (
+          <div className="text-green-600 flex items-center gap-2">
+            <CheckCircle2 /> {network} number detected
+          </div>
+        ) : (
+          <div className="text-red-500 flex items-center gap-2">
+            <AlertCircle /> Unsupported or invalid number
+          </div>
+        )
+      )}
+  
               </div>
 
               {/* PLAN TYPE */}

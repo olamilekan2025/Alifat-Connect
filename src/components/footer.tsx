@@ -6,26 +6,28 @@ import { Send, Mail, Phone, MapPin } from "lucide-react";
 import { SlSocialFacebook } from "react-icons/sl";
 import { BsInstagram } from "react-icons/bs";
 import { TfiTwitter } from "react-icons/tfi";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+
+import { Loader2 } from "lucide-react";
 
 const quickLinks = [
   { name: "About", href: "/about" },
-  { name: "Pricing", href: "/pricing" },
+  { name: "Pricing", href: "/price" },
   { name: "Testimonials", href: "/testimonials" },
-  { name: "FAQ", href: "/faq" },
+  { name: "Contact", href: "/contact" },
+  { name: "FAQ", href: "/FAQ" },
 ];
 
 const services = [
-  { name: "Data Bundle", href: "/services/data" },
-  { name: "Airtime Topup", href: "/services/airtime" },
-  { name: "TV Subscription", href: "/services/tv" },
-  { name: "Electricity Bills", href: "/services/electricity" },
+  { name: "Data Bundle", href: "/auth/login" },
+  { name: "Airtime Topup", href: "/auth/login" },
+  { name: "TV Subscription", href: "/auth/login" },
+  { name: "Electricity Bills", href: "/auth/login" },
 ];
 
 const socialLinks = [
@@ -72,8 +74,53 @@ export default function Footer() {
     pathname === "/dashboard/referral" ||
     pathname === "/auth/forgot-password";
 
-
   if (hideFooter) return null;
+
+  const [email, setEmail] = useState("");
+
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleNewsletterSubscribe = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail) {
+      toast.error("Enter your email");
+      return;
+    }
+
+    try {
+      setSubscribing(true);
+
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message);
+        return;
+      }
+
+      toast.success("Thanks for subscribing 🎉");
+
+      setEmail("");
+    } catch {
+      toast.error("Failed to subscribe");
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   return (
     <footer className="relative overflow-hidden bg-gray-100 text-white dark:bg-zinc-950">
@@ -95,8 +142,8 @@ export default function Footer() {
             </Link>
 
             <p className="mt-6 leading-relaxed text-gray-600 dark:text-slate-400">
-              Fast, secure, and reliable VTU platform for data,
-              airtime, utility bills, TV subscriptions, and more.
+              Fast, secure, and reliable VTU platform for data, airtime, utility
+              bills, TV subscriptions, and more.
             </p>
 
             {/* Social Icons */}
@@ -112,10 +159,7 @@ export default function Footer() {
                     variant="ghost"
                     className="h-11 w-11 rounded-full bg-black text-white hover:bg-[#D4AF37] hover:text-black"
                   >
-                    <Link
-                      href={social.href}
-                      aria-label={social.label}
-                    >
+                    <Link href={social.href} aria-label={social.label}>
                       <Icon className="h-5 w-5" />
                     </Link>
                   </Button>
@@ -196,19 +240,30 @@ export default function Footer() {
             {/* Newsletter Card */}
             <Card className="mt-4 border-white/10 bg-white/5 shadow-none backdrop-blur-sm dark:bg-white/5">
               <CardContent className="p-2">
-                <form className="flex items-center gap-2">
+                <form
+                  onSubmit={handleNewsletterSubscribe}
+                  className="flex items-center gap-2"
+                >
                   <Input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
+                    disabled={subscribing}
                     className="border-0 bg-transparent text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
 
                   <Button
                     type="submit"
                     size="icon"
-                    className="h-9  w-9 shrink-0 rounded-full bg-[#D4AF37] text-black hover:bg-white"
+                    disabled={subscribing}
+                    className="h-9 w-9 shrink-0 rounded-full bg-[#D4AF37] text-black hover:bg-[#E5C158]"
                   >
-                    <Send className="h-3 w-3" />
+                    {subscribing ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3" />
+                    )}
                   </Button>
                 </form>
               </CardContent>

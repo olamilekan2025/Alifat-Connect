@@ -1,10 +1,14 @@
-export function generateReferralCode(name: string) {
+export function generateReferralCode(
+  name: string
+) {
   const clean = name
-    ?.replace(/[^a-zA-Z]/g, "")
+    .replace(/[^a-zA-Z]/g, "")
     .toUpperCase()
     .slice(0, 4);
 
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const random = Math.floor(
+    100000 + Math.random() * 900000
+  );
 
-  return `${clean || "USER"}-${random}`;
+  return `${clean || "USER"}${random}`;
 }

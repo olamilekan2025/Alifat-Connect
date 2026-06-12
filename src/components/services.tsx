@@ -137,16 +137,6 @@ export default function Services() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="bg-white dark:bg-black">
-                  {/* Explore Link */}
-                  <Link
-                    href={service.href}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-black transition-colors group-hover:text-[#D4AF37] dark:text-white "
-                  >
-                    Explore Service
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </CardFooter>
               </Card>
             );
           })}

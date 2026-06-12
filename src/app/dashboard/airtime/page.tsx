@@ -121,6 +121,33 @@ export default function AirtimePage() {
 
   const [hasPaymentPin, setHasPaymentPin] = useState(false);
 
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("/api/user/profile");
+      const data = await res.json();
+
+    if (data.success && data.user?.phone) {
+  let formattedPhone = data.user.phone;
+
+  if (formattedPhone.startsWith("+234")) {
+    formattedPhone = `0${formattedPhone.slice(4)}`;
+  } else if (formattedPhone.startsWith("234")) {
+    formattedPhone = `0${formattedPhone.slice(3)}`;
+  }
+
+  setPhone(formattedPhone);
+  detectNetwork(formattedPhone);
+}
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+
   useEffect(() => {
     if (status === "authenticated") {
       fetchWallet();
@@ -275,6 +302,32 @@ export default function AirtimePage() {
     }
   }
 
+  useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const res = await fetch(
+        "/api/user/profile"
+      );
+
+      const data = await res.json();
+
+      if (
+        data.success &&
+        data.user?.phone
+      ) {
+        setPhone(data.user.phone);
+        detectNetwork(
+          data.user.phone
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadProfile();
+}, []);
+
   if (loading && transactions.length === 0) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
@@ -337,16 +390,16 @@ export default function AirtimePage() {
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         {/* LEFT */}
         <Card className="overflow-hidden rounded-[35px] rounded-md  border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="dark:bg-gradient-to-br from-black via-zinc-900 to-zinc-800 p-8 text-white">
+          <div className="dark:bg-gradient-to-br from-black via-zinc-900 to-zinc-800 p-6 text-white">
             <h2 className="text-3xl font-bold text-black dark:text-white">
               Buy Airtime
             </h2>
           </div>
 
-          <CardContent className="space-y-8 p-8  ">
+          <CardContent className="space-y-8 md:p-8  ">
             {/* PHONE */}
             <div className="space-y-8">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="text-sm mb-10 font-medium text-zinc-700 dark:text-zinc-300">
                 Recipient Number
               </label>
 

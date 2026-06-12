@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-<section className="relative flex min-h-screen  py-10 overflow-hidden bg-white px-4 dark:bg-black md:px-6 md:px-8 md:py-20 ">
+<section className="relative flex md:min-h-screen   py-10 overflow-hidden bg-white px-4 dark:bg-black md:px-6 md:px-8 md:py-20 ">
       {/* SVG Background */}
       <div className="pointer-events-none absolute inset-0">
         <svg
@@ -80,7 +80,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/pricing"
+              href="/price"
               className="inline-flex items-center text-xs gap-2 rounded-full border border-gray-300 bg-black px-5 py-3 font-semibold text-white transition hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-black dark:border-slate-700 dark:bg-white dark:text-black md:hover:border-[#D4AF37] md:hover:bg-[#D4AF37] md:hover:text-black md:px-6 md:py-3 md:text-sm "
             >
               View Pricing

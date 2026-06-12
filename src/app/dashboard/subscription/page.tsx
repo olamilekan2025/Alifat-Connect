@@ -238,7 +238,7 @@ const handleProcessSubscription = async () => {
                     onClick={() => setSelectedPlan(plan.id)}
                     className={`relative rounded-3xl border p-5 bg-card cursor-pointer transition-all duration-300 flex flex-col justify-between select-none group h-full ${
                       isSelected
-                        ? "border-orange-500 ring-2 ring-orange-500/20 shadow-xl scale-[1.01]"
+                        ? "border-orange-500 ring-2 ring-[#D4AF37] shadow-xl scale-[1.01]"
                         : "border-border/80 hover:border-border hover:bg-muted/30"
                     }`}
                   >
@@ -256,8 +256,8 @@ const handleProcessSubscription = async () => {
                         <div
                           className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                             isSelected
-                              ? "border-orange-500 bg-orange-500"
-                              : "border-muted-foreground/30"
+                              ? "border-[#D4AF37] bg-[#D4AF37]"
+                              : "border-[#D4AF37]"
                           }`}
                         >
                           {isSelected && (
@@ -314,7 +314,7 @@ const handleProcessSubscription = async () => {
                   key={idx}
                   className="flex gap-3 p-4 border border-border/50 rounded-2xl bg-muted/10 items-start"
                 >
-                  <div className="h-6 w-6 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 flex-shrink-0 mt-0.5">
+                  <div className="h-6 w-6 rounded-lg bg-orange-500/10 border border-[#D4AF37] flex items-center justify-center text-orange-500 flex-shrink-0 mt-0.5">
                     <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />
                   </div>
                   <div>
@@ -362,10 +362,10 @@ const handleProcessSubscription = async () => {
 
               <div className="border-t border-dashed border-border pt-4 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="w-3.5 h-3.5 text-orange-500" />
+                  <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>Time Pipeline Remaining</span>
                 </div>
-                <p className="font-mono font-black text-sm text-orange-600 dark:text-orange-400">
+                <p className="font-mono font-black text-sm text-[#D4AF37] dark:text-[#D4AF37]">
                   {currentSubscription.daysRemaining} Days
                 </p>
               </div>
@@ -373,14 +373,14 @@ const handleProcessSubscription = async () => {
           </Card>
 
           {/* 5. LIVE CHECKOUT SETTLEMENT PORT CARD CONTAINER */}
-          <Card className="rounded-[28px] border-2 border-orange-500/30 bg-card shadow-xl overflow-hidden relative">
+          <Card className="rounded-[28px] border-2 border-[#D4AF37] bg-card shadow-xl overflow-hidden relative">
             <div className="absolute top-0 right-0 p-3 opacity-10">
-              <Sparkles className="w-20 h-20 text-orange-500" />
+              <Sparkles className="w-20 h-20 text-[#D4AF37]" />
             </div>
 
             <div className="p-5 bg-gradient-to-b from-orange-500/10 via-orange-500/5 to-transparent border-b border-border/40">
               <h3 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-orange-500" />
+                <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
                 Secure Checkout Node Gateway
               </h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -404,7 +404,7 @@ const handleProcessSubscription = async () => {
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Platform Node Surcharge</span>
-                  <span className="font-mono text-emerald-500 font-bold">
+                  <span className="font-mono text-[#D4AF37] font-bold">
                     ₦0.00 (Waived)
                   </span>
                 </div>
@@ -415,7 +415,7 @@ const handleProcessSubscription = async () => {
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Gross Value Due:
                   </span>
-                  <span className="text-2xl font-black text-orange-600 dark:text-orange-500 font-mono tracking-tight">
+                  <span className="text-2xl font-black text-[#D4AF37] dark:text-[#D4AF37] font-mono tracking-tight">
                     ₦{resolvedPlanDetails.price.toLocaleString()}.00
                   </span>
                 </div>
@@ -423,7 +423,7 @@ const handleProcessSubscription = async () => {
                 <Button
                   onClick={handleProcessSubscription}
                   disabled={isSubmitting}
-                  className="w-full h-11 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:opacity-95 text-white font-bold transition-all shadow-md shadow-orange-500/10 flex items-center justify-center gap-2"
+                  className="w-full h-11 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#D4AF37] hover:opacity-95 text-white font-bold transition-all shadow-md shadow-[#D4AF37]/10 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
