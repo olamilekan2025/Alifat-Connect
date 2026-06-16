@@ -1,0 +1,503 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Users,
+  Wallet,
+  Shield,
+  ArrowUpRight,
+  Clock3,
+  XCircle,
+  CheckCircle2,
+  TrendingUp,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+import { Button } from "@/components/ui/button";
+
+type TransactionItem = {
+  _id: string;
+  reference: string;
+  category: string;
+  amount: number;
+  status: "success" | "pending" | "failed";
+  createdAt?: string;
+};
+
+type AdminStats = {
+  totalUsers: number;
+  totalAdmins: number;
+  verifiedUsers: number;
+
+  totalTransactions: number;
+  successfulTransactions: number;
+  failedTransactions: number;
+  pendingTransactions: number;
+
+  totalWalletBalance: number;
+  totalRevenue: number;
+
+  recentTransactions: TransactionItem[];
+};
+
+export default function AdminPage() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const term = search.trim().toLowerCase();
+  const [sortBy, setSortBy] = useState<"date" | "amount" | "status">("date");
+
+  const [dateFilter, setDateFilter] = useState<
+    "today" | "7days" | "30days" | "all"
+  >("all");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
+
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(
+    null,
+  );
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("/api/admin/stats")
+        .then((res) => res.json())
+        .then((data) => setStats(data));
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredTransactions = [...(stats?.recentTransactions ?? [])]
+    .filter((trx) => {
+      const term = search.toLowerCase();
+
+      return (
+        trx.reference?.toLowerCase().includes(term) ||
+        trx.category?.toLowerCase().includes(term)
+      );
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "amount":
+          return b.amount - a.amount;
+
+        case "status":
+          return String(a.status).localeCompare(String(b.status));
+
+        default:
+          return (
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime()
+          );
+      }
+    });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE),
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [filteredTransactions.length, totalPages]);
+
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  if (loading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
+          <p className="mt-4 text-muted-foreground">
+            Loading admin dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 p-0 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Recent Transactions</h2>
+
+          <p className="text-sm text-muted-foreground">
+            Monitor the latest platform activity in real time.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search reference or service..."
+            className="w-64"
+          />
+
+          <select
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(e.target.value as "date" | "amount" | "status")
+            }
+            className="rounded-lg border bg-background px-3 py-2 text-sm"
+          >
+            <option value="date">Sort by Date</option>
+
+            <option value="amount">Sort by Amount</option>
+
+            <option value="status">Sort by Status</option>
+          </select>
+
+          <Button variant="outline">Export CSV</Button>
+
+          <Button>View All</Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          title="Total Users"
+          value={stats?.totalUsers ?? 0}
+          icon={<Users className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Administrators"
+          value={stats?.totalAdmins ?? 0}
+          icon={<Shield className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Revenue"
+          value={`₦${Number(stats?.totalRevenue ?? 0).toLocaleString()}`}
+          icon={<TrendingUp className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Wallet Balance"
+          value={`₦${Number(stats?.totalWalletBalance ?? 0).toLocaleString()}`}
+          icon={<Wallet className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Transactions"
+          value={stats?.totalTransactions ?? 0}
+          icon={<ArrowUpRight className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Successful"
+          value={stats?.successfulTransactions ?? 0}
+          icon={<CheckCircle2 className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Pending"
+          value={stats?.pendingTransactions ?? 0}
+          icon={<Clock3 className="h-5 w-5" />}
+        />
+
+        <StatCard
+          title="Failed"
+          value={stats?.failedTransactions ?? 0}
+          icon={<XCircle className="h-5 w-5" />}
+        />
+      </div>
+
+      <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border p-4">
+          <p className="text-sm text-muted-foreground">Total</p>
+          <h3 className="text-2xl font-bold">{stats?.totalTransactions}</h3>
+        </div>
+
+        <div className="rounded-2xl border p-4">
+          <p className="text-sm text-muted-foreground">Success</p>
+          <h3 className="text-2xl font-bold text-green-600">
+            {stats?.successfulTransactions}
+          </h3>
+        </div>
+
+        <div className="rounded-2xl border p-4">
+          <p className="text-sm text-muted-foreground">Pending</p>
+          <h3 className="text-2xl font-bold text-yellow-600">
+            {stats?.pendingTransactions}
+          </h3>
+        </div>
+
+        <div className="rounded-2xl border p-4">
+          <p className="text-sm text-muted-foreground">Failed</p>
+          <h3 className="text-2xl font-bold text-red-600">
+            {stats?.failedTransactions}
+          </h3>
+        </div>
+      </div>
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="border-b bg-muted/30">
+            <tr className="text-left">
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Reference
+              </th>
+
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Service
+              </th>
+
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Amount
+              </th>
+
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Status
+              </th>
+
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Date
+              </th>
+
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedTransactions.length ? (
+              paginatedTransactions.map((trx: any) => (
+                <tr
+                  key={trx._id}
+                  className="border-b transition-colors hover:bg-muted/30"
+                >
+                  <td className="px-6 py-4 font-mono text-sm font-medium">
+                    {trx.reference}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600">
+                      {trx.category || "General"}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 font-semibold">
+                    ₦{Number(trx.amount).toLocaleString()}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {trx.status === "success" && (
+                      <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-600">
+                        Success
+                      </span>
+                    )}
+
+                    {trx.status === "pending" && (
+                      <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-600">
+                        Pending
+                      </span>
+                    )}
+
+                    {trx.status === "failed" && (
+                      <span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-600">
+                        Failed
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                    {trx.createdAt
+                      ? new Date(trx.createdAt).toLocaleString()
+                      : "-"}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedTransaction(trx)}
+                    >
+                      View
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  No recent transactions available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-6 flex items-center justify-between">
+        <Button
+          variant="outline"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        >
+          Previous
+        </Button>
+
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages || 1}
+        </span>
+
+        <Button
+          variant="outline"
+          disabled={currentPage >= totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        >
+          Next
+        </Button>
+      </div>
+      {selectedTransaction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          {/* Modal Card */}
+          <div
+            className="
+        relative w-full max-w-lg
+        rounded-2xl border border-white
+        bg-background/95 backdrop-blur-xl
+        p-6 shadow-2xl
+        animate-in fade-in zoom-in-95 duration-200
+      "
+          >
+            {/* Header */}
+            <div className="mb-5 flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Transaction Details</h2>
+                <p className="text-xs text-muted-foreground">
+                  Review transaction information
+                </p>
+              </div>
+
+              {/* Close X */}
+              <button
+                onClick={() => setSelectedTransaction(null)}
+                className="
+            rounded-lg p-2 text-muted-foreground
+            hover:bg-muted/60 hover:text-foreground
+            transition
+          "
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between border-b border-border/40 pb-2">
+                <span className="text-muted-foreground">Reference</span>
+                <span className="font-medium">
+                  {selectedTransaction.reference}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-border/40 pb-2">
+                <span className="text-muted-foreground">Category</span>
+                <span className="font-medium">
+                  {selectedTransaction.category}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-border/40 pb-2">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-semibold text-foreground">
+                  ₦{Number(selectedTransaction.amount).toLocaleString()}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+
+                <span
+                  className={`
+              rounded-full px-3 py-1 text-xs font-medium
+              ${
+                selectedTransaction.status === "success"
+                  ? "bg-green-500/10 text-green-600"
+                  : selectedTransaction.status === "pending"
+                    ? "bg-yellow-500/10 text-yellow-600"
+                    : "bg-red-500/10 text-red-600"
+              }
+            `}
+                >
+                  {selectedTransaction.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={() => setSelectedTransaction(null)}
+                className="
+            rounded-xl px-5
+            bg-primary hover:bg-primary/90
+            text-white shadow-md
+          "
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type StatCardProps = {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+};
+
+function StatCard({ title, value, icon }: StatCardProps) {
+  return (
+    <div className="rounded-3xl border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <div className="flex items-center justify-between">
+        <div className="rounded-2xl bg-yellow-500/10 p-3 text-yellow-600">
+          {icon}
+        </div>
+
+        <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">
+          LIVE
+        </span>
+      </div>
+
+      <p className="mt-5 text-sm text-muted-foreground">{title}</p>
+
+      <h2 className="mt-2 text-3xl font-black tracking-tight">{value}</h2>
+    </div>
+  );
+}

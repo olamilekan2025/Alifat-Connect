@@ -58,6 +58,7 @@ export default function Navbar() {
   ].includes(pathname)
     || pathname.startsWith(
       "/dashboard",
+    ) || pathname.startsWith("/admin-dashboard"
     );
 
   // Prevent body scroll when mobile menu is open

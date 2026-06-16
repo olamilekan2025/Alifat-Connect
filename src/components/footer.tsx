@@ -72,6 +72,7 @@ export default function Footer() {
     pathname === "/dashboard/manage-wallet" ||
     pathname === "/dashboard/reports" ||
     pathname === "/dashboard/referral" ||
+    pathname === "/admin-dashboard" ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;

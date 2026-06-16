@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
 
 import {
   Eye,
@@ -114,11 +115,32 @@ function VerifyLoginContent() {
         return;
       }
 
-      toast.success(
-        "Login successful"
-      );
+    const loginResult =
+  await signIn(
+    "credentials",
+    {
+      email,
+      password,
 
-      router.push("/dashboard");
+      adminVerified: true,
+
+      redirect: false,
+    }
+  );
+
+if (loginResult?.error) {
+  toast.error(
+    loginResult.error
+  );
+
+  return;
+}
+
+toast.success(
+  "Admin login successful"
+);
+
+router.push("/admin-dashboard");
     } catch {
       toast.error(
         "Verification failed"

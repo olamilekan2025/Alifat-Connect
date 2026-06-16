@@ -29,37 +29,106 @@ export const authOptions: NextAuthOptions = {
         },
       },
 
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing credentials");
-        }
+    async authorize(credentials) {
+  try {
+    if (
+      !credentials?.email ||
+      !credentials?.password
+    ) {
+      throw new Error(
+        "Email and password are required"
+      );
+    }
 
-        const db = await connectToDatabase();
+    const db =
+      await connectToDatabase();
 
-        const user = await db.connection.db!.collection("users").findOne({
-          email: credentials.email,
+    const email =
+      credentials.email
+        .trim()
+        .toLowerCase();
+
+    const user =
+      await db.connection.db!
+        .collection("users")
+        .findOne({
+          email,
         });
 
-        if (!user) {
-          throw new Error("User not found");
-        }
+    console.log(
+      "LOGIN EMAIL:",
+      email
+    );
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+    console.log(
+      "USER FOUND:",
+      !!user
+    );
 
-        if (!isPasswordValid) {
-          throw new Error("Invalid password");
-        }
+    if (!user) {
+      throw new Error(
+        "Invalid email or password"
+      );
+    }
 
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
+    console.log(
+      "USER ROLE:",
+      user.role
+    );
+
+    console.log(
+      "EMAIL VERIFIED:",
+      user.emailVerified
+    );
+
+    console.log(
+      "HAS PASSWORD:",
+      !!user.password
+    );
+
+    if (!user.password) {
+      throw new Error(
+        "Password not found"
+      );
+    }
+
+    const isPasswordValid =
+      await bcrypt.compare(
+        credentials.password,
+        user.password
+      );
+
+    console.log(
+      "PASSWORD MATCH:",
+      isPasswordValid
+    );
+
+    if (!isPasswordValid) {
+      throw new Error(
+        "Invalid email or password"
+      );
+    }
+
+    return {
+      id: user._id.toString(),
+      email: user.email,
+      name:
+        user.name ??
+        `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim(),
           role: user.role ?? "user",
+          // step-up verification marker (required for /admin access)
+          adminVerified: false,
         };
-      },
+  } catch (error) {
+
+    console.error(
+      "AUTH ERROR:",
+      error
+    );
+
+    throw error;
+  }
+}
     }),
   ],
 
@@ -68,19 +137,24 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.adminVerified = (user as any).adminVerified === true;
       }
 
       return token;
     },
 
+
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).adminVerified =
+          token.adminVerified === true;
       }
 
       return session;
     },
+
   },
 
   pages: {

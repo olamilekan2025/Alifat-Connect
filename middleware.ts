@@ -18,17 +18,12 @@ export default withAuth({
       }
 
       // ADMIN
-
-      if (
-        pathname.startsWith(
-          "/admin"
-        )
-      ) {
-        return (
-          token.role ===
-          "admin"
-        );
+      if (pathname.startsWith("/admin")) {
+        const isAdmin = token.role === "admin";
+        const isAdminVerified = (token as any).adminVerified === true;
+        return isAdmin && isAdminVerified;
       }
+
 
       // MODERATOR
 

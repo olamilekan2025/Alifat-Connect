@@ -4,37 +4,61 @@ import { connectToDatabase } from "@/lib/mongodb";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const {
+      email,
+      code,
+      password,
+    } = await req.json();
 
-    const email = body?.email;
-    const code = body?.code;
-    const password = body?.password;
-
-    if (!email || !code || !password) {
+    if (
+      !email ||
+      !code ||
+      !password
+    ) {
       return NextResponse.json(
-        { error: "Missing fields" },
+        {
+          error:
+            "Email, code and password are required",
+        },
         { status: 400 }
       );
     }
 
-    const db = await connectToDatabase();
+    const db =
+      await connectToDatabase();
 
-    const users = db.collection("users");
-    const loginCodes = db.collection(
-      "loginVerificationCodes"
-    );
+    const users =
+      db.connection.collection(
+        "users"
+      );
 
-    const user = await users.findOne({ email });
+    const loginCodes =
+      db.connection.collection(
+        "loginVerificationCodes"
+      );
+
+    const user =
+      await users.findOne({
+        email: email
+          .trim()
+          .toLowerCase(),
+      });
 
     if (!user) {
       return NextResponse.json(
-        { error: "User not found" },
+        {
+          error: "User not found",
+        },
         { status: 404 }
       );
     }
 
     // ADMIN ONLY
-    if (user.role !== "Admin") {
+    const role = String(
+      user.role || ""
+    ).toLowerCase();
+
+    if (role !== "admin") {
       return NextResponse.json(
         {
           error:
@@ -44,59 +68,114 @@ export async function POST(req: Request) {
       );
     }
 
+    // ACCOUNT VERIFIED
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        {
+          error:
+            "Please verify your email first",
+        },
+        { status: 403 }
+      );
+    }
+
     // PASSWORD CHECK
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
+    if (!user.password) {
+      return NextResponse.json(
+        {
+          error:
+            "Password not found",
+        },
+        { status: 400 }
+      );
+    }
+
+    const passwordMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: "Invalid password" },
+        {
+          error:
+            "Invalid password",
+        },
         { status: 401 }
       );
     }
 
-    // FIND CODE
-    const codeDoc = await loginCodes.findOne({
-      email,
-      code,
-      purpose: "verify-login",
-      usedAt: null,
-    });
+    // FIND OTP
+    const codeDoc =
+      await loginCodes.findOne({
+        email: email
+          .trim()
+          .toLowerCase(),
+        code: code.trim(),
+        purpose:
+          "verify-login",
+        usedAt: null,
+      });
 
     if (!codeDoc) {
       return NextResponse.json(
-        { error: "Invalid code" },
+        {
+          error:
+            "Invalid verification code",
+        },
         { status: 400 }
       );
     }
 
-    // EXPIRED?
+    // CHECK EXPIRY
     if (
-      new Date(codeDoc.expiresAt) <
-      new Date()
+      new Date(
+        codeDoc.expiresAt
+      ) < new Date()
     ) {
       return NextResponse.json(
-        { error: "Code expired" },
+        {
+          error:
+            "Verification code expired",
+        },
         { status: 400 }
       );
     }
 
-    // MARK USED
+    // MARK CODE USED
     await loginCodes.updateOne(
-      { _id: codeDoc._id },
+      {
+        _id: codeDoc._id,
+      },
       {
         $set: {
-          usedAt: new Date(),
+          usedAt:
+            new Date(),
+        },
+      }
+    );
+
+    // STORE VERIFIED LOGIN FLAG
+    await users.updateOne(
+      {
+        _id: user._id,
+      },
+      {
+        $set: {
+          adminLoginVerified:
+            true,
+          adminLoginVerifiedAt:
+            new Date(),
         },
       }
     );
 
     return NextResponse.json({
-      ok: true,
-      role: user.role,
-      redirectTo: "/admin/dashboard",
+      success: true,
+      role: "admin",
+      redirectTo:
+        "/admin",
     });
   } catch (error) {
     console.error(
@@ -105,7 +184,10 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json(
-      { error: "Verification failed" },
+      {
+        error:
+          "Verification failed",
+      },
       { status: 500 }
     );
   }

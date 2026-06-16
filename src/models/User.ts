@@ -43,6 +43,13 @@ export interface IUser {
   resetPinVerificationExpires?: Date | null;
   isResetPinVerified?: boolean;
 
+  adminLoginOtp?: string | null;
+  adminLoginOtpExpires?: Date | null;
+
+  // ADMIN LOGIN VERIFICATION
+  adminLoginVerified?: boolean;
+  adminLoginVerifiedAt?: Date | null;
+
   // =========================
   // 🚀 REFERRAL SYSTEM (FIXED)
   // =========================
@@ -162,6 +169,27 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+
+    adminLoginVerified: {
+  type: Boolean,
+  default: false,
+},
+
+adminLoginVerifiedAt: {
+  type: Date,
+  default: null,
+},
+
+
+    adminLoginOtp: {
+  type: String,
+  default: null,
+},
+
+adminLoginOtpExpires: {
+  type: Date,
+  default: null,
+},
 
     // =========================
     // 🚀 REFERRAL SYSTEM

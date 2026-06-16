@@ -6,14 +6,11 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 
 import { toast } from "sonner";
 
-import {
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -36,127 +33,81 @@ import GoogleIcon from "@/components/icons/google-icon";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [acceptedTerms, setAcceptedTerms] =
-    useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [googleLoading, setGoogleLoading] =
-    useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  async function onSubmit(
-    e: React.FormEvent
-  ) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error(
-        "Email and password are required"
-      );
-
+      toast.error("Email and password are required");
       return;
     }
 
     if (!acceptedTerms) {
-      toast.error(
-        "Please accept Terms & Privacy Policy"
-      );
-
+      toast.error("Please accept Terms & Privacy Policy");
       return;
     }
 
     setLoading(true);
 
     try {
-      const result = await signIn(
-        "credentials",
-        {
-          email: email
-            .trim()
-            .toLowerCase(),
-
-          password,
-
-          redirect: false,
-        }
-      );
+      const result = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password,
+        redirect: false,
+      });
 
       if (!result) {
-        toast.error(
-          "Unable to login"
-        );
-
+        toast.error("Unable to login");
         return;
       }
-
       if (result.error) {
-        toast.error(
-          "Invalid email or password"
-        );
+        console.log(result.error);
+
+        if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
+          toast.success("Verification code required");
+
+router.push(`/auth/verify-login?email=${encodeURIComponent(email)}`);
+
+          return;
+        }
+
+        toast.error(result.error);
 
         return;
       }
 
-      toast.success(
-        "Login successful"
-      );
+      const session = await getSession();
 
-      // IMPORTANT
+      const role = String(session?.user?.role ?? "user").toLowerCase();
+
+      toast.success("Login successful");
+
+      // NOTE: middleware enforces adminVerified step-up for /admin.
+      // Admins will be redirected to /auth/login if not verified.
+      if (role === "admin") {
+        router.replace("/admin");
+      } else if (role === "moderator") {
+        router.replace("/moderator");
+      } else {
+        router.replace("/dashboard");
+      }
+
       router.refresh();
-
-      // SHORT DELAY TO ALLOW SESSION UPDATE
-      setTimeout(async () => {
-        try {
-          const sessionRes = await fetch(
-            "/api/auth/session",
-            {
-              cache: "no-store",
-            }
-          );
-
-          const session =
-            await sessionRes.json();
-
-          const role =
-            session?.user?.role;
-
-          if (role === "Admin") {
-            router.replace("/admin");
-          } else if (
-            role === "Moderator"
-          ) {
-            router.replace(
-              "/moderator"
-            );
-          } else {
-            router.replace(
-              "/dashboard"
-            );
-          }
-
-          router.refresh();
-        } catch {
-          router.replace(
-            "/dashboard"
-          );
-        }
-      }, 500);
     } catch (error) {
-      console.error(error);
+      console.error("LOGIN ERROR:", error);
 
-      toast.error(
-        "Something went wrong"
-      );
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -164,9 +115,7 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     if (!acceptedTerms) {
-      toast.error(
-        "Accept Terms & Privacy Policy first"
-      );
+      toast.error("Accept Terms & Privacy Policy first");
 
       return;
     }
@@ -178,9 +127,7 @@ export default function LoginPage() {
         callbackUrl: "/dashboard",
       });
     } catch (error) {
-      toast.error(
-        "Google login failed"
-      );
+      toast.error("Google login failed");
     } finally {
       setGoogleLoading(false);
     }
@@ -196,22 +143,10 @@ export default function LoginPage() {
         preserveAspectRatio="none"
       >
         <defs>
-          <linearGradient
-            id="topGlow"
-            x1="0"
-            x2="1"
-          >
-            <stop
-              offset="0%"
-              stopColor="#D4AF37"
-              stopOpacity="0.95"
-            />
+          <linearGradient id="topGlow" x1="0" x2="1">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.95" />
 
-            <stop
-              offset="100%"
-              stopColor="#D4AF37"
-              stopOpacity="0.35"
-            />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
           </linearGradient>
         </defs>
 
@@ -236,22 +171,10 @@ export default function LoginPage() {
         preserveAspectRatio="none"
       >
         <defs>
-          <linearGradient
-            id="bottomGlow"
-            x1="1"
-            x2="0"
-          >
-            <stop
-              offset="0%"
-              stopColor="#D4AF37"
-              stopOpacity="0.92"
-            />
+          <linearGradient id="bottomGlow" x1="1" x2="0">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.92" />
 
-            <stop
-              offset="100%"
-              stopColor="#D4AF37"
-              stopOpacity="0.35"
-            />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
           </linearGradient>
         </defs>
 
@@ -276,16 +199,12 @@ export default function LoginPage() {
           </CardTitle>
 
           <CardDescription className="text-zinc-500 dark:text-zinc-400">
-            Login to continue to your
-            dashboard
+            Login to continue to your dashboard
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form
-            onSubmit={onSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={onSubmit} className="space-y-5">
             {/* EMAIL */}
             <div className="space-y-1">
               <label className="text-sm text-zinc-400 dark:text-zinc-500">
@@ -296,11 +215,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 className="h-10 rounded-2xl border-black dark:border-white/10  bg-white/5 dark:text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-yellow-500"
                 required
               />
@@ -314,39 +229,20 @@ export default function LoginPage() {
 
               <div className="relative">
                 <Input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
                   value={password}
-                  onChange={(e) =>
-                    setPassword(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   className="h-10 rounded-2xl  border-black dark:border-white/10  bg-white/5 pr-12 dark:text-white placeholder:text-black dark:placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-yellow-500"
                   required
                 />
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      (prev) =>
-                        !prev
-                    )
-                  }
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-white"
                 >
-                  {showPassword ? (
-                    <EyeOff
-                      size={18}
-                    />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -365,16 +261,8 @@ export default function LoginPage() {
             <div className="flex items-start space-x-3">
               <Checkbox
                 id="terms"
-                checked={
-                  acceptedTerms
-                }
-                onCheckedChange={(
-                  val
-                ) =>
-                  setAcceptedTerms(
-                    !!val
-                  )
-                }
+                checked={acceptedTerms}
+                onCheckedChange={(val) => setAcceptedTerms(!!val)}
               />
 
               <label
@@ -382,10 +270,7 @@ export default function LoginPage() {
                 className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-300"
               >
                 I agree to the{" "}
-                <Link
-                  href="/terms"
-                  className="text-yellow-400 hover:underline"
-                >
+                <Link href="/terms" className="text-yellow-400 hover:underline">
                   Terms
                 </Link>{" "}
                 and{" "}
@@ -401,15 +286,10 @@ export default function LoginPage() {
             {/* LOGIN BUTTON */}
             <Button
               type="submit"
-              disabled={
-                loading ||
-                !acceptedTerms
-              }
+              disabled={loading || !acceptedTerms}
               className="h-10 w-full rounded-2xl bg-yellow-500 font-semibold text-black transition hover:bg-yellow-400"
             >
-              {loading
-                ? "Logging in..."
-                : "Login"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
@@ -426,21 +306,14 @@ export default function LoginPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={
-              handleGoogleLogin
-            }
-            disabled={
-              googleLoading ||
-              !acceptedTerms
-            }
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || !acceptedTerms}
             className="h-10 w-full rounded-2xl border-black dark:border-white/10 bg-white/5 dark:text-white transition hover:bg-white/10"
           >
             <GoogleIcon />
 
             <span className="ml-2">
-              {googleLoading
-                ? "Loading..."
-                : "Continue with Google"}
+              {googleLoading ? "Loading..." : "Continue with Google"}
             </span>
           </Button>
 
