@@ -2,33 +2,84 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { sendLoginVerificationCode } from "@/lib/nodemailer";
 
-const LOGIN_CODE_TTL_MS = 5 * 60 * 1000;
+const LOGIN_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email: string | undefined = body?.email;
 
-    if (!email) return NextResponse.json({ error: "Missing email" }, { status: 400 });
+    const normalizedEmail = String(body?.email ?? "")
+      .trim()
+      .toLowerCase();
 
-    const db = await connectToDatabase();
-    const users = db.collection("users");
-    const loginCodes = db.collection("loginVerificationCodes");
-
-    const user = await users.findOne({ email });
-    if (!user) return NextResponse.json({ ok: true, message: "If account exists, code sent" });
-
-    if (!user.emailVerified) {
-      return NextResponse.json({ error: "Please verify your email" }, { status: 403 });
+    if (!normalizedEmail) {
+      return NextResponse.json(
+        { error: "Missing email" },
+        { status: 400 }
+      );
     }
 
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + LOGIN_CODE_TTL_MS);
+    const db = await connectToDatabase();
 
-    await loginCodes.deleteMany({ email, purpose: "verify-login" });
+    const users = db.connection.collection("users");
+    const loginCodes = db.connection.collection(
+      "loginVerificationCodes"
+    );
 
+    // Find user
+    const user = await users.findOne({
+      email: normalizedEmail,
+    });
+
+    // Prevent email enumeration
+    if (!user) {
+      return NextResponse.json({
+        ok: true,
+        message:
+          "If the account exists, a verification code has been sent.",
+      });
+    }
+
+    // Admin only
+    if (String(user.role || "").toLowerCase() !== "admin") {
+      return NextResponse.json(
+        {
+          error:
+            "Only administrators can request a login verification code.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Email must already be verified
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        {
+          error:
+            "Please verify your email address first.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Generate new 6-digit code
+    const code = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    const expiresAt = new Date(
+      Date.now() + LOGIN_CODE_TTL_MS
+    );
+
+    // Remove previous login codes
+    await loginCodes.deleteMany({
+      email: normalizedEmail,
+      purpose: "verify-login",
+    });
+
+    // Save new code
     await loginCodes.insertOne({
-      email,
+      email: normalizedEmail,
       userId: user._id,
       code,
       purpose: "verify-login",
@@ -37,11 +88,44 @@ export async function POST(req: Request) {
       usedAt: null,
     });
 
-    await sendLoginVerificationCode(email, code);
+    // Send email
+    const emailSent =
+      await sendLoginVerificationCode(
+        normalizedEmail,
+        code
+      );
 
-    return NextResponse.json({ ok: true, message: "Login code resent" });
-  } catch {
-    return NextResponse.json({ error: "Resend login code failed" }, { status: 500 });
+    if (!emailSent) {
+      console.error(
+        `Failed to send login verification email to ${normalizedEmail}`
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Unable to send verification email. Please try again later.",
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message:
+        "Login verification code sent successfully.",
+    });
+  } catch (error) {
+    console.error(
+      "RESEND LOGIN CODE ERROR:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Failed to resend login verification code.",
+      },
+      { status: 500 }
+    );
   }
 }
-
