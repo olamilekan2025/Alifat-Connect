@@ -9,7 +9,7 @@ export default function AdminLayout({
   return (
     <div
       id="admin-root"
-      className="flex h-screen overflow-hidden bg-zinc-950"
+      className="flex h-screen overflow-hidden dark:bg-black"
     >
       {/* Fixed Sidebar */}
       <AdminSidebar />
@@ -20,7 +20,7 @@ export default function AdminLayout({
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
-          <div className="min-h-full p-6">
+          <div className="min-h-full p-0">
             {children}
           </div>
         </main>

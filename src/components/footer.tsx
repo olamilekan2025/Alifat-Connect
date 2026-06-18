@@ -2,11 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Send, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Send,
+  Mail,
+  Phone,
+  MapPin,
+  Sun,
+  Moon,
+} from "lucide-react";
+
+import { useTheme } from "next-themes";
 import { SlSocialFacebook } from "react-icons/sl";
 import { BsInstagram } from "react-icons/bs";
 import { TfiTwitter } from "react-icons/tfi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Loader2 } from "lucide-react";
+
+
 
 const quickLinks = [
   { name: "About", href: "/about" },
@@ -48,8 +59,12 @@ const socialLinks = [
   },
 ];
 
+
+
 export default function Footer() {
   const pathname = usePathname();
+
+
 
   // Hide footer on auth pages
   const hideFooter =
@@ -73,6 +88,7 @@ export default function Footer() {
     pathname === "/dashboard/reports" ||
     pathname === "/dashboard/referral" ||
     pathname === "/admin-dashboard" ||
+    pathname === "/admin-dashboard/users" ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;
@@ -80,6 +96,13 @@ export default function Footer() {
   const [email, setEmail] = useState("");
 
   const [subscribing, setSubscribing] = useState(false);
+
+    const { theme, setTheme } = useTheme();
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
 
   const handleNewsletterSubscribe = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -278,7 +301,31 @@ export default function Footer() {
             © 2026 Alifat Connect. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+
+            {mounted && (
+  <Button
+    type="button"
+    variant="outline"
+    size="sm"
+    onClick={() =>
+      setTheme(theme === "dark" ? "light" : "dark")
+    }
+    className="flex items-center gap-2 rounded-full text-black dark:text-white  "
+  >
+    {theme === "dark" ? (
+      <>
+        <Sun className="h-4 w-4" />
+        Light Mode
+      </>
+    ) : (
+      <>
+        <Moon className="h-4 w-4" />
+        Dark Mode
+      </>
+    )}
+  </Button>
+)}
             <Link
               href="/privacy-policy"
               className="text-gray-500 transition-colors hover:text-[#D4AF37] dark:text-slate-500"
@@ -296,5 +343,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+
+
   );
 }

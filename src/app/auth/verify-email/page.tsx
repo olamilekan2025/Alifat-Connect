@@ -76,6 +76,47 @@ function VerifyEmailContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black px-4">
+      
+      {/* TOP SVG */}
+      <svg
+        className="absolute top-0 left-0 h-32 w-full lg:h-25"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="topGlow" x1="0" x2="1">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#D4AF37" stopOpacity="0.82" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.45" />
+          </linearGradient>
+        </defs>
+        <path
+          fill="url(#topGlow)"
+          d="M0,160 C240,260 480,40 720,160 C960,260 1200,60 1440,160 L1440,0 L0,0 Z"
+        />
+      </svg>
+
+      {/* BOTTOM SVG */}
+      <svg
+        className="absolute bottom-0 left-0 h-32 w-full lg:h-25"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="bottomGlow" x1="1" x2="0">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.92" />
+            <stop offset="35%" stopColor="#D4AF37" stopOpacity="0.78" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.40" />
+          </linearGradient>
+        </defs>
+        <path
+          fill="url(#bottomGlow)"
+          d="M0,160 C240,60 480,280 720,160 C960,40 1200,240 1440,160 L1440,320 L0,320 Z"
+        />
+      </svg>
+
       <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Verify Email</h1>

@@ -49,10 +49,11 @@ export default function RootLayout({
         "
       >
         {/* Paystack */}
-        <Script
-          src="https://js.paystack.co/v1/inline.js"
-          strategy="beforeInteractive"
-        />
+       <Script
+  id="paystack-inline"
+  src="https://js.paystack.co/v1/inline.js"
+  strategy="afterInteractive"
+/>
 
         {/* Tawk Live Chat */}
         {process.env.NODE_ENV === "production" && (

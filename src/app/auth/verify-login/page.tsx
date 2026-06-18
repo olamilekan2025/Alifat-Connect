@@ -380,12 +380,6 @@
 //   );
 // }
 
-
-
-
-
-
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -411,11 +405,11 @@ function VerifyLoginContent() {
   const email = searchParams.get("email") || "";
 
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Timer state for resending code cooldown (60 seconds)
   const [countdown, setCountdown] = useState(0);
 
@@ -440,18 +434,15 @@ function VerifyLoginContent() {
 
     setResending(true);
     try {
-    const res = await fetch(
-  "/api/auth/resend-login-code",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-    }),
-  }
-);
+      const res = await fetch("/api/auth/resend-login-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -468,10 +459,69 @@ function VerifyLoginContent() {
     }
   }
 
+  const handleCodeChange = (index: number, value: string) => {
+    // Only allow digits
+    if (!/^\d?$/.test(value)) return;
+
+    const newCode = [...code];
+    newCode[index] = value;
+    setCode(newCode);
+
+    // Move to next input
+    if (value && index < 5) {
+      const next = document.getElementById(
+        `code-${index + 1}`,
+      ) as HTMLInputElement | null;
+      next?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "") // keep only digits
+      .slice(0, 6);
+
+    if (!pasted) return;
+
+    const newCode = Array(6).fill("");
+
+    pasted.split("").forEach((char, index) => {
+      newCode[index] = char;
+    });
+
+    setCode(newCode);
+
+    // Focus the last filled input
+    const lastIndex = Math.min(pasted.length - 1, 5);
+    const lastInput = document.getElementById(
+      `code-${lastIndex}`,
+    ) as HTMLInputElement | null;
+
+    lastInput?.focus();
+  };
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    // Move back on Backspace
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      const prev = document.getElementById(
+        `code-${index - 1}`,
+      ) as HTMLInputElement | null;
+      prev?.focus();
+    }
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!code.trim()) {
+    const verificationCode = code.join("");
+
+    if (!verificationCode.trim()) {
       toast.error("Verification code is required");
       return;
     }
@@ -486,7 +536,7 @@ function VerifyLoginContent() {
         },
         body: JSON.stringify({
           email,
-          code,
+          code: verificationCode,
           password,
         }),
       });
@@ -520,9 +570,9 @@ function VerifyLoginContent() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 dark:bg-black">
+    <div className="relative flex min-h-screen bg-white items-center justify-center overflow-hidden px-4 py-10  dark:bg-black">
       {/* BACKGROUND OVERLAY */}
-      <div className="absolute inset-0 bg-black/70" />
+      <div className="absolute inset-0 bg-white dark:bg-black/70" />
 
       {/* TOP SVG */}
       <svg
@@ -565,7 +615,7 @@ function VerifyLoginContent() {
       </svg>
 
       {/* CARD */}
-      <Card className="relative z-10 w-full max-w-md overflow-hidden rounded-[34px] border bg-white/5 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-3xl dark:border-white/10">
+      <Card className="relative z-10 w-full max-w-md overflow-hidden rounded-[34px] border bg-white/5 backdrop-blur-3xl dark:border-white/10">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-yellow-500/10">
             <MailCheck className="h-8 w-8 text-yellow-400" />
@@ -619,7 +669,7 @@ function VerifyLoginContent() {
                 <label className="text-sm font-medium text-zinc-400 dark:text-zinc-300">
                   Verification Code
                 </label>
-                
+
                 {/* Resend Actions Link */}
                 <button
                   type="button"
@@ -632,14 +682,23 @@ function VerifyLoginContent() {
                 </button>
               </div>
 
-              <Input
-                placeholder="Enter 6-digit code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                maxLength={6}
-                className="h-14 rounded-2xl border bg-white/5 px-4 text-center text-xl font-bold tracking-[8px] text-white placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-yellow-500 dark:border-white/10"
-                required
-              />
+              <div className="flex justify-center gap-2">
+                {code.map((digit: string, index: number) => (
+                  <Input
+                    key={index}
+                    id={`code-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                    className="h-14 w-12 rounded-xl border bg-white text-center text-xl font-bold text-black dark:bg-white/5 dark:text-white dark:border-white/10 focus-visible:ring-2 focus-visible:ring-yellow-500"
+                    required
+                  />
+                ))}
+              </div>
             </div>
 
             {/* BUTTON */}

@@ -122,21 +122,21 @@ export default function AdminPage() {
     currentPage * ITEMS_PER_PAGE,
   );
 
-  if (loading) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
-          <p className="mt-4 text-muted-foreground">
-            Loading admin dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+ 
+   if (loading) {
   return (
-    <div className="space-y-8 p-0 md:p-6">
+    <div className="flex h-[70vh] items-center justify-center bg-white text-zinc-900 dark:bg-black dark:text-white">
+      <div className="text-center">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
+        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+          Loading admin dashboard...
+        </p>
+      </div>
+    </div>
+  );
+}
+  return (
+    <div className="space-y-8 bg-white text-zinc-900 dark:bg-black dark:text-white p-2 md:p-6">
       {/* Header */}
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
         <div>
@@ -163,7 +163,19 @@ export default function AdminPage() {
             onChange={(e) =>
               setSortBy(e.target.value as "date" | "amount" | "status")
             }
-            className="rounded-lg border bg-background px-3 py-2 text-sm"
+            className="
+    rounded-lg
+    border
+    border-zinc-300
+    bg-white
+    px-3
+    py-2
+    text-sm
+    text-zinc-900
+    dark:border-zinc-700
+    dark:bg-zinc-900
+    dark:text-white
+  "
           >
             <option value="date">Sort by Date</option>
 
@@ -230,7 +242,7 @@ export default function AdminPage() {
       </div>
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border p-4">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
           <p className="text-sm text-muted-foreground">Total</p>
           <h3 className="text-2xl font-bold">{stats?.totalTransactions}</h3>
         </div>
@@ -257,9 +269,9 @@ export default function AdminPage() {
         </div>
       </div>
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <table className="w-full">
-          <thead className="border-b bg-muted/30">
+          <thead className="border-b border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900">
             <tr className="text-left">
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide">
                 Reference
@@ -292,14 +304,21 @@ export default function AdminPage() {
               paginatedTransactions.map((trx: any) => (
                 <tr
                   key={trx._id}
-                  className="border-b transition-colors hover:bg-muted/30"
+                  className="
+  border-b
+  border-zinc-200
+  transition-colors
+  hover:bg-zinc-100
+  dark:border-zinc-800
+  dark:hover:bg-zinc-900
+"
                 >
                   <td className="px-6 py-4 font-mono text-sm font-medium">
                     {trx.reference}
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600">
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                       {trx.category || "General"}
                     </span>
                   </td>
@@ -385,9 +404,14 @@ export default function AdminPage() {
           <div
             className="
         relative w-full max-w-lg
-        rounded-2xl border border-white
-        bg-background/95 backdrop-blur-xl
-        p-6 shadow-2xl
+  rounded-2xl
+  border border-zinc-200
+  bg-white
+  p-6
+  shadow-2xl
+  backdrop-blur-xl
+  dark:border-zinc-800
+  dark:bg-zinc-950/95
         animate-in fade-in zoom-in-95 duration-200
       "
           >
@@ -404,10 +428,16 @@ export default function AdminPage() {
               <button
                 onClick={() => setSelectedTransaction(null)}
                 className="
-            rounded-lg p-2 text-muted-foreground
-            hover:bg-muted/60 hover:text-foreground
-            transition
-          "
+  rounded-lg
+  p-2
+  text-zinc-500
+  transition
+  hover:bg-red-500
+  hover:text-white
+  dark:text-white
+  dark:hover:bg-zinc-800
+  dark:hover:text-white
+"
               >
                 ✕
               </button>
