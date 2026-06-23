@@ -47,6 +47,11 @@ export default function Navbar() {
   const [isOpen, setIsOpen] =
     useState(false);
 
+    const [branding, setBranding] = useState({
+  platformName: "Alifat Connect",
+  logoUrl: "",
+});
+
   // Hide navbar on auth/dashboard pages
   const hideNavbar = [
     "/auth/login",
@@ -79,6 +84,30 @@ export default function Navbar() {
     setIsOpen(false);
   }, [pathname]);
 
+
+
+  useEffect(() => {
+  async function loadBranding() {
+    try {
+      const res = await fetch("/api/admin/settings");
+      const data = await res.json();
+
+      if (data?.success && data?.settings) {
+        setBranding({
+          platformName:
+            data.settings.platformName || "Alifat Connect",
+          logoUrl:
+            data.settings.branding?.logoUrl || "",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load branding", error);
+    }
+  }
+
+  loadBranding();
+}, []);
+
   if (hideNavbar) {
     return null;
   }
@@ -109,13 +138,26 @@ export default function Navbar() {
             onClick={closeMenu}
             className="flex items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D4AF37] font-bold text-black shadow-lg shadow-[#D4AF37]/25">
-              AC
-            </div>
+            {branding.logoUrl ? (
+  <img
+    src={branding.logoUrl}
+    alt={branding.platformName}
+    className="h-10 w-10 rounded-full object-cover"
+  />
+) : (
+  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D4AF37] font-bold text-black shadow-lg shadow-[#D4AF37]/25">
+    {branding.platformName
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()}
+  </div>
+)}
 
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              Alifat Connect
-            </span>
+<span className="text-xl font-bold text-gray-900 dark:text-white">
+  {branding.platformName}
+</span>
           </Link>
 
           {/* Desktop Nav */}

@@ -75,9 +75,9 @@ export const authOptions: NextAuthOptions = {
             .trim()
             .toLowerCase();
 
-          const user = await User.findOne({
-            email,
-          });
+  const user = await User.findOne({
+  email,
+}).select("+password");
 
           console.log(
             "========== LOGIN DEBUG =========="
@@ -104,22 +104,22 @@ export const authOptions: NextAuthOptions = {
             user.emailVerified
           );
 
-          console.log(
-            "HAS PASSWORD:",
-            !!user.password
-          );
+        console.log("HAS PASSWORD:", Boolean(user.password));
 
-          if (!user.emailVerified) {
-            throw new Error(
-              "Please verify your email"
-            );
-          }
+if (
+  typeof user.password !== "string" ||
+  user.password.length === 0
+) {
+  throw new Error(
+    "Your account does not have a valid password. Please reset it or contact an administrator."
+  );
+}
 
-          if (!user.password) {
-            throw new Error(
-              "Password not found"
-            );
-          }
+         if (!user.emailVerified) {
+  throw new Error("EMAIL_VERIFICATION_REQUIRED");
+}
+
+         
 
           const role =
             user.role
@@ -191,11 +191,15 @@ throw new Error(
             isPasswordValid
           );
 
-          if (!isPasswordValid) {
-            throw new Error(
-              "Invalid email or password"
-            );
-          }
+         if (!isPasswordValid) {
+  throw new Error("Invalid email or password");
+}
+
+// Update login information
+user.lastLoginAt = new Date();
+user.sessionCreatedAt = new Date();
+
+await user.save();
 
           return {
             id: user._id.toString(),

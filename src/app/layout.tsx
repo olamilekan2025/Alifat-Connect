@@ -9,6 +9,7 @@ import Footer from "@/components/footer";
 import Providers from "@/components/provider/providers";
 import ToasterProvider from "@/app/providers/toaster-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import FaviconUpdater from "@/components/FaviconUpdater";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -16,20 +17,70 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Alifat Connect",
-    template: "%s | Alifat Connect",
-  },
-  description:
-    "Fast and reliable platform for data, airtime, utility bills, TV subscriptions, and more.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let favicon = "/favicon.ico";
 
-export default function RootLayout({
+  try {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/admin/settings`, {
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      const faviconUrl = data?.settings?.branding?.faviconUrl;
+
+      if (faviconUrl) {
+        favicon = faviconUrl;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to load favicon:", error);
+  }
+
+  return {
+    title: {
+      default: "Alifat Connect",
+      template: "%s | Alifat Connect",
+    },
+    description:
+      "Fast and reliable platform for data, airtime, utility bills, TV subscriptions, and more.",
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
+      apple: favicon,
+    },
+  };
+}
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  async function getSettings() {
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+      const res = await fetch(`${baseUrl}/api/admin/settings`, {
+        cache: "no-store",
+      });
+
+      if (!res.ok) return null;
+
+      return res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  const settings = await getSettings();
+  const faviconUrl =
+    settings?.settings?.branding?.faviconUrl ?? "/favicon.ico";
+
   return (
     <html
       lang="en"
@@ -48,6 +99,7 @@ export default function RootLayout({
           dark:text-white
         "
       >
+         <FaviconUpdater url={faviconUrl} />
         {/* Paystack */}
        <Script
   id="paystack-inline"

@@ -61,31 +61,93 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+
+      const checkRes = await fetch("/api/auth/check-email-verification", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    email: email.trim().toLowerCase(),
+  }),
+});
+
+if (!checkRes.ok) {
+  const text = await checkRes.text();
+  console.error(text);
+  toast.error("Unable to verify account status.");
+  return;
+}
+
+const checkData = await checkRes.json();
+
+if (!checkData.emailVerified) {
+  // Send a new verification code
+  await fetch("/api/auth/resend-verification-code", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+    }),
+  });
+
+  toast.info("A new verification code has been sent to your email.");
+
+  router.push(
+    `/auth/verify-email?email=${encodeURIComponent(
+      email.trim().toLowerCase()
+    )}`
+  );
+
+  return;
+}
       const result = await signIn("credentials", {
         email: email.trim().toLowerCase(),
         password,
         redirect: false,
       });
 
+      console.log("signIn result:", result);
+
+      console.log(result);
+console.log(result?.error);
+
       if (!result) {
         toast.error("Unable to login");
         return;
       }
-      if (result.error) {
-        console.log(result.error);
+     if (result.error) {
+  console.log(result.error);
 
-        if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
-          toast.success("Verification code required");
+  // 👇 ADD THIS FIRST
+  if (result.error === "EMAIL_VERIFICATION_REQUIRED") {
+    toast.info("Please verify your account first.");
 
-router.push(`/auth/verify-login?email=${encodeURIComponent(email)}`);
+    router.push(
+      `/auth/verify?email=${encodeURIComponent(email.trim().toLowerCase())}`
+    );
 
-          return;
-        }
+    return;
+  }
 
-        toast.error(result.error);
+  // Existing admin verification
+if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
+  toast.success("Verification code required");
 
-        return;
-      }
+  router.push(
+    `/auth/verify-login?email=${encodeURIComponent(
+      email.trim().toLowerCase()
+    )}`
+  );
+
+  return;
+}
+
+  toast.error(result.error);
+  return;
+}
 
       const session = await getSession();
 

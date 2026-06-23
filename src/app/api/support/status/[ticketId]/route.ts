@@ -1,23 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import SupportTicket from "@/models/SupportTicket";
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   {
     params,
   }: {
-    params: {
+    params: Promise<{
       ticketId: string;
-    };
+    }>;
   }
 ) {
   await connectToDatabase();
 
-  const ticket =
-    await SupportTicket.findOne({
-      ticketId: params.ticketId,
-    });
+  const { ticketId } = await params;
+
+  const ticket = await SupportTicket.findOne({
+    ticketId,
+  });
 
   if (!ticket) {
     return NextResponse.json(

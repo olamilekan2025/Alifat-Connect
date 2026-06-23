@@ -360,6 +360,60 @@ function ResetPasswordContent() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+      <svg
+        className="absolute left-0 top-0 h-25 w-full"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="topGlow" x1="0" x2="1">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.95" />
+
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+
+        <path
+          fill="url(#topGlow)"
+          d="
+            M0,160
+            C240,260 480,40 720,160
+            C960,260 1200,60 1440,160
+            L1440,0
+            L0,0
+            Z
+          "
+        />
+      </svg>
+
+      {/* BOTTOM GLOW */}
+      <svg
+        className="absolute bottom-0 left-0 h-25 w-full"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="bottomGlow" x1="1" x2="0">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.92" />
+
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+
+        <path
+          fill="url(#bottomGlow)"
+          d="
+            M0,160
+            C240,60 480,280 720,160
+            C960,40 1200,240 1440,160
+            L1440,320
+            L0,320
+            Z
+          "
+        />
+      </svg>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">
@@ -518,7 +572,7 @@ function ResetPasswordContent() {
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className=" justify-end"
       disabled={
         resending ||
         countdown > 0

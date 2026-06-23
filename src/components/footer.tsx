@@ -89,6 +89,8 @@ export default function Footer() {
     pathname === "/dashboard/referral" ||
     pathname === "/admin-dashboard" ||
     pathname === "/admin-dashboard/users" ||
+    pathname === "/admin-dashboard/transactions" ||
+    pathname === "/admin-dashboard/settings" ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;
@@ -100,8 +102,36 @@ export default function Footer() {
     const { theme, setTheme } = useTheme();
 const [mounted, setMounted] = useState(false);
 
+const [branding, setBranding] = useState({
+  footerText: "",
+  copyrightText: "",
+});
+
 useEffect(() => {
   setMounted(true);
+}, []);
+
+useEffect(() => {
+  async function loadBranding() {
+    try {
+      const res = await fetch("/api/admin/settings");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch settings");
+      }
+
+      const data = await res.json();
+
+      setBranding({
+        footerText: data?.settings?.branding?.footerText ?? "",
+        copyrightText: data?.settings?.branding?.copyrightText ?? "",
+      });
+    } catch (error) {
+      console.error("Failed to load branding settings:", error);
+    }
+  }
+
+  loadBranding();
 }, []);
 
   const handleNewsletterSubscribe = async (
@@ -165,10 +195,10 @@ useEffect(() => {
               <span className="text-[#D4AF37]"> Connect</span>
             </Link>
 
-            <p className="mt-6 leading-relaxed text-gray-600 dark:text-slate-400">
-              Fast, secure, and reliable VTU platform for data, airtime, utility
-              bills, TV subscriptions, and more.
-            </p>
+         <p className="mt-6 leading-relaxed text-gray-600 dark:text-slate-400">
+  {branding.footerText ||
+    "Fast, secure, and reliable VTU platform for data, airtime, utility bills, TV subscriptions, and more."}
+</p>
 
             {/* Social Icons */}
             <div className="mt-8 flex items-center gap-4">
@@ -297,9 +327,10 @@ useEffect(() => {
 
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row border-t border-black/10">
-          <p className="text-sm text-gray-500 dark:text-slate-500">
-            © 2026 Alifat Connect. All rights reserved.
-          </p>
+         <p className="text-sm text-gray-500 dark:text-slate-500">
+  {branding.copyrightText ||
+    "© 2026 Alifat Connect. All rights reserved."}
+</p>
 
           <div className="flex flex-wrap items-center gap-4 text-sm">
 

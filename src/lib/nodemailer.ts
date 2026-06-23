@@ -9,38 +9,35 @@ const requiredEnv = [
 
 requiredEnv.forEach((env) => {
   if (!process.env[env]) {
-    console.error(
-      `❌ Missing environment variable: ${env}`,
-    );
+    throw new Error(`Missing environment variable: ${env}`);
   }
 });
 
-// CREATE TRANSPORTER
-const transporter =
-  nodemailer.createTransport({
-    service: "gmail",
 
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-  });
+console.log({
+  EMAIL_SERVER_USER: process.env.EMAIL_SERVER_USER,
+  EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD ? "SET" : "MISSING",
+  FROM_EMAIL: process.env.FROM_EMAIL,
+});
+// CREATE TRANSPORTER
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_SERVER_USER,
+    pass: process.env.EMAIL_SERVER_PASSWORD,
+  },
+});
 
 // VERIFY SMTP CONNECTION
-transporter.verify(
-  (error, success) => {
-    if (error) {
-      console.error(
-        "❌ SMTP CONNECTION ERROR:",
-        error,
-      );
-    } else {
-      console.log(
-        "✅ SMTP SERVER READY",
-      );
-    }
-  },
-);
+transporter.verify((error) => {
+  if (error) {
+    console.error("❌ SMTP CONNECTION ERROR:", error);
+  } else {
+    console.log("✅ SMTP SERVER READY");
+  }
+});
 
 /**
  * GENERIC EMAIL SENDER

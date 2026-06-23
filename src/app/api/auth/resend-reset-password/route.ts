@@ -1,26 +1,57 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { sendPasswordResetCode } from "@/lib/nodemailer";
+import User from "@/models/User";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email: string | undefined = body?.email;
+    const email: string | undefined = body?.email?.trim().toLowerCase();
 
-    if (!email) return NextResponse.json({ error: "Missing email" }, { status: 400 });
+    if (!email) {
+      return NextResponse.json(
+        { error: "Missing email" },
+        { status: 400 }
+      );
+    }
 
     const db = await connectToDatabase();
-    const users = db.collection("users");
-    const resetTokens = db.collection("passwordResetTokens");
 
-    const user = await users.findOne({ email });
-    if (!user) return NextResponse.json({ ok: true, message: "If account exists, email sent" });
+    // Use Mongoose model for users
+    const user = await User.findOne({ email });
 
-    const secret = process.env.RESET_PASSWORD_SECRET || "reset_password_secret";
-    const token = jwt.sign({ sub: String(user._id), email }, secret, { expiresIn: 60 * 60 });
+    // Native MongoDB collection for reset tokens
+    const resetTokens =
+      db.connection.db!.collection("passwordResetTokens");
 
-    await resetTokens.deleteMany({ email, purpose: "reset-password" });
+    // Don't reveal whether the email exists
+    if (!user) {
+      return NextResponse.json({
+        ok: true,
+        message: "If the account exists, a reset email has been sent.",
+      });
+    }
+
+    const secret =
+      process.env.RESET_PASSWORD_SECRET ||
+      "reset_password_secret";
+
+    const token = jwt.sign(
+      {
+        sub: String(user._id),
+        email,
+      },
+      secret,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    await resetTokens.deleteMany({
+      email,
+      purpose: "reset-password",
+    });
 
     await resetTokens.insertOne({
       email,
@@ -34,9 +65,18 @@ export async function POST(req: Request) {
 
     await sendPasswordResetCode(email, token);
 
-    return NextResponse.json({ ok: true, message: "Reset email resent" });
-  } catch {
-    return NextResponse.json({ error: "Resend reset password failed" }, { status: 500 });
+    return NextResponse.json({
+      ok: true,
+      message: "Reset email resent successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        error: "Resend reset password failed",
+      },
+      { status: 500 }
+    );
   }
 }
-

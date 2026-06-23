@@ -319,6 +319,10 @@ await db
       },
     },
   );
+
+  console.log("USER ID:", user._id);
+console.log("USER EMAIL:", user.email);
+
     await Transaction.create({
   userId:
     user._id.toString(),

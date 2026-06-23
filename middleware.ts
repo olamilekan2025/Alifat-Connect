@@ -1,3 +1,70 @@
+// import { withAuth } from "next-auth/middleware";
+
+// export default withAuth({
+//   pages: {
+//     signIn: "/auth/login",
+//   },
+
+//   callbacks: {
+//     authorized: ({
+//       token,
+//       req,
+//     }) => {
+//       const pathname =
+//         req.nextUrl.pathname;
+
+//       if (!token) {
+//         return false;
+//       }
+
+//       // ADMIN
+//       if (pathname.startsWith("/admin")) {
+//         const isAdmin = token.role === "admin";
+//         const isAdminVerified = (token as any).adminVerified === true;
+//         return isAdmin && isAdminVerified;
+//       }
+
+
+//       // MODERATOR
+
+//       if (
+//         pathname.startsWith(
+//           "/moderator"
+//         )
+//       ) {
+//         return (
+//           token.role ===
+//           "moderator"
+//         );
+//       }
+
+//       // USER
+
+//       if (
+//         pathname.startsWith(
+//           "/dashboard"
+//         )
+//       ) {
+//         return true;
+//       }
+
+//       return true;
+//     },
+//   },
+// });
+
+// export const config = {
+//   matcher: [
+//     "/dashboard/:path*",
+
+//     "/admin/:path*",
+
+//     "/moderator/:path*",
+//   ],
+// };
+
+
+
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
@@ -6,49 +73,32 @@ export default withAuth({
   },
 
   callbacks: {
-    authorized: ({
-      token,
-      req,
-    }) => {
-      const pathname =
-        req.nextUrl.pathname;
+    authorized: ({ token, req }) => {
+      const pathname = req.nextUrl.pathname;
 
-      if (!token) {
-        return false;
-      }
+      // ❌ No token = block
+      if (!token) return false;
 
-      // ADMIN
+      const role = token.role;
+      const isAdmin = token.isAdmin === true;
+
+      // 🔐 ADMIN ROUTES
       if (pathname.startsWith("/admin")) {
-        const isAdmin = token.role === "admin";
-        const isAdminVerified = (token as any).adminVerified === true;
-        return isAdmin && isAdminVerified;
+        return role === "admin" && isAdmin;
       }
 
-
-      // MODERATOR
-
-      if (
-        pathname.startsWith(
-          "/moderator"
-        )
-      ) {
-        return (
-          token.role ===
-          "moderator"
-        );
+      // 🧑 MODERATOR ROUTES
+      if (pathname.startsWith("/moderator")) {
+        return role === "moderator";
       }
 
-      // USER
-
-      if (
-        pathname.startsWith(
-          "/dashboard"
-        )
-      ) {
-        return true;
+      // 👤 DASHBOARD ROUTES
+      if (pathname.startsWith("/dashboard")) {
+        return true; // any logged-in user
       }
 
-      return true;
+      // 🚫 BLOCK EVERYTHING ELSE PROTECTED AREAS
+      return false;
     },
   },
 });
@@ -56,9 +106,7 @@ export default withAuth({
 export const config = {
   matcher: [
     "/dashboard/:path*",
-
     "/admin/:path*",
-
     "/moderator/:path*",
   ],
 };

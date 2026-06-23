@@ -52,19 +52,19 @@ export async function POST(request: Request) {
     }
 
     // 💾 SAVE TO DB
+    const autoReply = generateAutoReply(category, message);
+
     const ticket = await SupportTicket.create({
-       ticketId,
-    name,
-    email,
-    phone,
-    subject,
-    message,
-    category,
-
-    autoReply,
-
-    status: "unread",
-  });
+      ticketId,
+      name,
+      email,
+      phone,
+      subject,
+      message,
+      category,
+      autoReply,
+      status: "unread",
+    });
 
     // 📧 RESEND EMAIL (unchanged, safe)
     if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {

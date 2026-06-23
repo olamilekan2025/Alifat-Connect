@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   LayoutDashboard,
@@ -98,6 +98,31 @@ export default function AdminSidebar() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const [branding, setBranding] = useState({
+    platformName: "ACP Admin",
+    logoUrl: "",
+  });
+
+  useEffect(() => {
+    async function loadBranding() {
+      try {
+        const res = await fetch("/api/admin/settings");
+        const data = await res.json();
+
+        if (data?.success) {
+          setBranding({
+            platformName: data.settings?.platformName || "ACP Admin",
+            logoUrl: data.settings?.branding?.logoUrl || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load branding:", error);
+      }
+    }
+
+    loadBranding();
+  }, []);
+
   return (
     <>
       {/* Mobile Toggle */}
@@ -144,12 +169,27 @@ export default function AdminSidebar() {
 "
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 text-black shadow-lg">
-              <Shield className="h-6 w-6" />
-            </div>
+            {branding.logoUrl ? (
+              <img
+                src={branding.logoUrl}
+                alt={branding.platformName}
+                className="h-12 w-12 rounded-2xl object-cover border border-zinc-200 dark:border-white/10"
+              />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 text-black font-black shadow-lg">
+                {branding.platformName
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+            )}
 
             <div>
-              <h2 className="text-lg font-black tracking-wide">ACP Admin</h2>
+              <h2 className="text-lg font-black tracking-wide">
+                {branding.platformName}
+              </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 Control Center
               </p>

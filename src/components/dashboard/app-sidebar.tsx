@@ -48,39 +48,30 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
+  const [branding, setBranding] = useState({
+    platformName: "Alifat Connect",
+    logoUrl: "",
+  });
 
   const handleLinkClick = () => {
-  setOpenMobile(false);
-};
+    setOpenMobile(false);
+  };
 
   const isMobileGroupActive =
-    pathname ===
-      "/dashboard/airtime" ||
-    pathname ===
-      "/dashboard/data";
+    pathname === "/dashboard/airtime" || pathname === "/dashboard/data";
 
   const isUtilitiesGroupActive =
-    pathname ===
-      "/dashboard/subscription" ||
-    pathname ===
-      "/dashboard/electricity" ||
-    pathname ===
-      "/dashboard/recharge-card";
+    pathname === "/dashboard/subscription" ||
+    pathname === "/dashboard/electricity" ||
+    pathname === "/dashboard/recharge-card";
 
-  const isBillsGroupActive =
-    pathname ===
-    "/dashboard/education";
+  const isBillsGroupActive = pathname === "/dashboard/education";
 
-  const [mobileOpen, setMobileOpen] =
-    useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [
-    utilitiesOpen,
-    setUtilitiesOpen,
-  ] = useState(false);
+  const [utilitiesOpen, setUtilitiesOpen] = useState(false);
 
-  const [billsOpen, setBillsOpen] =
-    useState(false);
+  const [billsOpen, setBillsOpen] = useState(false);
 
   // FIXED: no more infinite re-render
   useEffect(() => {
@@ -90,9 +81,7 @@ export function AppSidebar() {
   }, [isMobileGroupActive]);
 
   useEffect(() => {
-    if (
-      isUtilitiesGroupActive
-    ) {
+    if (isUtilitiesGroupActive) {
       setUtilitiesOpen(true);
     }
   }, [isUtilitiesGroupActive]);
@@ -103,104 +92,121 @@ export function AppSidebar() {
     }
   }, [isBillsGroupActive]);
 
-const menuClass = (active: boolean) =>
-  `group relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 transition-all duration-200 ${
-    active
-      ? "bg-gradient-to-r from-[#D4AF37]/18 to-[#D4AF37]/8 text-[#D4AF37]"
-      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-  }`;
+  useEffect(() => {
+    async function loadBranding() {
+      try {
+        const res = await fetch("/api/admin/settings");
+        const data = await res.json();
+
+        if (data?.success) {
+          setBranding({
+            platformName: data.settings?.platformName || "Alifat Connect",
+            logoUrl: data.settings?.branding?.logoUrl || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load branding:", error);
+      }
+    }
+
+    loadBranding();
+  }, []);
+
+  const menuClass = (active: boolean) =>
+    `group relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 transition-all duration-200 ${
+      active
+        ? "bg-gradient-to-r from-[#D4AF37]/18 to-[#D4AF37]/8 text-[#D4AF37]"
+        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+    }`;
 
   return (
-   <Sidebar
-  collapsible="icon"
-  className="w-[280px] border-r border-zinc-200 bg-white/95 backdrop-blur-xl dark:border-zinc-800 dark:bg-black md:w-[300px] group-data-[collapsible=icon]:w-[80px]"
->
+    <Sidebar
+      collapsible="icon"
+      className="w-[280px] border-r border-zinc-200 bg-white/95 backdrop-blur-xl dark:border-zinc-800 dark:bg-black md:w-[300px] group-data-[collapsible=icon]:w-[80px]"
+    >
       {/* HEADER */}
       <SidebarHeader className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 px-4 py-5 backdrop-blur-xl dark:border-zinc-800 dark:bg-black">
         <div className="flex items-center gap-3">
-         <div className="relative h-12 w-[130px] shrink-0 overflow-hidden rounded-2xl transition-all duration-300 group-data-[collapsible=icon]:w-12">
-            <Image
-              src="/logo.png"
-              fill
-              alt="Logo"
-              sizes="(max-width: 768px) 100px, 120px"
-              priority
-   className="object-contain object-left transition-all duration-300 group-data-[collapsible=icon]:object-center"
-            />
-          </div>
+          <div className="flex items-center gap-3">
+  {/* Logo box */}
+  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl transition-all duration-300 group-data-[collapsible=icon]:w-12">
+    {branding.logoUrl ? (
+      <Image
+        src={branding.logoUrl}
+        fill
+        alt={branding.platformName}
+        sizes="48px"
+        priority
+        className="object-contain transition-all duration-300"
+      />
+    ) : (
+      <div className="flex h-full w-full items-center justify-center rounded-2xl bg-[#D4AF37] text-sm font-bold text-black">
+        {branding.platformName
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()}
+      </div>
+    )}
+  </div>
+
+  {/* Brand text */}
+  <span className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+    {branding.platformName}
+  </span>
+</div>
         </div>
       </SidebarHeader>
-<SidebarContent className="overflow-y-auto px-3 py-5">
+      <SidebarContent className="overflow-y-auto px-3 py-5">
         {/* NAVIGATION */}
         <SidebarGroup>
-         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Dashboard"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Dashboard" asChild>
                   <Link
                     href="/dashboard"
-                     onClick={handleLinkClick}
-                    className={menuClass(
-                      pathname ===
-                        "/dashboard",
-                    )}
+                    onClick={handleLinkClick}
+                    className={menuClass(pathname === "/dashboard")}
                   >
                     <LayoutDashboard className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate text-sm">
-                      Dashboard
-                    </span>
+                    <span className="truncate text-sm">Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Wallet"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Wallet" asChild>
                   <Link
                     href="/dashboard/wallet"
-                     onClick={handleLinkClick}
-                    className={menuClass(
-                      pathname ===
-                        "/dashboard/wallet",
-                    )}
+                    onClick={handleLinkClick}
+                    className={menuClass(pathname === "/dashboard/wallet")}
                   >
                     <Wallet className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate text-sm">
-                      Wallet
-                    </span>
+                    <span className="truncate text-sm">Wallet</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Become Seller"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Become Seller" asChild>
                   <Link
                     href="/dashboard/become-seller"
-                     onClick={handleLinkClick}
+                    onClick={handleLinkClick}
                     className={menuClass(
-                      pathname ===
-                        "/dashboard/become-seller",
+                      pathname === "/dashboard/become-seller",
                     )}
                   >
                     <Store className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate text-sm">
-                      Become Seller
-                    </span>
+                    <span className="truncate text-sm">Become Seller</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -210,7 +216,7 @@ const menuClass = (active: boolean) =>
 
         {/* SERVICES */}
         <SidebarGroup className="mt-2">
-         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Services
           </SidebarGroupLabel>
 
@@ -220,13 +226,7 @@ const menuClass = (active: boolean) =>
               <SidebarMenuItem>
                 <button
                   type="button"
-                  onClick={() =>
-                    setMobileOpen(
-                      (
-                        prev,
-                      ) => !prev,
-                    )
-                  }
+                  onClick={() => setMobileOpen((prev) => !prev)}
                   className="flex h-11 w-full items-center justify-between rounded-2xl px-3 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-black dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
@@ -256,32 +256,22 @@ const menuClass = (active: boolean) =>
                   <div className="ml-6 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-800">
                     <Link
                       href="/dashboard/airtime"
-                       onClick={handleLinkClick}
-                      className={menuClass(
-                        pathname ===
-                          "/dashboard/airtime",
-                      )}
+                      onClick={handleLinkClick}
+                      className={menuClass(pathname === "/dashboard/airtime")}
                     >
                       <Smartphone className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Buy Airtime
-                      </span>
+                      <span className="truncate">Buy Airtime</span>
                     </Link>
 
                     <Link
                       href="/dashboard/data"
-                       onClick={handleLinkClick}
-                      className={menuClass(
-                        pathname ===
-                          "/dashboard/data",
-                      )}
+                      onClick={handleLinkClick}
+                      className={menuClass(pathname === "/dashboard/data")}
                     >
                       <Wifi className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Buy Data
-                      </span>
+                      <span className="truncate">Buy Data</span>
                     </Link>
                   </div>
                 </div>
@@ -291,13 +281,7 @@ const menuClass = (active: boolean) =>
               <SidebarMenuItem>
                 <button
                   type="button"
-                  onClick={() =>
-                    setUtilitiesOpen(
-                      (
-                        prev,
-                      ) => !prev,
-                    )
-                  }
+                  onClick={() => setUtilitiesOpen((prev) => !prev)}
                   className="flex h-11 w-full items-center justify-between rounded-2xl px-3 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-black dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
                 >
                   <div className="flex items-center gap-3">
@@ -327,47 +311,38 @@ const menuClass = (active: boolean) =>
                   <div className="ml-6 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-800">
                     <Link
                       href="/dashboard/subscription"
-                       onClick={handleLinkClick}
+                      onClick={handleLinkClick}
                       className={menuClass(
-                        pathname ===
-                          "/dashboard/subscription",
+                        pathname === "/dashboard/subscription",
                       )}
                     >
                       <Tv className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Subscription
-                      </span>
+                      <span className="truncate">Subscription</span>
                     </Link>
 
                     <Link
                       href="/dashboard/electricity"
-                       onClick={handleLinkClick}
+                      onClick={handleLinkClick}
                       className={menuClass(
-                        pathname ===
-                          "/dashboard/electricity",
+                        pathname === "/dashboard/electricity",
                       )}
                     >
                       <Zap className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Electricity
-                      </span>
+                      <span className="truncate">Electricity</span>
                     </Link>
 
                     <Link
                       href="/dashboard/recharge-card"
-                       onClick={handleLinkClick}
+                      onClick={handleLinkClick}
                       className={menuClass(
-                        pathname ===
-                          "/dashboard/recharge-card",
+                        pathname === "/dashboard/recharge-card",
                       )}
                     >
                       <CreditCard className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Recharge Card
-                      </span>
+                      <span className="truncate">Recharge Card</span>
                     </Link>
                   </div>
                 </div>
@@ -377,13 +352,7 @@ const menuClass = (active: boolean) =>
               <SidebarMenuItem>
                 <button
                   type="button"
-                  onClick={() =>
-                    setBillsOpen(
-                      (
-                        prev,
-                      ) => !prev,
-                    )
-                  }
+                  onClick={() => setBillsOpen((prev) => !prev)}
                   className="flex h-11 w-full items-center justify-between rounded-2xl px-3 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-black dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
                 >
                   <div className="flex items-center gap-3">
@@ -410,20 +379,15 @@ const menuClass = (active: boolean) =>
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                 <div className="ml-4 space-y-1 border-l border-zinc-200 pl-3 dark:border-zinc-800 md:ml-6 md:pl-4">
+                  <div className="ml-4 space-y-1 border-l border-zinc-200 pl-3 dark:border-zinc-800 md:ml-6 md:pl-4">
                     <Link
                       href="/dashboard/education"
-                       onClick={handleLinkClick}
-                      className={menuClass(
-                        pathname ===
-                          "/dashboard/education",
-                      )}
+                      onClick={handleLinkClick}
+                      className={menuClass(pathname === "/dashboard/education")}
                     >
                       <GraduationCap className="h-4 w-4 shrink-0" />
 
-                      <span className="truncate">
-                        Educational Bills
-                      </span>
+                      <span className="truncate">Educational Bills</span>
                     </Link>
                   </div>
                 </div>
@@ -434,74 +398,54 @@ const menuClass = (active: boolean) =>
 
         {/* TRANSACTIONS */}
         <SidebarGroup className="mt-2">
-         <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Transactions
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Recharge History"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Recharge History" asChild>
                   <Link
                     href="/dashboard/recharge-history"
-                     onClick={handleLinkClick}
+                    onClick={handleLinkClick}
                     className={menuClass(
-                      pathname ===
-                        "/dashboard/recharge-history",
+                      pathname === "/dashboard/recharge-history",
                     )}
                   >
                     <Receipt className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
-                      Recharge History
-                    </span>
+                    <span className="truncate">Recharge History</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Manage Wallet"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Manage Wallet" asChild>
                   <Link
                     href="/dashboard/manage-wallet"
-                     onClick={handleLinkClick}
+                    onClick={handleLinkClick}
                     className={menuClass(
-                      pathname ===
-                        "/dashboard/manage-wallet",
+                      pathname === "/dashboard/manage-wallet",
                     )}
                   >
                     <BadgeDollarSign className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
-                      Manage Wallet
-                    </span>
+                    <span className="truncate">Manage Wallet</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Reports"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Reports" asChild>
                   <Link
                     href="/dashboard/reports"
-                     onClick={handleLinkClick}
-                    className={menuClass(
-                      pathname ===
-                        "/dashboard/reports",
-                    )}
+                    onClick={handleLinkClick}
+                    className={menuClass(pathname === "/dashboard/reports")}
                   >
                     <FileDown className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
-                      Reports
-                    </span>
+                    <span className="truncate">Reports</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -518,23 +462,15 @@ const menuClass = (active: boolean) =>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Settings"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Settings" asChild>
                   <Link
                     href="/dashboard/settings"
-                     onClick={handleLinkClick}
-                    className={menuClass(
-                      pathname ===
-                        "/dashboard/settings",
-                    )}
+                    onClick={handleLinkClick}
+                    className={menuClass(pathname === "/dashboard/settings")}
                   >
                     <Settings className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
-                      Settings
-                    </span>
+                    <span className="truncate">Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -544,30 +480,22 @@ const menuClass = (active: boolean) =>
 
         {/* OTHERS */}
         <SidebarGroup className="mt-2">
-        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             Others
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Referral"
-                  asChild
-                >
+                <SidebarMenuButton tooltip="Referral" asChild>
                   <Link
                     href="/dashboard/referral"
-                     onClick={handleLinkClick}
-                    className={menuClass(
-                      pathname ===
-                        "/dashboard/referral",
-                    )}
+                    onClick={handleLinkClick}
+                    className={menuClass(pathname === "/dashboard/referral")}
                   >
                     <Users className="h-5 w-5 shrink-0" />
 
-                    <span className="truncate">
-                      Referral
-                    </span>
+                    <span className="truncate">Referral</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -577,17 +505,14 @@ const menuClass = (active: boolean) =>
                   type="button"
                   onClick={() =>
                     signOut({
-                      callbackUrl:
-                        "/auth/login",
+                      callbackUrl: "/auth/login",
                     })
                   }
                   className="flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
 
-                  <span className="truncate">
-                    Logout
-                  </span>
+                  <span className="truncate">Logout</span>
                 </button>
               </SidebarMenuItem>
             </SidebarMenu>

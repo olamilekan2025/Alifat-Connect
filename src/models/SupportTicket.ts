@@ -4,42 +4,62 @@ const SupportTicketSchema = new Schema(
   {
     ticketId: {
       type: String,
-      unique: true,
       required: true,
+      unique: true,
+      trim: true,
     },
 
-    name: String,
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    email: String,
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
 
-    phone: String,
+    phone: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
-    subject: String,
+    subject: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     category: {
       type: String,
       default: "General",
+      trim: true,
     },
 
-    message: String,
+    message: {
+      type: String,
+      required: true,
+    },
 
-    attachment: String,
+    attachment: {
+      type: String,
+      default: "",
+    },
 
     status: {
       type: String,
-      enum: [
-        "Open",
-        "Pending",
-        "Resolved",
-        "Closed",
-      ],
+      enum: ["Open", "Pending", "Resolved", "Closed"],
       default: "Open",
     },
 
     autoReply: {
-  type: String,
-  default: "",
-},
+      type: String,
+      default: "",
+    },
 
     adminReply: {
       type: String,
@@ -49,6 +69,7 @@ const SupportTicketSchema = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
   },
   {
@@ -56,8 +77,8 @@ const SupportTicketSchema = new Schema(
   }
 );
 
-export default models.SupportTicket ||
-  model(
-    "SupportTicket",
-    SupportTicketSchema
-  );
+const SupportTicket =
+  models.SupportTicket ||
+  model("SupportTicket", SupportTicketSchema);
+
+export default SupportTicket;
