@@ -21,8 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   let favicon = "/favicon.ico";
 
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const res = await fetch(`${baseUrl}/api/admin/settings`, {
       cache: "no-store",
@@ -78,8 +77,7 @@ export default async function RootLayout({
   }
 
   const settings = await getSettings();
-  const faviconUrl =
-    settings?.settings?.branding?.faviconUrl ?? "/favicon.ico";
+  const faviconUrl = settings?.settings?.branding?.faviconUrl ?? "/favicon.ico";
 
   return (
     <html
@@ -99,33 +97,21 @@ export default async function RootLayout({
           dark:text-white
         "
       >
-         <FaviconUpdater url={faviconUrl} />
+        <FaviconUpdater url={faviconUrl} />
         {/* Paystack */}
-       <Script
-  id="paystack-inline"
-  src="https://js.paystack.co/v1/inline.js"
-  strategy="afterInteractive"
-/>
+        <Script
+          id="paystack-inline"
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="afterInteractive"
+        />
 
         {/* Tawk Live Chat */}
         {process.env.NODE_ENV === "production" && (
           <Script
             id="tawk-chat"
             strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-        (function(){
-          var s1=document.createElement("script"),
-          s0=document.getElementsByTagName("script")[0];
-          s1.async=true;
-          s1.src='https://embed.tawk.to/6a28bb8d3b75f31c2bcf6a9c/1jqnhp8a0';
-          s1.charset='UTF-8';
-          s1.setAttribute('crossorigin','*');
-          s0.parentNode.insertBefore(s1,s0);
-        })();
-      `,
-            }}
+            src="https://embed.tawk.to/6a28bb8d3b75f31c2bcf6a9c/1jqnhp8a0"
+            crossOrigin="anonymous"
           />
         )}
 

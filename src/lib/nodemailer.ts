@@ -70,6 +70,388 @@ export async function sendEmail(
   }
 }
 
+// /**
+//  * SEND EMAIL VERIFICATION CODE
+//  */
+// export async function sendEmailVerificationCode(
+//   email: string,
+//   code: string,
+// ): Promise<boolean> {
+//   const html = `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="utf-8" />
+//   <title>Email Verification</title>
+// </head>
+
+// <body style="
+//   font-family:Arial,sans-serif;
+//   background:#f5f5f5;
+//   padding:40px;
+// ">
+
+//   <div style="
+//     max-width:600px;
+//     margin:auto;
+//     background:white;
+//     padding:40px;
+//     border-radius:12px;
+//     text-align:center;
+//   ">
+
+//     <h1>📧 Verify Your Email</h1>
+
+//     <p>
+//       Use the verification code below
+//       to verify your account.
+//     </p>
+
+//     <div style="
+//       font-size:36px;
+//       font-weight:bold;
+//       letter-spacing:8px;
+//       background:#0ea5e9;
+//       color:white;
+//       padding:20px;
+//       border-radius:10px;
+//       margin:30px 0;
+//     ">
+//       ${code}
+//     </div>
+
+//     <p>
+//       This code expires in
+//       <strong>10 minutes</strong>.
+//     </p>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+
+//   return await sendEmail({
+//     to: email,
+//     subject:
+//       "Verify Your Email",
+//     html,
+//   });
+// }
+
+// /**
+//  * SEND LOGIN VERIFICATION CODE
+//  */
+// export async function sendLoginVerificationCode(
+//   email: string,
+//   code: string,
+// ): Promise<boolean> {
+//   const html = `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="utf-8" />
+//   <title>Login Verification</title>
+// </head>
+
+// <body style="
+//   font-family:Arial,sans-serif;
+//   background:#f5f5f5;
+//   padding:40px;
+// ">
+
+//   <div style="
+//     max-width:600px;
+//     margin:auto;
+//     background:white;
+//     padding:40px;
+//     border-radius:12px;
+//     text-align:center;
+//   ">
+
+//     <h1>🔐 Login Verification</h1>
+
+//     <p>
+//       Use the code below to verify login.
+//     </p>
+
+//     <div style="
+//       font-size:36px;
+//       font-weight:bold;
+//       letter-spacing:8px;
+//       background:#111827;
+//       color:white;
+//       padding:20px;
+//       border-radius:10px;
+//       margin:30px 0;
+//     ">
+//       ${code}
+//     </div>
+
+//     <p>
+//       This code expires in
+//       <strong>5 minutes</strong>.
+//     </p>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+
+//   return await sendEmail({
+//     to: email,
+//     subject:
+//       "Login Verification Code",
+//     html,
+//   });
+// }
+
+// /**
+//  * SEND PASSWORD RESET CODE
+//  */
+// export async function sendPasswordResetCode(
+//   email: string,
+//   code: string,
+// ): Promise<boolean> {
+//   const html = `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="utf-8" />
+//   <title>Reset Password</title>
+// </head>
+
+// <body style="
+//   font-family:Arial,sans-serif;
+//   background:#f5f5f5;
+//   padding:40px;
+// ">
+
+//   <div style="
+//     max-width:600px;
+//     margin:auto;
+//     background:white;
+//     padding:40px;
+//     border-radius:12px;
+//     text-align:center;
+//   ">
+
+//     <h1>🔑 Reset Password</h1>
+
+//     <p>
+//       Use the verification code below
+//       to reset your password.
+//     </p>
+
+//     <div style="
+//       font-size:36px;
+//       font-weight:bold;
+//       letter-spacing:8px;
+//       background:#dc2626;
+//       color:white;
+//       padding:20px;
+//       border-radius:10px;
+//       margin:30px 0;
+//     ">
+//       ${code}
+//     </div>
+
+//     <p>
+//       This code expires in
+//       <strong>10 minutes</strong>.
+//     </p>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+
+//   return await sendEmail({
+//     to: email,
+//     subject:
+//       "Reset Password Code",
+//     html,
+//   });
+// }
+
+// /**
+//  * SEND PAYMENT PIN RESET CODE
+//  */
+// export async function sendPaymentPinResetCode(
+//   email: string,
+//   code: string,
+// ): Promise<boolean> {
+//   const html = `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="utf-8" />
+//   <title>Reset Payment PIN</title>
+// </head>
+
+// <body style="
+//   font-family:Arial,sans-serif;
+//   background:#f5f5f5;
+//   padding:40px;
+// ">
+
+//   <div style="
+//     max-width:600px;
+//     margin:auto;
+//     background:white;
+//     padding:40px;
+//     border-radius:12px;
+//     text-align:center;
+//   ">
+
+//     <h1>🔐 Reset Payment PIN</h1>
+
+//     <p>
+//       Use the verification code below
+//       to reset your payment PIN.
+//     </p>
+
+//     <div style="
+//       font-size:36px;
+//       font-weight:bold;
+//       letter-spacing:8px;
+//       background:#16a34a;
+//       color:white;
+//       padding:20px;
+//       border-radius:10px;
+//       margin:30px 0;
+//     ">
+//       ${code}
+//     </div>
+
+//     <p>
+//       This code expires in
+//       <strong>10 minutes</strong>.
+//     </p>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+
+//   return await sendEmail({
+//     to: email,
+//     subject:
+//       "Reset Payment PIN",
+//     html,
+//   });
+// }
+
+// /**
+//  * SEND WELCOME EMAIL
+//  */
+// export async function sendWelcomeEmail(
+//   email: string,
+//   firstname: string,
+// ): Promise<boolean> {
+//   const html = `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="utf-8" />
+//   <title>Welcome</title>
+// </head>
+
+// <body style="
+//   font-family:Arial,sans-serif;
+//   background:#f5f5f5;
+//   padding:40px;
+// ">
+
+//   <div style="
+//     max-width:600px;
+//     margin:auto;
+//     background:linear-gradient(135deg,#667eea,#764ba2);
+//     color:white;
+//     padding:40px;
+//     border-radius:12px;
+//     text-align:center;
+//   ">
+
+//     <h1>
+//       🎉 Welcome, ${firstname}!
+//     </h1>
+
+//     <p>
+//       Your account has been created
+//       successfully.
+//     </p>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+
+//   return await sendEmail({
+//     to: email,
+//     subject: `Welcome ${firstname}`,
+//     html,
+//   });
+// }
+
+
+
+
+/**
+ * Helper template to wrap common structures and keep code DRY.
+ * Handles the HTML boilerplate, mobile responsiveness, and layout limits.
+ */
+function getEmailWrapper(contentHtml: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notification</title>
+  <style>
+    @media only screen and (max-width: 620px) {
+      .email-body { padding: 16px !important; }
+      .email-card { padding: 24px !important; border-radius: 8px !important; }
+      .code-display { font-size: 28px !important; letter-spacing: 4px !important; padding: 16px !important; }
+      .email-heading { font-size: 22px !important; }
+    }
+  </style>
+</head>
+<body class="email-body" style="
+  margin: 0;
+  padding: 40px;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+">
+  <div class="email-card" style="
+    max-width: 560px;
+    margin: 0 auto;
+    background-color: #D4AF37;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  ">
+    ${contentHtml}
+    
+    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0 16px 0;" />
+    <p style="font-size: 12px; color: #f2f4f6; margin: 0; line-height: 1.5;">
+      If you did not request this email, you can safely ignore it.
+    </p>
+  </div>
+</body>
+</html>
+`;
+}
+
 /**
  * SEND EMAIL VERIFICATION CODE
  */
@@ -77,65 +459,34 @@ export async function sendEmailVerificationCode(
   email: string,
   code: string,
 ): Promise<boolean> {
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Email Verification</title>
-</head>
-
-<body style="
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  padding:40px;
-">
-
-  <div style="
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
-  ">
-
-    <h1>📧 Verify Your Email</h1>
-
-    <p>
-      Use the verification code below
-      to verify your account.
+  const innerContent = `
+    <h1 class="email-heading" style="color: #0f172a; font-size: 26px; font-weight: 700; margin: 0 0 16px 0; -webkit-font-smoothing: antialiased;">📧 Verify Your Email</h1>
+    <p style="color: #f2f4f6; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+      Use the verification code below to verify and activate your account.
     </p>
-
-    <div style="
-      font-size:36px;
-      font-weight:bold;
-      letter-spacing:8px;
-      background:#0ea5e9;
-      color:white;
-      padding:20px;
-      border-radius:10px;
-      margin:30px 0;
+    <div class="code-display" style="
+      font-size: 34px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 6px;
+      background-color: #f0f9ff;
+      color: #0284c7;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      border: 2px dashed #000;
     ">
       ${code}
     </div>
-
-    <p>
-      This code expires in
-      <strong>10 minutes</strong>.
+    <p style="color: #f2f4f6; font-size: 14px; margin: 0;">
+      This code expires in <strong style="color: #0f172a; font-weight: 600;">10 minutes</strong>.
     </p>
-
-  </div>
-
-</body>
-</html>
-`;
+  `;
 
   return await sendEmail({
     to: email,
-    subject:
-      "Verify Your Email",
-    html,
+    subject: "Verify Your Email",
+    html: getEmailWrapper(innerContent),
   });
 }
 
@@ -146,64 +497,34 @@ export async function sendLoginVerificationCode(
   email: string,
   code: string,
 ): Promise<boolean> {
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Login Verification</title>
-</head>
-
-<body style="
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  padding:40px;
-">
-
-  <div style="
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
-  ">
-
-    <h1>🔐 Login Verification</h1>
-
-    <p>
-      Use the code below to verify login.
+  const innerContent = `
+    <h1 class="email-heading" style="color: #0f172a; font-size: 26px; font-weight: 700; margin: 0 0 16px 0; -webkit-font-smoothing: antialiased;">🔐 Login Verification</h1>
+    <p style="color: #f2f4f6; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+      Use the code below to complete your login verification.
     </p>
-
-    <div style="
-      font-size:36px;
-      font-weight:bold;
-      letter-spacing:8px;
-      background:#111827;
-      color:white;
-      padding:20px;
-      border-radius:10px;
-      margin:30px 0;
+    <div class="code-display" style="
+      font-size: 34px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 6px;
+      background-color: white;
+      color: #0f172a;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      border: 2px dashed #000;
     ">
       ${code}
     </div>
-
-    <p>
-      This code expires in
-      <strong>5 minutes</strong>.
+    <p style="color: #f2f4f6; font-size: 14px; margin: 0;">
+      This code expires in <strong style="color: #0f172a; font-weight: 600;">5 minutes</strong>.
     </p>
-
-  </div>
-
-</body>
-</html>
-`;
+  `;
 
   return await sendEmail({
     to: email,
-    subject:
-      "Login Verification Code",
-    html,
+    subject: "Login Verification Code",
+    html: getEmailWrapper(innerContent),
   });
 }
 
@@ -214,65 +535,34 @@ export async function sendPasswordResetCode(
   email: string,
   code: string,
 ): Promise<boolean> {
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Reset Password</title>
-</head>
-
-<body style="
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  padding:40px;
-">
-
-  <div style="
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
-  ">
-
-    <h1>🔑 Reset Password</h1>
-
-    <p>
-      Use the verification code below
-      to reset your password.
+  const innerContent = `
+    <h1 class="email-heading" style="color: #0f172a; font-size: 26px; font-weight: 700; margin: 0 0 16px 0; -webkit-font-smoothing: antialiased;">🔑 Reset Password</h1>
+    <p style="color: #fafbfd; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+      Use the security verification code below to reset your password.
     </p>
-
-    <div style="
-      font-size:36px;
-      font-weight:bold;
-      letter-spacing:8px;
-      background:#dc2626;
-      color:white;
-      padding:20px;
-      border-radius:10px;
-      margin:30px 0;
+    <div class="code-display" style="
+      font-size: 34px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 6px;
+      background-color: #fef2f2;
+      color: #dc2626;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      border: 2px dashed #dc2626;
     ">
       ${code}
     </div>
-
-    <p>
-      This code expires in
-      <strong>10 minutes</strong>.
+    <p style="color: #f3f6f9; font-size: 14px; margin: 0;">
+      This code expires in <strong style="color: #0f172a; font-weight: 600;">10 minutes</strong>.
     </p>
-
-  </div>
-
-</body>
-</html>
-`;
+  `;
 
   return await sendEmail({
     to: email,
-    subject:
-      "Reset Password Code",
-    html,
+    subject: "Reset Password Code",
+    html: getEmailWrapper(innerContent),
   });
 }
 
@@ -283,65 +573,34 @@ export async function sendPaymentPinResetCode(
   email: string,
   code: string,
 ): Promise<boolean> {
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Reset Payment PIN</title>
-</head>
-
-<body style="
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  padding:40px;
-">
-
-  <div style="
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
-  ">
-
-    <h1>🔐 Reset Payment PIN</h1>
-
-    <p>
-      Use the verification code below
-      to reset your payment PIN.
+  const innerContent = `
+    <h1 class="email-heading" style="color: #0f172a; font-size: 26px; font-weight: 700; margin: 0 0 16px 0; -webkit-font-smoothing: antialiased;">🔐 Reset Payment PIN</h1>
+    <p style="color: #f8fafc; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+      Use the verification code below to update your payment security PIN.
     </p>
-
-    <div style="
-      font-size:36px;
-      font-weight:bold;
-      letter-spacing:8px;
-      background:#16a34a;
-      color:white;
-      padding:20px;
-      border-radius:10px;
-      margin:30px 0;
+    <div class="code-display" style="
+      font-size: 34px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 6px;
+      background-color: #f0fdf4;
+      color: #16a34a;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      border: 2px dashed #000;
     ">
       ${code}
     </div>
-
-    <p>
-      This code expires in
-      <strong>10 minutes</strong>.
+    <p style="color: #f5f7fa; font-size: 14px; margin: 0;">
+      This code expires in <strong style="color: #0f172a; font-weight: 600;">10 minutes</strong>.
     </p>
-
-  </div>
-
-</body>
-</html>
-`;
+  `;
 
   return await sendEmail({
     to: email,
-    subject:
-      "Reset Payment PIN",
-    html,
+    subject: "Reset Payment PIN",
+    html: getEmailWrapper(innerContent),
   });
 }
 
@@ -354,39 +613,43 @@ export async function sendWelcomeEmail(
 ): Promise<boolean> {
   const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome</title>
+  <style>
+    @media only screen and (max-width: 620px) {
+      .email-body { padding: 16px !important; }
+      .email-card { padding: 32px 20px !important; border-radius: 8px !important; }
+      .email-heading { font-size: 24px !important; }
+    }
+  </style>
 </head>
-
-<body style="
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  padding:40px;
+<body class="email-body" style="
+  margin: 0;
+  padding: 40px;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 ">
-
-  <div style="
-    max-width:600px;
-    margin:auto;
-    background:linear-gradient(135deg,#667eea,#764ba2);
-    color:white;
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
+  <div class="email-card" style="
+    max-width: 560px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    padding: 48px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+    text-align: center;
   ">
-
-    <h1>
+    <h1 class="email-heading" style="font-size: 30px; font-weight: 800; margin: 0 0 12px 0; color: #ffffff;">
       🎉 Welcome, ${firstname}!
     </h1>
-
-    <p>
-      Your account has been created
-      successfully.
+    <p style="color: #e0e7ff; font-size: 16px; line-height: 1.6; margin: 0; font-weight: 400;">
+      Your account has been successfully created. We're excited to have you on board!
     </p>
-
   </div>
-
 </body>
 </html>
 `;

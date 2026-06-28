@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Send,
-  Mail,
-  Phone,
-  MapPin,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { Send, Mail, Phone, MapPin, Sun, Moon } from "lucide-react";
 
 import { useTheme } from "next-themes";
 import { SlSocialFacebook } from "react-icons/sl";
@@ -23,8 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Loader2 } from "lucide-react";
-
-
 
 const quickLinks = [
   { name: "About", href: "/about" },
@@ -59,12 +50,8 @@ const socialLinks = [
   },
 ];
 
-
-
 export default function Footer() {
   const pathname = usePathname();
-
-
 
   // Hide footer on auth pages
   const hideFooter =
@@ -91,6 +78,7 @@ export default function Footer() {
     pathname === "/admin-dashboard/users" ||
     pathname === "/admin-dashboard/transactions" ||
     pathname === "/admin-dashboard/settings" ||
+    pathname === "/admin-dashboard/wallet" ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;
@@ -99,40 +87,40 @@ export default function Footer() {
 
   const [subscribing, setSubscribing] = useState(false);
 
-    const { theme, setTheme } = useTheme();
-const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-const [branding, setBranding] = useState({
-  footerText: "",
-  copyrightText: "",
-});
+  const [branding, setBranding] = useState({
+    footerText: "",
+    copyrightText: "",
+  });
 
-useEffect(() => {
-  setMounted(true);
-}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-useEffect(() => {
-  async function loadBranding() {
-    try {
-      const res = await fetch("/api/admin/settings");
+  useEffect(() => {
+    async function loadBranding() {
+      try {
+        const res = await fetch("/api/admin/settings");
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch settings");
+        if (!res.ok) {
+          throw new Error("Failed to fetch settings");
+        }
+
+        const data = await res.json();
+
+        setBranding({
+          footerText: data?.settings?.branding?.footerText ?? "",
+          copyrightText: data?.settings?.branding?.copyrightText ?? "",
+        });
+      } catch (error) {
+        console.error("Failed to load branding settings:", error);
       }
-
-      const data = await res.json();
-
-      setBranding({
-        footerText: data?.settings?.branding?.footerText ?? "",
-        copyrightText: data?.settings?.branding?.copyrightText ?? "",
-      });
-    } catch (error) {
-      console.error("Failed to load branding settings:", error);
     }
-  }
 
-  loadBranding();
-}, []);
+    loadBranding();
+  }, []);
 
   const handleNewsletterSubscribe = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -195,10 +183,10 @@ useEffect(() => {
               <span className="text-[#D4AF37]"> Connect</span>
             </Link>
 
-         <p className="mt-6 leading-relaxed text-gray-600 dark:text-slate-400">
-  {branding.footerText ||
-    "Fast, secure, and reliable VTU platform for data, airtime, utility bills, TV subscriptions, and more."}
-</p>
+            <p className="mt-6 leading-relaxed text-gray-600 dark:text-slate-400">
+              {branding.footerText ||
+                "Fast, secure, and reliable VTU platform for data, airtime, utility bills, TV subscriptions, and more."}
+            </p>
 
             {/* Social Icons */}
             <div className="mt-8 flex items-center gap-4">
@@ -211,7 +199,7 @@ useEffect(() => {
                     asChild
                     size="icon"
                     variant="ghost"
-                    className="h-11 w-11 rounded-full bg-black text-white hover:bg-[#D4AF37] hover:text-black"
+                    className="h-11 w-11 rounded-full bg-black text-white hover:bg-[#D4AF37] dark:hover:text-[#D4AF37]"
                   >
                     <Link href={social.href} aria-label={social.label}>
                       <Icon className="h-5 w-5" />
@@ -219,6 +207,20 @@ useEffect(() => {
                   </Button>
                 );
               })}
+              
+              <Button
+  size="icon"
+  variant="ghost"
+  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  className="h-11 w-11 rounded-full bg-black text-white hover:bg-[#D4AF37] dark:hover:text-[#D4AF37]"
+  aria-label="Toggle theme"
+>
+  {theme === "dark" ? (
+    <Sun className="h-5 w-5" />
+  ) : (
+    <Moon className="h-5 w-5" />
+  )}
+</Button>
             </div>
           </div>
 
@@ -327,36 +329,13 @@ useEffect(() => {
 
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row border-t border-black/10">
-         <p className="text-sm text-gray-500 dark:text-slate-500">
-  {branding.copyrightText ||
-    "© 2026 Alifat Connect. All rights reserved."}
-</p>
+          <p className="text-sm text-gray-500 dark:text-slate-500">
+            {branding.copyrightText ||
+              "© 2026 Alifat Connect. All rights reserved."}
+          </p>
 
           <div className="flex flex-wrap items-center gap-4 text-sm">
-
-            {mounted && (
-  <Button
-    type="button"
-    variant="outline"
-    size="sm"
-    onClick={() =>
-      setTheme(theme === "dark" ? "light" : "dark")
-    }
-    className="flex items-center gap-2 rounded-full text-black dark:text-white  "
-  >
-    {theme === "dark" ? (
-      <>
-        <Sun className="h-4 w-4" />
-        Light Mode
-      </>
-    ) : (
-      <>
-        <Moon className="h-4 w-4" />
-        Dark Mode
-      </>
-    )}
-  </Button>
-)}
+            
             <Link
               href="/privacy-policy"
               className="text-gray-500 transition-colors hover:text-[#D4AF37] dark:text-slate-500"
@@ -374,7 +353,5 @@ useEffect(() => {
         </div>
       </div>
     </footer>
-
-
   );
 }

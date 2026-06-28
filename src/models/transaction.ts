@@ -23,12 +23,12 @@ export interface ITransaction {
 
   status:
     | "pending"
+    | "processing"
     | "success"
     | "failed";
 
   description?: string;
 
-  // AIRTIME / DATA
   network?: string;
 
   phone?: string;
@@ -36,6 +36,12 @@ export interface ITransaction {
   plan?: string;
 
   reference?: string;
+
+  approvedAt?: Date;
+
+  approvedBy?: string;
+
+  rejectionReason?: string;
 
   createdAt?: Date;
 
@@ -48,6 +54,7 @@ const TransactionSchema =
       userId: {
         type: String,
         required: true,
+        index: true,
       },
 
       type: {
@@ -74,50 +81,73 @@ const TransactionSchema =
       amount: {
         type: Number,
         required: true,
+        min: 0,
       },
 
       status: {
         type: String,
         enum: [
           "pending",
+          "processing",
           "success",
           "failed",
         ],
-        default: "success",
+        default: "pending",
+        index: true,
       },
 
       description: {
         type: String,
+        trim: true,
       },
 
       network: {
         type: String,
+        trim: true,
       },
 
       phone: {
         type: String,
+        trim: true,
       },
 
       plan: {
         type: String,
+        trim: true,
       },
 
       reference: {
         type: String,
+        unique: true,
+        index: true,
         default: () =>
-          `TXN-${Date.now()}`,
+          `TXN-${Date.now()}-${Math.floor(
+            1000 + Math.random() * 9000
+          )}`,
+      },
+
+      approvedAt: {
+        type: Date,
+      },
+
+      approvedBy: {
+        type: String,
+      },
+
+      rejectionReason: {
+        type: String,
       },
     },
     {
       timestamps: true,
-    },
+    }
   );
 
 const Transaction: Model<ITransaction> =
   models.Transaction ||
   model<ITransaction>(
     "Transaction",
-    TransactionSchema,
+    TransactionSchema
   );
 
 export default Transaction;

@@ -142,7 +142,7 @@ export default function Navbar() {
   <img
     src={branding.logoUrl}
     alt={branding.platformName}
-    className="h-10 w-10 rounded-full object-cover"
+    className="h-10 w-10 rounded-full object-cover border-4 border-[#D4AF37]"
   />
 ) : (
   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D4AF37] font-bold text-black shadow-lg shadow-[#D4AF37]/25">

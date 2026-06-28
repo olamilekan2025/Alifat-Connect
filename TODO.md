@@ -1,17 +1,44 @@
-# TODO - Admin Settings Premium Page
+# TODO - VTU Profit/Ledger & Refund Consistency
 
-## Completed
-- [x] Added `AdminSettings` model: `src/models/AdminSettings.ts`
-- [x] Added admin settings API: `src/app/api/admin/settings/route.ts`
-- [x] Added admin audit logs API (searchable): `src/app/api/admin/audit-logs/route.ts`
-- [x] Added premium admin settings page UI: `src/app/admin-dashboard/settings/page.tsx`
+## Phase 0 - Repo discovery (done/ongoing)
+- [x] Inspect current Transaction model & admin/system wallet ledger usage
+- [x] Inspect airtime/data/electricity purchase routes and existing reports aggregation
+- [x] Identify that current routes debit wallet + write Transaction without provider cost/profit/refund
 
-## Next (recommended)
-- [ ] Implement missing endpoints for Maintenance & Backup buttons (clear cache, rebuild indexes, restart jobs, create/download backup, restore).
-- [ ] Implement full Admin Profile actions (change password, 2FA enable/disable, last login writeback).
-- [ ] Hook Security settings into authentication flow (email verification enforcement, rate limiting, session timeout, password policy, etc.).
-- [ ] Hook Payment/Email/Notification settings into runtime services (wallet rules, nodemailer/smtp, notifications).
-- [ ] Add Audit logging writes for admin actions (POST) from maintenance/backup/settings/other admin pages.
-- [ ] Ensure audit log document includes required fields (ip, status, target resource) when logging.
-- [ ] Run `npm test`/`npm run build` (or `npm run lint`) and fix TypeScript/ESLint errors if any.
+## Phase 1 - Data model changes (required)
+- [ ] Extend `src/models/transaction.ts` with:
+  - userAmount
+  - providerCost
+  - platformProfit
+  - providerReference
+  - reversalOf
+  - (optionally) purchaseCategory/serviceType fields
+- [ ] Add indexes/uniqueness guidance for idempotency using `reference` or a dedicated `purchaseReference`
+
+## Phase 2 - Settlement helper (scaffold)
+- [ ] Replace scaffold in `src/lib/vtu/settlement.ts` with real logic once provider call points are identified
+
+## Phase 3 - Refactor purchase flow (required)
+- [ ] Refactor airtime purchase route to:
+  - check wallet
+  - deduct/queue debit
+  - call provider API
+  - on success: write providerCost/platformProfit
+  - on failure: refund user and write reversal
+- [ ] Refactor data purchase route similarly
+- [ ] Ensure payment/gateway webhook finalization triggers the same settlement path (idempotent)
+
+## Phase 4 - Admin reporting
+- [ ] Update admin reporting endpoints to aggregate:
+  - totalRevenue = Σ(userAmount)
+  - totalProviderCost = Σ(providerCost)
+  - totalProfit = Σ(platformProfit)
+
+## Phase 5 - Reconciliation safeguards
+- [ ] Ensure all webhook/payment completion handlers are idempotent by purchaseReference
+- [ ] Ensure refund postings reference the original purchase (reversalOf)
+
+## Phase 6 - Validate
+- [ ] Run build
+- [ ] Run targeted “simulate success then simulate provider failure” checks
 
