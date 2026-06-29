@@ -98,6 +98,7 @@ export default async function RootLayout({
         "
       >
         <FaviconUpdater url={faviconUrl} />
+
         {/* Paystack */}
         <Script
           id="paystack-inline"
@@ -114,6 +115,7 @@ export default async function RootLayout({
             crossOrigin="anonymous"
           />
         )}
+
 
         <Providers>
           <TooltipProvider delayDuration={0}>
