@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 
-import { Bell, Search, LogOut, ChevronDown } from "lucide-react";
+import { Bell, Home, Search, LogOut, ChevronDown } from "lucide-react";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Input } from "@/components/ui/input";
 import LogoutModal from "@/components/admin/logout-modal";
+import { toast } from "sonner";
 
 export default function AdminNavbar() {
   const { data: session } = useSession();
@@ -37,7 +39,7 @@ export default function AdminNavbar() {
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
-      playPromise.catch(() => {});
+      playPromise.catch(() => { });
     }
   };
 
@@ -115,7 +117,7 @@ export default function AdminNavbar() {
     setShowModal(true);
     setStep(1);
     setPin("");
-    sendAudit("ADMIN_LOGOUT_INITIATED");
+  void sendAudit("ADMIN_LOGOUT_INITIATED");
   };
 
   // ================= VERIFY PIN =================
@@ -129,7 +131,7 @@ export default function AdminNavbar() {
       await handleLogout();
     } else {
       setLoading(false);
-      alert("Invalid PIN");
+  toast.error("Invalid PIN");
     }
   };
 
@@ -219,7 +221,7 @@ export default function AdminNavbar() {
             {/* PROFILE */}
             <div ref={dropdownRef} className="relative">
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+              onClick={() => setDropdownOpen((prev) => !prev)}
                 className="
   flex items-center gap-2 rounded-2xl
   border border-zinc-300
@@ -251,13 +253,12 @@ export default function AdminNavbar() {
               {dropdownOpen && (
                 <div
                   className="
-    absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl
-    border border-zinc-200
-    bg-white
-    shadow-2xl
-    dark:border-white/10
-    dark:bg-zinc-950
-  "
+      absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl
+      border border-zinc-200
+      bg-white shadow-2xl
+      dark:border-white/10
+      dark:bg-zinc-950
+    "
                 >
                   <div className="border-b border-zinc-200 px-4 py-3 dark:border-white/10">
                     <p className="text-sm font-semibold text-zinc-900 dark:text-white">
@@ -265,16 +266,25 @@ export default function AdminNavbar() {
                     </p>
 
                     <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-                      {session?.user?.email || "Secure Account"}
+                      {session?.user?.email}
                     </p>
                   </div>
+
+                  <Link
+                    href="/"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-white/10"
+                  >
+                    <Home className="h-4 w-4" />
+                    Home
+                  </Link>
 
                   <button
                     onClick={() => {
                       setDropdownOpen(false);
                       openModal();
                     }}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-400 transition hover:bg-red-500/10"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-500 transition hover:bg-red-500/10"
                   >
                     <LogOut className="h-4 w-4" />
                     Logout

@@ -83,7 +83,7 @@ export function DashboardNavbar() {
 
   return (
     <>
-     <header className="fixed inset-x-75 top-0 z-[100] flex h-16 w-323  items-center justify-between border-b border-zinc-200 bg-white/95 px-4 shadow-sm backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95 md:h-20 md:px-6">
+     <header className="fixed inset-x-0 top-0 z-[100] flex h-16 w-full items-center justify-between border-b border-zinc-200 bg-white/95 px-4 shadow-sm backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95 md:h-20 md:px-6">
   {/* LEFT */}
  <div className="flex min-w-0 flex-1 items-center gap-3">
   <SidebarTrigger className="h-10 w-10 shrink-0 rounded-xl border border-zinc-200 bg-white shadow-sm hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800" />
@@ -109,6 +109,8 @@ export function DashboardNavbar() {
 
   {/* RIGHT */}
   <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+    
+
     {/* NOTIFICATION */}
     <Button
       variant="outline"
@@ -158,14 +160,14 @@ export function DashboardNavbar() {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link
-            href="/dashboard"
-            className="flex h-11 items-center gap-3 rounded-xl px-3"
-          >
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
-        </DropdownMenuItem>
+  <Link
+    href="/"
+    className="flex h-11 items-center gap-3 rounded-xl px-3"
+  >
+    <Home className="h-4 w-4" />
+    Home
+  </Link>
+</DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link

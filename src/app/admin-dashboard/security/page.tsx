@@ -12,8 +12,11 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SecurityScore } from "../../admin-dashboard/security/security-score";
-import { AuthenticationSettings } from "../../admin-dashboard/security/authentication-settings";
+import { SecurityScore } from "./security-score";
+import { AuthenticationSettings } from "./authentication-settings";
+import { LoginProtection } from "./login-protection";
+import { PasswordPolicy } from "./password-policy";
+import { AuditLogs } from "./audit-logs";
 
 export default function SecurityPage() {
     const [security, setSecurity] = useState<any>(null);
@@ -118,49 +121,13 @@ export default function SecurityPage() {
         {/* Sections */}
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <Card className="rounded-2xl shadow-lg">
-            <CardHeader>
-              <CardTitle>Authentication</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              Authentication settings will go here.
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-lg">
-            <CardHeader>
-              <CardTitle>Login Protection</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              Login protection settings will go here.
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-lg">
-            <CardHeader>
-              <CardTitle>Password Policy</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              Password policy configuration.
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-lg">
-            <CardHeader>
-              <CardTitle>Audit Logs</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              Recent administrator activities.
-            </CardContent>
-          </Card>
+          <AuthenticationSettings />
+          <LoginProtection />
+          <PasswordPolicy />
+          <AuditLogs />
         </div>
-         <SecurityScore />
 
-      <AuthenticationSettings />
+        <SecurityScore />
       </div>
          
     </div>

@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
+import AdminLoginLog from "@/models/AdminLoginLog";
 import {
   sendLoginVerificationCode,
 } from "@/lib/nodemailer";
@@ -58,7 +59,7 @@ export const authOptions: NextAuthOptions = {
   },
 },
 
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
           if (
             !credentials?.email ||
@@ -192,6 +193,22 @@ throw new Error(
           );
 
          if (!isPasswordValid) {
+  // Log failed login attempt for admin
+  if (user.role === "admin") {
+    const ip = req?.headers?.["x-forwarded-for"] || "unknown";
+    const userAgent = req?.headers?.["user-agent"] || "";
+    try {
+      await AdminLoginLog.create({
+        adminId: user._id,
+        ip,
+        device: "web",
+        userAgent,
+        success: false,
+      });
+    } catch (logError) {
+      console.error("Failed to log login attempt:", logError);
+    }
+  }
   throw new Error("Invalid email or password");
 }
 
@@ -200,6 +217,23 @@ user.lastLoginAt = new Date();
 user.sessionCreatedAt = new Date();
 
 await user.save();
+
+// Log successful login attempt for admin
+if (user.role === "admin") {
+  const ip = req?.headers?.["x-forwarded-for"] || "unknown";
+  const userAgent = req?.headers?.["user-agent"] || "";
+  try {
+    await AdminLoginLog.create({
+      adminId: user._id,
+      ip,
+      device: "web",
+      userAgent,
+      success: true,
+    });
+  } catch (logError) {
+    console.error("Failed to log login attempt:", logError);
+  }
+}
 
           return {
             id: user._id.toString(),

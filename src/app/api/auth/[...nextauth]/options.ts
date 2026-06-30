@@ -86,16 +86,16 @@ export const authOptions: NextAuthOptions = {
             );
           }
 
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            name:
-              user.name ??
-              `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim(),
+        return {
+  id: user._id.toString(),
+  email: user.email,
+  name:
+    user.name ??
+    `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim(),
 
-            role: user.role ?? "user",
-            isAdmin: user.role === "admin",
-          };
+  role: user.role?.toLowerCase() ?? "user",
+  isAdmin: user.role?.toLowerCase() === "admin",
+};
         } catch (error) {
           console.error("AUTH ERROR:", error);
           throw error;

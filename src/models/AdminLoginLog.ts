@@ -2,7 +2,11 @@ import { Schema, model, models } from "mongoose";
 
 const AdminLoginLogSchema = new Schema(
   {
-    adminId: { type: String, required: true },
+    adminId: { 
+      type: Schema.Types.ObjectId, 
+      ref: "User", 
+      required: true 
+    },
 
     ip: { type: String, default: "" },
     device: { type: String, default: "" },
@@ -10,10 +14,11 @@ const AdminLoginLogSchema = new Schema(
     userAgent: { type: String, default: "" },
 
     success: { type: Boolean, default: true },
-
-    createdAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
 export default models.AdminLoginLog ||

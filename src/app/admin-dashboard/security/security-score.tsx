@@ -20,21 +20,21 @@ import { useSecurity } from "../../../../hooks/use-security";
 export function SecurityScore() {
   const { data, loading, error } = useSecurity();
 
-//   if (loading) {
-//     return (
-//       <Card className="rounded-3xl p-8 justify-center item-center bg-red-500 ">
-//         Loading security score...
-//       </Card>
-//     );
-//   }
+  if (loading) {
+    return (
+      <Card className="rounded-3xl p-8 flex justify-center items-center">
+        Loading security score...
+      </Card>
+    );
+  }
 
-//   if (error) {
-//     return (
-//       <Card className="rounded-3xl p-8 text-red-500">
-//         {error}
-//       </Card>
-//     );
-//   }
+  if (error) {
+    return (
+      <Card className="rounded-3xl p-8 text-red-500">
+        {error}
+      </Card>
+    );
+  }
 
   const score = data?.overview?.securityScore ?? 0;
 

@@ -520,9 +520,9 @@ function StatCard({ title, value, icon }: StatCardProps) {
           {icon}
         </div>
 
-        <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">
+        {/* <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">
           LIVE
-        </span>
+        </span> */}
       </div>
 
       <p className="mt-5 text-sm text-muted-foreground">{title}</p>
