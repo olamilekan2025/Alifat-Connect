@@ -102,7 +102,7 @@ export default function Services() {
             return (
               <Card
                 key={service.title}
-                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-[#EAEAEA] bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white-12 dark:bg-black dark:hover:border-[#D4AF37] dark:hover:shadow-2xl"
+                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-black bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white dark:bg-black dark:hover:border-[#D4AF37] dark:hover:shadow-2xl"
               >
                 {/* Top Accent Bar */}
                 <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-[#D4AF37] transition-transform duration-500 group-hover:scale-x-100" />

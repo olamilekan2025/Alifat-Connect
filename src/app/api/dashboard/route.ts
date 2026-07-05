@@ -135,13 +135,18 @@ export async function GET() {
 
     // RETURN RESPONSE
     return NextResponse.json({
-      user: {
-        name:
-          user.name || "User",
+   user: {
+  name:
+    user.name ||
+    `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim() ||
+    "User",
 
-        email:
-          user.email || "",
-      },
+  email:
+    user.email || "",
+
+  membershipLevel:
+    user.membershipLevel || "starter",
+},
 
       wallet: {
         balance:

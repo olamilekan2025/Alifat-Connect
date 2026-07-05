@@ -7,23 +7,29 @@ import bcrypt from "bcryptjs";
 import { authOptions } from "@/lib/auth";
 
 import { connectToDatabase } from "@/lib/mongodb";
+import mongoose from "mongoose";
 
 import User from "@/models/User";
 
 import Transaction from "@/models/transaction";
+import {
+  updateMembership,
+  getMembershipBenefits,
+  calculateDiscount,
+} from "@/lib/membership";
 
-export async function POST(
-  request: Request,
-) {
+export async function POST(request: Request) {
+  const session = await mongoose.startSession();
+
   try {
     await connectToDatabase();
 
-    const session =
+    const auth =
       await getServerSession(
         authOptions,
       );
 
-    if (!session?.user?.email) {
+    if (!auth?.user?.email) {
       return NextResponse.json(
         {
           success: false,
@@ -36,23 +42,26 @@ export async function POST(
       );
     }
 
-    const body =
-      await request.json();
+  const body = await request.json();
 
-    const {
-      network,
-      phone,
-      amount,
-      pin,
-    } = body;
+const network = String(body.network ?? "")
+  .trim()
+  .toLowerCase();
+
+const phone = String(body.phone ?? "")
+  .replace(/\s+/g, "");
+
+const amount = Number(body.amount);
+
+const pinString = String(body.pin ?? "").trim();
 
     // VALIDATION
-    if (
-      !network ||
-      !phone ||
-      !amount ||
-      !pin
-    ) {
+  if (
+  !network ||
+  !phone ||
+  !pinString ||
+  !Number.isFinite(amount)
+) {
       return NextResponse.json(
         {
           success: false,
@@ -68,8 +77,7 @@ export async function POST(
     const parsedAmount =
       Number(amount);
 
-    const pinString =
-      String(pin);
+    
 
     if (
       !/^\d{4}$/.test(
@@ -124,14 +132,18 @@ export async function POST(
       );
     }
 
-    // FIND USER
+    // START ATOMIC TRANSACTION
+    session.startTransaction();
+
     const user =
       await User.findOne({
         email:
-          session.user.email,
-      });
+          auth.user.email,
+      }).session(session);
 
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
         {
           success: false,
@@ -146,6 +158,8 @@ export async function POST(
 
     // CHECK PIN
     if (!user.paymentPin) {
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
         {
           success: false,
@@ -166,6 +180,8 @@ export async function POST(
       );
 
     if (!isPinCorrect) {
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
         {
           success: false,
@@ -178,25 +194,36 @@ export async function POST(
       );
     }
 
+    // Get membership benefits
+const benefits = await getMembershipBenefits(
+  user._id.toString()
+);
+
+const { discount, payable } = calculateDiscount(
+  parsedAmount,
+  benefits.airtimeDiscount
+);
+
+const discountAmount = Number(discount.toFixed(2));
+
+const payableAmount = Number(payable.toFixed(2));
+
     // CONNECT DB
-    const mongooseConnection =
-      await connectToDatabase();
+   const db = mongoose.connection.db;
 
-    const db =
-      mongooseConnection.connection.db;
-
-    if (!db) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Database connection failed",
-        },
-        {
-          status: 500,
-        },
-      );
+if (!db) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Database connection failed",
+    },
+    {
+      status: 500,
     }
+  );
+}
 
     // FIND WALLET
 let wallet =
@@ -263,9 +290,10 @@ const currentBalance =
 
 // CHECK BALANCE
 if (
-  currentBalance <
-  parsedAmount
+  currentBalance < payableAmount
 ) {
+  await session.abortTransaction();
+  session.endSession();
   return NextResponse.json(
     {
       success: false,
@@ -278,11 +306,13 @@ if (
 }
 
 // CALCULATE NEW BALANCE
-const newBalance =
-  currentBalance -
-  parsedAmount;
+const newBalance = Number(
+(currentBalance - payableAmount).toFixed(2)
+);
 
 if (newBalance < 0) {
+  await session.abortTransaction();
+  session.endSession();
   return NextResponse.json(
     {
       success: false,
@@ -295,11 +325,38 @@ if (newBalance < 0) {
   );
 }
 
-// UPDATE USER BALANCE
-user.walletBalance =
-  newBalance;
+/* =========================================
+   CRITICAL: ATOMIC BALANCE DEDUCTION
+========================================= */
+const updatedUser = await User.findOneAndUpdate(
+  {
+    _id: user._id,
+    walletBalance: { $gte: payableAmount },
+  },
+  {
+    $inc: {
+      walletBalance: -payableAmount,
+      lifetimeSavings: discountAmount,
+    },
+  },
+  {
+    new: true,
+    session,
+  }
+);
 
-await user.save();
+if (!updatedUser) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      message:
+        "Balance update failed (possible concurrent request)",
+    },
+    { status: 409 }
+  );
+}
 
 // UPDATE WALLET BALANCE
 await db
@@ -312,57 +369,110 @@ await db
     {
       $set: {
         balance:
-          newBalance,
+          updatedUser.walletBalance,
 
         updatedAt:
           new Date(),
       },
+      $setOnInsert: {
+        accountNumber: Math.floor(
+          1000000000 + Math.random() * 9000000000
+        ).toString(),
+        bankName: "Alifat Connect Pay",
+        createdAt: new Date(),
+      },
+    },
+    {
+      upsert: true,
+      session,
     },
   );
 
-  console.log("USER ID:", user._id);
-console.log("USER EMAIL:", user.email);
+ const reference = `AIR-${Date.now()}-${Math.random()
+  .toString(36)
+  .substring(2, 8)
+  .toUpperCase()}`;
 
-    await Transaction.create({
-  userId:
-    user._id.toString(),
+ const transaction = await Transaction.create([{
+  userId: user._id.toString(),
 
   type: "debit",
 
-  category:
-    "airtime",
+  category: "airtime",
 
-  amount:
-    parsedAmount,
+  amount: parsedAmount,
 
-  status:
-    "success",
+  chargedAmount: payableAmount,
 
-  description:
-    `${network} airtime purchase`,
+ discount: discountAmount,
+
+  reference,
+
+status: "success",
+
+  description: `${network} airtime purchase`,
 
   network,
 
   phone,
 
-  createdAt:
-    new Date(),
+  createdAt: new Date(),
+}],
+{
+  session,
 });
-    return NextResponse.json(
-      {
-        success: true,
+// Commit database transaction
+await session.commitTransaction();
+session.endSession();
 
-        message:
-          "Airtime purchase successful",
+// Update membership AFTER successful commit
+try {
+  await updateMembership(user._id.toString());
+} catch (membershipError) {
+  console.error(
+    "Membership Update Error:",
+    membershipError
+  );
+}
 
-        balance:
-          newBalance,
-      },
-      {
-        status: 200,
-      },
-    );
+const latestUser =
+  await User.findById(user._id).select(
+    "membershipLevel lifetimeSavings walletBalance"
+  );
+return NextResponse.json(
+  {
+    success: true,
+    message: "Airtime purchase successful",
+
+    balance: latestUser?.walletBalance,
+
+    amount: parsedAmount,
+
+    chargedAmount: payableAmount,
+
+    discount: discountAmount,
+
+    reference,
+
+    membership:
+      latestUser?.membershipLevel,
+
+    lifetimeSavings:
+      latestUser?.lifetimeSavings,
+
+    transaction: transaction[0],
+  },
+  {
+    status: 200,
+  }
+);
   } catch (error) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    session.endSession();
+
     console.error(
       "AIRTIME PURCHASE ERROR:",
       error,

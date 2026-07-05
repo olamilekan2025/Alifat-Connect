@@ -88,7 +88,7 @@ export default function DataPricingSection() {
           {networks.map((network) => (
             <Card
               key={network.name}
-              className="group overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37]/40 hover:shadow-2xl dark:border-white dark:bg-black"
+              className="group overflow-hidden rounded-[1.5rem] border border-black bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white dark:bg-black"
             >
               {/* Header */}
               <CardHeader className="pb-2">

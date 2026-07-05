@@ -63,7 +63,7 @@ export default function PricingFAQ() {
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="overflow-hidden rounded-3xl border border-gray-200 bg-white px-6 shadow-sm transition-all duration-300 hover:border-[#D4AF37]/40 hover:shadow-lg dark:border-white dark:bg-zinc-950 dark:hover:border-[#D4AF37]/40"
+              className="overflow-hidden rounded-3xl border border-black bg-white px-6 shadow-sm transition-all duration-300 hover:border-[#D4AF37]/40 hover:shadow-lg dark:border-white dark:bg-zinc-950 dark:hover:border-[#D4AF37]/40"
             >
               <AccordionTrigger className="py-6 text-left text-lg font-semibold text-gray-900 hover:no-underline dark:text-white">
                 {faq.question}

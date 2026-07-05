@@ -81,7 +81,7 @@ export default function Features() {
             return (
               <Card
                 key={feature.title}
-                className="group rounded-3xl border border-[#EAEAEA] bg-[#FAFAFA] shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37] hover:bg-white hover:shadow-2xl dark:border-white-20 dark:bg-black dark:hover:border-[#D4AF37]"
+                className="group rounded-3xl border border-black bg-[#FAFAFA] shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37] hover:bg-white hover:shadow-2xl dark:border-white dark:bg-black dark:hover:border-[#D4AF37]"
               >
                 <CardHeader>
                   {/* Icon */}

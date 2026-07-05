@@ -28,6 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import MembershipCard from "@/components/dashboard/membership-card";
+import MembershipSummary from "@/components/dashboard/MembershipSummary";
 
 const quickActions = [
   {
@@ -86,29 +88,32 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
-  const user = {
-    name:
-      dashboardData?.user?.name ||
-      "User",
+ const user = {
+  name:
+    dashboardData?.user?.name ||
+    "User",
 
-    balance:
-      Number(
-        dashboardData?.wallet
-          ?.balance
-      ) || 0,
+  membershipLevel:
+    dashboardData?.user?.membershipLevel ||
+    "starter",
 
-    totalTransactions:
-      Number(
-        dashboardData?.stats
-          ?.totalTransactions
-      ) || 0,
+  balance:
+    Number(
+      dashboardData?.wallet?.balance
+    ) || 0,
 
-    successfulRate:
-      Number(
-        dashboardData?.stats
-          ?.successfulRate
-      ) || 0,
-  };
+  totalTransactions:
+    Number(
+      dashboardData?.stats
+        ?.totalTransactions
+    ) || 0,
+
+  successfulRate:
+    Number(
+      dashboardData?.stats
+        ?.successfulRate
+    ) || 0,
+};
 
   const transactions =
     dashboardData?.transactions ||
@@ -232,6 +237,12 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+ <div className="grid gap-6 lg:grid-cols-2" >
+  <MembershipCard membershipLevel={user.membershipLevel} />
+
+  <MembershipSummary  />
+</div>
 
       {/* QUICK ACTIONS */}
       <Card className="rounded-3xl border-zinc-200/70 shadow-sm dark:border-zinc-800">

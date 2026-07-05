@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function TestimonialsHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffdf7] to-white py-10 md:py-10 dark:from-black dark:via-black dark:to-black">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffdf7] to-white py-10 md:py-25 dark:from-black dark:via-black dark:to-black">
       {/* Background Glow */}
       <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-3xl" />
       <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-3xl" />

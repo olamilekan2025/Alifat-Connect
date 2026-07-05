@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Users,
   Wallet,
@@ -12,7 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 type TransactionItem = {
@@ -43,18 +44,17 @@ type AdminStats = {
 export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const [search, setSearch] = useState("");
   const term = search.trim().toLowerCase();
   const [sortBy, setSortBy] = useState<"date" | "amount" | "status">("date");
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
   const [dateFilter, setDateFilter] = useState<
     "today" | "7days" | "30days" | "all"
   >("all");
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const ITEMS_PER_PAGE = 10;
 
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(
     null,
@@ -102,41 +102,21 @@ export default function AdminPage() {
       }
     });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE),
-  );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortBy]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(1);
-    }
-  }, [filteredTransactions.length, totalPages]);
-
-  const paginatedTransactions = filteredTransactions.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
-
- 
-   if (loading) {
-  return (
-    <div className="flex h-[70vh] items-center justify-center bg-white text-zinc-900 dark:bg-black dark:text-white">
-      <div className="text-center">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
-        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-          Loading admin dashboard...
-        </p>
+  const recentTransactions = filteredTransactions.slice(0, 5);
+  if (loading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
+          <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+            Loading admin dashboard...
+          </p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
   return (
-    <div className="space-y-8 bg-white text-zinc-900 dark:bg-black dark:text-white p-2 md:p-6">
+    <div className="space-y-8 p-2 md:p-6">
       {/* Header */}
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
         <div>
@@ -185,64 +165,71 @@ export default function AdminPage() {
           </select>
 
           <Button variant="outline">Export CSV</Button>
-
-          <Button>View All</Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 grid-cols-3  md:grid-cols-4 ">
         <StatCard
           title="Total Users"
           value={stats?.totalUsers ?? 0}
           icon={<Users className="h-5 w-5" />}
+            valueClassName="text-blue-600 dark:text-blue-400"
         />
 
         <StatCard
           title="Administrators"
           value={stats?.totalAdmins ?? 0}
           icon={<Shield className="h-5 w-5" />}
+            valueClassName="text-violet-600 dark:text-violet-400"
         />
 
         <StatCard
           title="Revenue"
           value={`₦${Number(stats?.totalRevenue ?? 0).toLocaleString()}`}
           icon={<TrendingUp className="h-5 w-5" />}
+            valueClassName="text-emerald-600 dark:text-emerald-400"
         />
 
         <StatCard
           title="Wallet Balance"
           value={`₦${Number(stats?.totalWalletBalance ?? 0).toLocaleString()}`}
           icon={<Wallet className="h-5 w-5" />}
+            valueClassName="text-amber-600 dark:text-amber-400"
+          
         />
 
         <StatCard
           title="Transactions"
           value={stats?.totalTransactions ?? 0}
           icon={<ArrowUpRight className="h-5 w-5" />}
+           valueClassName="text-cyan-600 dark:text-cyan-400"
         />
 
         <StatCard
           title="Successful"
           value={stats?.successfulTransactions ?? 0}
           icon={<CheckCircle2 className="h-5 w-5" />}
+          valueClassName="text-green-600 dark:text-green-400"
         />
 
         <StatCard
           title="Pending"
           value={stats?.pendingTransactions ?? 0}
           icon={<Clock3 className="h-5 w-5" />}
+          valueClassName="text-yellow-500 dark:text-yellow-400"
         />
 
         <StatCard
           title="Failed"
           value={stats?.failedTransactions ?? 0}
           icon={<XCircle className="h-5 w-5" />}
+          valueClassName="text-red-600 dark:text-red-400"
         />
       </div>
 
-      <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="justify-end flex">
+        {/* <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
           <p className="text-sm text-muted-foreground">Total</p>
           <h3 className="text-2xl font-bold">{stats?.totalTransactions}</h3>
         </div>
@@ -266,9 +253,18 @@ export default function AdminPage() {
           <h3 className="text-2xl font-bold text-red-600">
             {stats?.failedTransactions}
           </h3>
-        </div>
+        </div> */}
+       <Link
+  href="/admin-dashboard/transactions"
+  className="group inline-flex items-center font-medium text-primary transition-colors hover:text-primary/80"
+>
+  <span className="border-b border-dashed border-transparent transition-all duration-200 group-hover:border-current">
+    View All Transactions
+  </span>
+</Link>
       </div>
       {/* Table */}
+
       <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <table className="w-full">
           <thead className="border-b border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900">
@@ -300,8 +296,8 @@ export default function AdminPage() {
           </thead>
 
           <tbody>
-            {paginatedTransactions.length ? (
-              paginatedTransactions.map((trx: any) => (
+            {recentTransactions.length ? (
+              recentTransactions.map((trx) => (
                 <tr
                   key={trx._id}
                   className="
@@ -377,27 +373,7 @@ export default function AdminPage() {
           </tbody>
         </table>
       </div>
-      <div className="mt-6 flex items-center justify-between">
-        <Button
-          variant="outline"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => p - 1)}
-        >
-          Previous
-        </Button>
 
-        <span className="text-sm text-muted-foreground">
-          Page {currentPage} of {totalPages || 1}
-        </span>
-
-        <Button
-          variant="outline"
-          disabled={currentPage >= totalPages}
-          onClick={() => setCurrentPage((p) => p + 1)}
-        >
-          Next
-        </Button>
-      </div>
       {selectedTransaction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           {/* Modal Card */}
@@ -510,24 +486,29 @@ type StatCardProps = {
   title: string;
   value: string | number;
   icon: React.ReactNode;
+  valueClassName?: string;
 };
 
-function StatCard({ title, value, icon }: StatCardProps) {
+function StatCard({ title, value, icon, valueClassName = "" }: StatCardProps) {
   return (
-    <div className="rounded-3xl border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <div className="rounded-2xl border  bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:rounded-3xl md:p-6">
       <div className="flex items-center justify-between">
-        <div className="rounded-2xl bg-yellow-500/10 p-3 text-yellow-600">
-          {icon}
+        <div className="rounded-xl bg-yellow-500/10 p-2 text-yellow-600 md:rounded-2xl md:p-3">
+          <div className="[&>svg]:h-[15px] [&>svg]:w-[15px] md:[&>svg]:h-5 md:[&>svg]:w-5">
+            {icon}
+          </div>
         </div>
-
-        {/* <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">
-          LIVE
-        </span> */}
       </div>
 
-      <p className="mt-5 text-sm text-muted-foreground">{title}</p>
+      <p className="mt-3 text-xs text-muted-foreground md:mt-5 md:text-sm">
+        {title}
+      </p>
 
-      <h2 className="mt-2 text-3xl font-black tracking-tight">{value}</h2>
+      <h2
+        className={`mt-1 text-lg font-black tracking-tight md:mt-2 md:text-3xl ${valueClassName}`}
+      >
+        {value}
+      </h2>
     </div>
   );
 }

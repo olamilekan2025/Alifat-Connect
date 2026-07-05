@@ -144,10 +144,10 @@ export default function AdminNavbar() {
       <div
         className="
     sticky top-0 z-40
-    border-b border-zinc-200
+    border-b border-black
     bg-white
     backdrop-blur-2xl
-    dark:border-white
+    dark:border-white/30
     dark:bg-gradient-to-r
     dark:from-black
     dark:via-zinc-900

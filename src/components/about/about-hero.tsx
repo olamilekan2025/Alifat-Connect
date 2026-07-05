@@ -43,7 +43,7 @@ export default function AboutHero() {
         />
       </svg>
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl pt-20 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-center">
           <div className="w-full max-w-4xl text-center">
             {/* Badge */}

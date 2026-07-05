@@ -1,5 +1,3 @@
-
-
 import { Schema, model, models, Model } from "mongoose";
 
 /**
@@ -17,19 +15,32 @@ export interface IUser {
   image?: string;
 
   role: "admin" | "user" | "moderator";
+
   accountType: "user" | "seller";
 
+ membershipLevel?: "starter" | "premium" | "enterprise";
+
+membershipHistory?: {
+  level: "starter" | "premium" | "enterprise";
+  achievedAt: Date;
+}[];
+
+/**
+ * Total amount saved through membership discounts
+ */
+lifetimeSavings?: number;
+
   walletBalance: number;
-  isSuspended: boolean; // Added for structural management tracking
+
+  isSuspended: boolean;
 
   sellerSince?: Date | null;
 
-
   lastPasswordChange?: Date | null;
-lastLoginAt?: Date | null;
-lastLoginIp?: string | null;
-lastDevice?: string | null;
-sessionCreatedAt?: Date | null;
+  lastLoginAt?: Date | null;
+  lastLoginIp?: string | null;
+  lastDevice?: string | null;
+  sessionCreatedAt?: Date | null;
 
   // SUBSCRIPTION
   subscriptionType?: "monthly" | "quarterly" | "yearly" | null;
@@ -53,15 +64,14 @@ sessionCreatedAt?: Date | null;
   resetPinVerificationExpires?: Date | null;
   isResetPinVerified?: boolean;
 
+  // ADMIN LOGIN
   adminLoginOtp?: string | null;
   adminLoginOtpExpires?: Date | null;
-
-  // ADMIN LOGIN VERIFICATION
   adminLoginVerified?: boolean;
   adminLoginVerifiedAt?: Date | null;
 
   // =========================
-  // 🚀 REFERRAL SYSTEM
+  // REFERRAL SYSTEM
   // =========================
   referralCode: string;
   referredBy?: string | null;
@@ -69,7 +79,6 @@ sessionCreatedAt?: Date | null;
   referralsCount?: number;
   referralEarnings?: number;
 
-  // timestamps
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -79,11 +88,30 @@ sessionCreatedAt?: Date | null;
  */
 const UserSchema = new Schema<IUser>(
   {
-    name: { type: String, trim: true },
-    firstname: { type: String, trim: true },
-    lastname: { type: String, trim: true },
-    address: { type: String, trim: true },
-    phone: { type: String, trim: true },
+    name: {
+      type: String,
+      trim: true,
+    },
+
+    firstname: {
+      type: String,
+      trim: true,
+    },
+
+    lastname: {
+      type: String,
+      trim: true,
+    },
+
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
 
     email: {
       type: String,
@@ -93,12 +121,15 @@ const UserSchema = new Schema<IUser>(
       trim: true,
     },
 
-  password: {
-  type: String,
-  required: true,
-  select: false,
-},
-    image: { type: String },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+
+    image: {
+      type: String,
+    },
 
     role: {
       type: String,
@@ -112,6 +143,43 @@ const UserSchema = new Schema<IUser>(
       default: "user",
     },
 
+    membershipLevel: {
+      type: String,
+      enum: ["starter", "premium", "enterprise"],
+      default: "starter",
+    },
+
+
+    membershipHistory: {
+  type: [
+    {
+      level: {
+        type: String,
+        enum: ["starter", "premium", "enterprise"],
+        required: true,
+      },
+
+      achievedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
+  default: [
+    {
+      level: "starter",
+      achievedAt: new Date(),
+    },
+  ],
+},
+
+lifetimeSavings: {
+  type: Number,
+  default: 0,
+  min: 0,
+},
+
     walletBalance: {
       type: Number,
       default: 0,
@@ -120,7 +188,7 @@ const UserSchema = new Schema<IUser>(
 
     isSuspended: {
       type: Boolean,
-      default: false, // Default state for all newly registered profiles
+      default: false,
     },
 
     sellerSince: {
@@ -128,31 +196,30 @@ const UserSchema = new Schema<IUser>(
       default: null,
     },
 
-
     lastPasswordChange: {
-  type: Date,
-  default: null,
-},
+      type: Date,
+      default: null,
+    },
 
-lastLoginAt: {
-  type: Date,
-  default: null,
-},
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
 
-lastLoginIp: {
-  type: String,
-  default: null,
-},
+    lastLoginIp: {
+      type: String,
+      default: null,
+    },
 
-lastDevice: {
-  type: String,
-  default: null,
-},
+    lastDevice: {
+      type: String,
+      default: null,
+    },
 
-sessionCreatedAt: {
-  type: Date,
-  default: null,
-},
+    sessionCreatedAt: {
+      type: Date,
+      default: null,
+    },
 
     subscriptionType: {
       type: String,
@@ -235,11 +302,10 @@ sessionCreatedAt: {
       default: null,
     },
 
-    
+    // =========================
+    // REFERRAL SYSTEM
+    // =========================
 
-    // =========================
-    // 🚀 REFERRAL SYSTEM
-    // =========================
     referralCode: {
       type: String,
       required: true,
@@ -269,9 +335,10 @@ sessionCreatedAt: {
 );
 
 /**
- * SAFE MODEL EXPORT (PREVENT OVERWRITE ERROR)
+ * SAFE MODEL EXPORT
  */
 const User: Model<IUser> =
-  models.User || model<IUser>("User", UserSchema);
+  models.User ||
+  model<IUser>("User", UserSchema);
 
 export default User;

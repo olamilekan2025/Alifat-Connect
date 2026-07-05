@@ -68,7 +68,7 @@ export default function WhyChooseUs() {
                 key={reason.title}
                 className="
                   group rounded-3xl
-                  border border-gray-200
+                  border border-black
                   bg-[#FAFAFA]
                   shadow-sm
                   transition-all duration-300

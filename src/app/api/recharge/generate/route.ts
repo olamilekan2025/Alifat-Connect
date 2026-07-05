@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
+import mongoose from "mongoose";
 
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
-
+import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import Transaction from "@/models/transaction";
 import RechargeCardHistory from "@/models/RechargeCardHistory";
+import {
+  updateMembership,
+  getMembershipBenefits,
+  calculateDiscount,
+} from "@/lib/membership";
 
 interface GeneratedPin {
   id: string;
@@ -54,13 +60,15 @@ function generatePinsArray(
 export async function POST(
   request: Request
 ) {
+  const session = await mongoose.startSession();
+
   try {
     await connectToDatabase();
 
-    const session =
+    const auth =
       await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
+    if (!auth?.user?.email) {
       return NextResponse.json(
         {
           success: false,
@@ -72,27 +80,44 @@ export async function POST(
 
     const body = await request.json();
 
-    const {
-      network,
-      amount,
-      quantity,
-      businessName,
-    } = body;
+    const network = String(body.network ?? "")
+  .trim()
+  .toLowerCase();
 
-    if (
-      !network ||
-      !amount ||
-      !quantity
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Missing required fields",
-        },
-        { status: 400 }
-      );
+const numericAmount = Number(body.amount);
+
+const numericQuantity = Number(body.quantity);
+
+const businessName = String(
+  body.businessName ?? ""
+).trim();
+
+const pin = String(body.pin ?? "").trim();
+if (!/^\d{4}$/.test(pin)) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "PIN must be 4 digits.",
+    },
+    {
+      status: 400,
     }
+  );
+}
+    if (
+  !network ||
+  !pin ||
+  !Number.isFinite(numericAmount) ||
+  !Number.isFinite(numericQuantity)
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "All fields are required.",
+    },
+    { status: 400 }
+  );
+}
 
     const allowedNetworks = [
       "mtn",
@@ -108,11 +133,7 @@ export async function POST(
       1000,
     ];
 
-    const numericAmount =
-      Number(amount);
-
-    const numericQuantity =
-      Number(quantity);
+  
 
     if (
       !allowedNetworks.includes(
@@ -129,73 +150,132 @@ export async function POST(
       );
     }
 
-    if (
-      !allowedAmounts.includes(
-        numericAmount
-      )
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Invalid recharge amount",
-        },
-        { status: 400 }
-      );
+ if (
+  !Number.isInteger(numericAmount) ||
+  !allowedAmounts.includes(numericAmount)
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Invalid recharge amount.",
+    },
+    {
+      status: 400,
     }
+  );
+}
 
-    if (
-      numericQuantity < 1 ||
-      numericQuantity > 100
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Quantity must be between 1 and 100",
-        },
-        { status: 400 }
-      );
+   if (
+  !Number.isInteger(numericQuantity) ||
+  numericQuantity < 1 ||
+  numericQuantity > 100
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Quantity must be between 1 and 100.",
+    },
+    {
+      status: 400,
     }
+  );
+}
 
-    const user = await User.findOne({
-      email: session.user.email,
-    });
+    // START ATOMIC TRANSACTION
+    session.startTransaction();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "User not found",
-        },
-        { status: 404 }
-      );
+ const user = await User.findOne({
+  email: auth.user.email,
+}).session(session);
+
+if (!user) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "User not found",
+    },
+    {
+      status: 404,
     }
+  );
+}
+
+if (!user.paymentPin) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Please set your payment PIN.",
+    },
+    {
+      status: 400,
+    }
+  );
+}
+
+
+
+const validPin = await bcrypt.compare(
+  pin,
+  user.paymentPin
+);
+
+if (!validPin) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Incorrect payment PIN.",
+    },
+    {
+      status: 400,
+    }
+  );
+}
+
+const benefits = await getMembershipBenefits(
+  user._id.toString()
+);
 
     const totalCost =
-      numericAmount *
-      numericQuantity;
+  numericAmount *
+  numericQuantity;
 
-    const balanceBefore =
-      Number(
-        user.walletBalance || 0
-      );
+const {
+  discount,
+  payable: chargedAmount,
+} = calculateDiscount(
+  totalCost,
+  benefits.rechargeCardDiscount
+);
 
-    if (
-      balanceBefore < totalCost
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Insufficient wallet balance",
-        },
-        { status: 400 }
-      );
-    }
+const discountAmount = Number(
+  discount.toFixed(2)
+);
 
-    const balanceAfter =
-      balanceBefore - totalCost;
+const payableAmount = Number(
+  chargedAmount.toFixed(2)
+);
+
+const balanceBefore = Number(
+  user.walletBalance || 0
+);
+
+if (balanceBefore < payableAmount) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Insufficient wallet balance",
+    },
+    { status: 400 }
+  );
+}
 
     const generatedPins =
       generatePinsArray(
@@ -208,85 +288,217 @@ export async function POST(
       .toString("hex")
       .toUpperCase()}`;
 
-    user.walletBalance =
-      balanceAfter;
+/* =========================================
+   CRITICAL: ATOMIC BALANCE DEDUCTION
+========================================= */
+const updatedUser = await User.findOneAndUpdate(
+  {
+    _id: user._id,
+    walletBalance: { $gte: payableAmount },
+  },
+  {
+    $inc: {
+      walletBalance: -payableAmount,
+      lifetimeSavings: discountAmount,
+    },
+  },
+  {
+    new: true,
+    session,
+  }
+);
 
-    await user.save();
+if (!updatedUser) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        "Balance update failed (possible concurrent request)",
+    },
+    { status: 409 }
+  );
+}
 
-    await RechargeCardHistory.create({
-      userId:
-        user._id.toString(),
+/* =========================================
+   WALLET UPDATE
+========================================= */
+const db = mongoose.connection.db;
 
-      batchId,
+if (!db) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Database connection failed",
+    },
+    { status: 500 }
+  );
+}
 
-      network,
+await db.collection("wallets").updateOne(
+  {
+    userId: user._id.toString(),
+  },
+  {
+    $set: {
+      balance: updatedUser.walletBalance,
+      updatedAt: new Date(),
+    },
+    $setOnInsert: {
+      accountNumber: Math.floor(
+        1000000000 + Math.random() * 9000000000
+      ).toString(),
+      bankName: "Alifat Connect Pay",
+      createdAt: new Date(),
+    },
+  },
+  {
+    upsert: true,
+    session,
+  }
+);
 
-      amount:
-        numericAmount,
+  await RechargeCardHistory.create(
+    [
+      {
+        userId: user._id.toString(),
 
-      quantity:
-        numericQuantity,
+        batchId,
 
-      totalCost,
+        network: network as "mtn" | "airtel" | "glo" | "9mobile",
 
-      businessName:
-        businessName?.trim() ||
-        "COMMERCIAL VENDOR",
+        discount: discountAmount,
 
-      status: "success",
+        amount: numericAmount,
 
-      pins: generatedPins,
-    });
+        quantity: numericQuantity,
 
-    try {
-      await Transaction.create({
-        userId:
-          user._id.toString(),
+        totalCost,
+
+        chargedAmount: payableAmount,
+
+        businessName:
+          businessName?.trim() ||
+          "COMMERCIAL VENDOR",
+
+        status: "success",
+
+        pins: generatedPins,
+      }
+    ],
+    {
+      session,
+    }
+  );
+
+   let transaction = null;
+
+try {
+  transaction = await Transaction.create(
+    [
+      {
+        userId: user._id.toString(),
 
         type: "debit",
 
+        category: "recharge-card",
+        provider: network,
+
         amount: totalCost,
+
+        chargedAmount: payableAmount,
+
+        discount: discountAmount,
 
         status: "success",
 
         description: `${network.toUpperCase()} Recharge Card Purchase`,
 
         reference: batchId,
-      });
-    } catch (transactionError) {
-      console.error(
-        "Transaction Save Error:",
-        transactionError
-      );
+      }
+    ],
+    {
+      session,
     }
+  );
+} catch (transactionError) {
+  await session.abortTransaction();
+  session.endSession();
+  console.error(
+    "Transaction Save Error:",
+    transactionError
+  );
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Failed to save transaction",
+    },
+    { status: 500 }
+  );
+}
 
-    return NextResponse.json({
+    // Commit database transaction
+    await session.commitTransaction();
+    session.endSession();
+
+// Update membership after a successful purchase.
+// Don't fail the purchase if membership update fails.
+try {
+  await updateMembership(user._id.toString());
+} catch (membershipError) {
+  console.error(
+    "Membership Update Error:",
+    membershipError
+  );
+}
+
+const latestUser = await User.findById(user._id).select(
+  "membershipLevel lifetimeSavings walletBalance"
+);
+
+
+
+return NextResponse.json({
       success: true,
 
       data: {
-        batchId,
+  batchId,
 
-        network,
+  network,
 
-        amount:
-          numericAmount,
+  amount: numericAmount,
 
-        quantity:
-          numericQuantity,
+  quantity: numericQuantity,
 
-        totalCost,
+  totalCost,
 
-        items:
-          generatedPins,
+  chargedAmount: payableAmount,
 
-        newBalance:
-          balanceAfter,
+discount: discountAmount,
 
-        timestamp:
-          new Date().toISOString(),
-      },
+ membership: latestUser?.membershipLevel,
+
+  lifetimeSavings: latestUser?.lifetimeSavings,
+
+  items: generatedPins,
+
+  newBalance: latestUser?.walletBalance,
+
+  transaction: transaction ? transaction[0] : null,
+
+  timestamp: new Date().toISOString(),
+},
     });
   } catch (error) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    session.endSession();
+
     console.error(
       "Recharge Card Error:",
       error

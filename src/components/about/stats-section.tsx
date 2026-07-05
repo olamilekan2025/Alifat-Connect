@@ -12,13 +12,13 @@ import {
 const stats = [
   {
     label: "Happy Customers",
-    value: 10000,
+    value: 100,
     suffix: "+",
     icon: Users,
   },
   {
     label: "Transactions Completed",
-    value: 1000000,
+    value: 100,
     suffix: "+",
     icon: CreditCard,
   },
@@ -50,7 +50,7 @@ export default function StatsSection() {
                 key={stat.label}
                 className="
                   group relative overflow-hidden rounded-3xl
-                  border border-gray-200
+                  border border-black
                   bg-white
                   px-6 py-8
                   text-center

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function CTASection() {
   return (
-    <section className="relative overflow-hidden bg-white py-24 md:py-32 dark:bg-zinc-950">
+    <section className="relative overflow-hidden bg-white py-18 md:py-10 dark:bg-zinc-950">
       {/* Background Glow */}
       {/* <div className="absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[#D4AF37]/10 blur-3xl" /> */}
 
@@ -14,17 +14,19 @@ export default function CTASection() {
         <div
           className="
             relative overflow-hidden rounded-[2.5rem]
-            bg-black
+            bg-white
+            border
+            border-black
             px-8 py-16
             text-center
-            shadow-[0_30px_100px_rgba(0,0,0,0.25)]
+           
             md:px-16 md:py-20
             dark:border dark:border-white
             dark:bg-black
           "
         >
           {/* Gold Gradient Overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(179,150,55,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.10),transparent_35%)]" />
+          <div className="absolute inset-0 dark:bg-[radial-gradient(circle_at_top_right,rgba(179,150,55,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.10),transparent_35%)]" />
 
           {/* Top Accent */}
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
@@ -37,7 +39,7 @@ export default function CTASection() {
             </p>
 
             {/* Heading */}
-            <h2 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+            <h2 className="mt-6 text-4xl font-bold tracking-tight text-black dark:text-white md:text-5xl lg:text-6xl">
               Ready to Simplify Your
               <span className="block bg-gradient-to-r from-[#D4AF37] via-[#F7E28A] to-[#D4AF37] bg-clip-text text-transparent">
                 Digital Transactions?
@@ -45,7 +47,7 @@ export default function CTASection() {
             </h2>
 
             {/* Description */}
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300 dark:text-slate-300">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-black dark:text-slate-300">
               Join thousands of customers who trust Alifat Connect for fast,
               secure, and reliable digital payments.
             </p>
@@ -70,15 +72,18 @@ export default function CTASection() {
                 className="
                   rounded-full
                   border-white/20
-                  bg-white/5
+                  bg-black
                   px-8
                   text-white
                   backdrop-blur-sm
-                  hover:bg-white/10
-                  hover:text-white
+                  hover:bg-[#D4AF37] 
+                  hover:text-black
+                  dark:text-black
+                  dark:border-white/20
+                  dark:bg-black/50
                   dark:border-slate-700
-                  dark:bg-slate-800/50
-                  dark:hover:bg-slate-800
+                  dark:bg-white
+                  dark:hover:bg-[#D4AF37]
                 "
               >
                 <Link href="/contact">Contact Support</Link>

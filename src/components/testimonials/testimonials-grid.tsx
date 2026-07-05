@@ -76,7 +76,7 @@ export default function TestimonialsGrid() {
                 key={index}
                 className="pl-4 md:basis-1/2 lg:basis-1/3"
               >
-                <Card className="h-full rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:bg-black ">
+                <Card className="h-full rounded-3xl border border-black bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:bg-black dark:border-white ">
                   <CardContent className="flex h-full flex-col p-8">
                     {/* Stars */}
                     <div className="mb-6 flex items-center gap-1">
@@ -94,7 +94,7 @@ export default function TestimonialsGrid() {
                     </p>
 
                     {/* Author */}
-                    <div className="mt-6 border-t border-gray-100 pt-6">
+                    <div className="mt-6 border-t border-black dark:border-white pt-6">
                       <h4 className="font-semibold text-gray-900 dark:text-[#D4AF37]">
                         {testimonial.name}
                       </h4>
@@ -110,8 +110,8 @@ export default function TestimonialsGrid() {
 
           {/* Navigation */}
           <div className="mt-10 flex items-center justify-center gap-4">
-            <CarouselPrevious className="static translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
-            <CarouselNext className="static translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
+            <CarouselPrevious className="static h-12 w-12 translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
+            <CarouselNext className="static h-12 w-12 translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
           </div>
         </Carousel>
       </div>

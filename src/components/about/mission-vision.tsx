@@ -81,7 +81,7 @@ export default function MissionVision() {
                 key={item.title}
                 className="
                   group relative overflow-hidden rounded-[2rem]
-                  border border-gray-200 bg-white
+                  border border-black bg-white
                   p-8 md:p-10
                   shadow-[0_20px_60px_rgba(0,0,0,0.06)]
                   transition-all duration-500

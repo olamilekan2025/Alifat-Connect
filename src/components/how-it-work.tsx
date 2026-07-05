@@ -62,7 +62,7 @@ export default function HowItWorks() {
         {/* Steps Grid */}
         <div className="relative grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Connecting Line */}
-          <div className="absolute left-0 top-20 hidden w-full border-t border-dashed border-[#D4AF37]/40 lg:block" />
+          <div className="absolute left-0 top-20 hidden w-full border-t border-dashed border-black lg:block" />
 
           {steps.map((step, index) => {
             const Icon = step.icon;
@@ -77,7 +77,7 @@ export default function HowItWorks() {
                   0{index + 1}
                 </div>
 
-                <Card className="relative z-10 rounded-3xl border border-[#EAEAEA] bg-white pt-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white-20 dark:bg-black dark:hover:border-[#D4AF37]">
+                <Card className="relative z-10 rounded-3xl border border-black bg-white pt-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white dark:bg-black dark:hover:border-[#D4AF37]">
                   <CardHeader>
                     {/* Icon */}
                     <div className="mb-6 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] transition-all duration-300 group-hover:bg-[#D4AF37] group-hover:text-black">

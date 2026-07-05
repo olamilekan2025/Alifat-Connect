@@ -253,7 +253,7 @@ export default function PremiumAdminTransactions() {
   const uiStatus = selectedTxn ? toUiStatus(selectedTxn.status) : null;
 
   return (
-    <div className="min-h-screen bg-slate-50/60 p-4 font-sans text-slate-900 dark:bg-black dark:text-slate-50 md:p-8">
+    <div className="min-h-screen bg-white p-4 font-sans text-slate-900 dark:bg-black dark:text-slate-50 md:p-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -302,14 +302,15 @@ export default function PremiumAdminTransactions() {
         <DollarSign className="h-5 w-5" />
       </div>
     </div>
-    <div className="mt-4">
-      <h3 className="text-2xl font-bold tracking-tight md:text-3xl">
-        {summary.totalTransactions.toLocaleString()}
-      </h3>
-      <p className="mt-1 text-xs text-slate-500">
-        Live metrics not available in DB schema.
-      </p>
-    </div>
+  <div className="mt-4">
+  <h3 className="text-2xl font-bold tracking-tight text-cyan-600 dark:text-cyan-400 md:text-3xl">
+    {summary.totalTransactions.toLocaleString()}
+  </h3>
+
+  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+    Total transactions processed on the platform.
+  </p>
+</div>
   </div>
 
   <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-black">
@@ -322,12 +323,12 @@ export default function PremiumAdminTransactions() {
       </div>
     </div>
     <div className="mt-4">
-      <h3 className="text-2xl font-bold tracking-tight md:text-3xl">
-        {summary.successfulCount.toLocaleString()}
-      </h3>
+      <h3 className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 md:text-3xl">
+  {summary.successfulCount.toLocaleString()}
+</h3>
       <p className="mt-1 text-xs text-slate-500">
-        Live metrics not available in DB schema.
-      </p>
+  Successfully completed transactions.
+</p>
     </div>
   </div>
 
@@ -341,12 +342,12 @@ export default function PremiumAdminTransactions() {
       </div>
     </div>
     <div className="mt-4">
-      <h3 className="text-2xl font-bold tracking-tight md:text-3xl">
-        {summary.pendingCount.toLocaleString()}
-      </h3>
+     <h3 className="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 md:text-3xl">
+  {summary.pendingCount.toLocaleString()}
+</h3>
       <p className="mt-1 text-xs text-slate-500">
-        Live metrics not available in DB schema.
-      </p>
+  Transactions awaiting processing.
+</p>
     </div>
   </div>
 
@@ -360,12 +361,12 @@ export default function PremiumAdminTransactions() {
       </div>
     </div>
     <div className="mt-4">
-      <h3 className="text-2xl font-bold tracking-tight md:text-3xl">
-        {summary.failedCount.toLocaleString()}
-      </h3>
-      <p className="mt-1 text-xs text-rose-600">
-        Use status badges per row.
-      </p>
+    <h3 className="text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400 md:text-3xl">
+  {summary.failedCount.toLocaleString()}
+</h3>
+     <p className="mt-1 text-xs text-rose-600">
+  Transactions that could not be completed.
+</p>
     </div>
   </div>
 </div>

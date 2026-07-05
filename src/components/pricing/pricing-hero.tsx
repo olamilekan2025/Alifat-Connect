@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function PricingHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffdf7] to-white py-10 md:py-10 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffdf7] to-white py-10 md:py-25 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       {/* Background Glow */}
       <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-3xl" />
       <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-3xl" />

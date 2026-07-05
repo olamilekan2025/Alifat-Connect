@@ -103,7 +103,7 @@ export default function Footer() {
   useEffect(() => {
     async function loadBranding() {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch("/api/public/branding");
 
         if (!res.ok) {
           throw new Error("Failed to fetch settings");
@@ -112,8 +112,8 @@ export default function Footer() {
         const data = await res.json();
 
         setBranding({
-          footerText: data?.settings?.branding?.footerText ?? "",
-          copyrightText: data?.settings?.branding?.copyrightText ?? "",
+          footerText: data?.branding?.footerText ?? "",
+          copyrightText: data?.branding?.copyrightText ?? "",
         });
       } catch (error) {
         console.error("Failed to load branding settings:", error);

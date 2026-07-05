@@ -63,7 +63,7 @@ export default function FAQ() {
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="overflow-hidden rounded-3xl border border-gray-200 bg-[#FAFAFA] px-6 shadow-sm transition-all duration-300 hover:border-[#D4AF37]/40 hover:shadow-lg dark:border-white-20 dark:bg-zinc-950 dark:hover:border-[#D4AF37]/40 dark:hover:shadow-lg"
+              className="overflow-hidden rounded-3xl border border-black bg-[#FAFAFA] px-6 shadow-sm transition-all duration-300 hover:border-[#D4AF37]/40 hover:shadow-lg dark:border-white dark:bg-zinc-950 dark:hover:border-[#D4AF37]/40 dark:hover:shadow-lg"
             >
               <AccordionTrigger className="py-6 text-left text-lg font-semibold text-gray-900 hover:no-underline md:text-xl dark:text-white">
                 {faq.question}

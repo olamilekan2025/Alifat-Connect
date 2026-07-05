@@ -1,86 +1,458 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+
+import { authOptions } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/mongodb";
+import {
+  updateMembership,
+  getMembershipBenefits,
+  calculateDiscount,
+} from "@/lib/membership";
+
+import User from "@/models/User";
+import Transaction from "@/models/transaction";
 
 export async function POST(request: Request) {
+  const session = await mongoose.startSession();
+
   try {
+    await connectToDatabase();
+
+    const auth = await getServerSession(authOptions);
+
+    if (!auth?.user?.email) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const body = await request.json();
-    const { provider, meterNumber, meterType, customerName, amount, pin } = body;
 
-    // 1. Structural Constraints Validation Checks
-    if (!provider || !meterNumber || !meterType || !customerName || !amount || !pin) {
+  const provider = String(
+  body.provider ?? ""
+)
+  .trim()
+  .toLowerCase();
+
+    const meterNumber = String(
+      body.meterNumber || ""
+    ).trim();
+
+    const meterType = String(
+      body.meterType || ""
+    ).trim();
+
+    const customerName = String(
+      body.customerName || ""
+    ).trim();
+
+    const pin = String(
+      body.pin || ""
+    ).trim();
+
+    const parsedAmount = Number(body.amount);
+
+    // Validate request
+    if (
+  !provider ||
+  !meterNumber ||
+  !meterType ||
+  !customerName ||
+  !pin ||
+  !Number.isFinite(parsedAmount)
+){
       return NextResponse.json(
-        { success: false, error: "Incomplete transaction configuration parameters provided." },
-        { status: 400 }
+        {
+          success: false,
+          error: "All fields are required.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    if (Number(amount) < 500) {
+    if (
+      !["prepaid", "postpaid"].includes(
+        meterType
+      )
+    ) {
       return NextResponse.json(
-        { success: false, error: "Minimum allowably provisionable transaction floor is ₦500.00." },
-        { status: 400 }
+        {
+          success: false,
+          error: "Invalid meter type.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // 2. Security Access PIN Authentication Match Verification
-    // Replace this mockup block with your application's encrypted hashing comparisons against actual database user objects
-    if (pin !== "1234") {
+    if (
+      isNaN(parsedAmount) ||
+      parsedAmount < 500
+    ) {
       return NextResponse.json(
-        { success: false, error: "Security validation error: Unauthorized transaction PIN supplied." },
-        { status: 401 }
+        {
+          success: false,
+          error:
+            "Minimum electricity purchase is ₦500.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // 3. User Balance Sufficiency Verification Check
-    // In a live production configuration, fetch the latest balance record directly from your database
-    const systemMockBalance = 25000; 
-    if (systemMockBalance < Number(amount)) {
+    if (!/^\d{10,13}$/.test(meterNumber)) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Invalid meter number.",
+    },
+    {
+      status: 400,
+    }
+  );
+}
+
+    // START ATOMIC TRANSACTION
+    session.startTransaction();
+
+    const user = await User.findOne({
+      email: auth.user.email,
+    }).session(session);
+
+    if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
-        { success: false, error: "Transaction aborted: Insufficient available system wallet liquidity tokens." },
-        { status: 402 }
+        {
+          success: false,
+          error: "User not found.",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
-    // 4. Token String Generator Utility Configuration (Only for Prepaid Accounts)
-    // Generates a mock standard 20-digit token partitioned in blocks of 4
-    let generatedToken: string | undefined = undefined;
+    // Verify payment PIN
+    if (!user.paymentPin) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Please set your payment PIN.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json(
+    {
+      success: false,
+      error: "PIN must be 4 digits.",
+    },
+    {
+      status: 400,
+    }
+  );
+}
+
+    const isPinCorrect =
+      await bcrypt.compare(
+        pin,
+        user.paymentPin
+      );
+
+    if (!isPinCorrect) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Incorrect payment PIN.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // Membership discount
+    const benefits =
+      await getMembershipBenefits(
+        user._id.toString()
+      );
+
+    const {
+      discount,
+      payable,
+    } = calculateDiscount(
+      parsedAmount,
+      benefits.electricityDiscount
+    );
+
+    // Wallet balance
+    const currentBalance = Number(
+      user.walletBalance ?? 0
+    );
+
+    if (currentBalance < payable) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insufficient balance. Wallet: ₦${currentBalance}`,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const newBalance = Number(
+      (currentBalance - payable).toFixed(2)
+    );
+
+    /* =========================================
+       CRITICAL: ATOMIC BALANCE DEDUCTION
+    ========================================= */
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: user._id,
+        walletBalance: { $gte: payable },
+      },
+      {
+        $inc: {
+          walletBalance: -payable,
+          lifetimeSavings: discount,
+        },
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    if (!updatedUser) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Balance update failed (possible concurrent request)",
+        },
+        { status: 409 }
+      );
+    }
+
+    /* =========================================
+       WALLET UPDATE
+    ========================================= */
+    const db = mongoose.connection.db;
+
+    if (!db) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Database connection failed",
+        },
+        { status: 500 }
+      );
+    }
+
+    await db.collection("wallets").updateOne(
+      {
+        userId: user._id.toString(),
+      },
+      {
+        $set: {
+          balance: updatedUser.walletBalance,
+          updatedAt: new Date(),
+        },
+        $setOnInsert: {
+          accountNumber: Math.floor(
+            1000000000 + Math.random() * 9000000000
+          ).toString(),
+          bankName: "Alifat Connect Pay",
+          createdAt: new Date(),
+        },
+      },
+      {
+        upsert: true,
+        session,
+      }
+    );
+
+    // Generate prepaid token
+    let token: string | undefined;
+
     if (meterType === "prepaid") {
-      const parts = Array.from({ length: 5 }, () =>
-        Math.floor(1000 + Math.random() * 9000).toString()
-      );
-      generatedToken = parts.join("-");
+      token = Array.from(
+        { length: 5 },
+        () =>
+          Math.floor(
+            1000 +
+              Math.random() * 9000
+          ).toString()
+      ).join("-");
     }
 
-    // 5. Build Final Structural Database System Model Schema Object
-    const transactionReference = `ELC-${Math.floor(10000000 + Math.random() * 90000000)}`;
-    const newComputedBalance = systemMockBalance - Number(amount);
+    // Transaction reference
+   const reference = `ELC-${Date.now()}-${Math.random()
+  .toString(36)
+  .substring(2, 8)
+  .toUpperCase()}`;
 
-    const txData = {
-      type: "electricity",
-      provider,
-      meterNumber,
-      meterType,
-      customerName,
-      amount: Number(amount),
-      token: generatedToken,
-      status: "success",
-      reference: transactionReference,
-      newBalance: newComputedBalance,
-      createdAt: new Date().toISOString(),
-    };
+    // Save transaction
+    const transaction =
+      await Transaction.create(
+        [
+          {
+            userId:
+              user._id.toString(),
 
-    // NOTE: Inside your actual system wrapper lifecycle, update the database user object here:
-    // await db.user.update({ where: { id: userId }, data: { balance: newComputedBalance } });
-    // await db.transaction.create({ data: txData });
+            type: "debit",
 
-    return NextResponse.json({
-      success: true,
-      data: txData,
-    });
+            category: "electricity",
 
-  } catch (error) {
-    console.error("Fatal runtime core error inside transaction purchase processing channel:", error);
+            amount: parsedAmount,
+
+            chargedAmount: payable,
+
+            discount,
+
+            status: "success",
+
+            provider,
+
+            meterNumber,
+
+            meterType,
+
+            customerName,
+
+            token,
+
+            reference,
+
+            description: `${provider} electricity purchase`,
+          }
+        ],
+        {
+          session,
+        }
+      );
+
+    // Commit database transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    // Update membership AFTER successful commit
+    try {
+      await updateMembership(
+        user._id.toString()
+      );
+    } catch (membershipError) {
+      console.error(
+        "Membership Update Error:",
+        membershipError
+      );
+    }
+
+   const latestUser =
+  await User.findById(user._id).select(
+    "membershipLevel lifetimeSavings walletBalance"
+  );
+
     return NextResponse.json(
-      { success: false, error: "System transaction generation mapping failure encountered on central server." },
-      { status: 500 }
+      {
+        success: true,
+
+        data: {
+          type: "electricity",
+
+          provider,
+
+          meterNumber,
+
+          meterType,
+
+          customerName,
+
+          amount: parsedAmount,
+
+          chargedAmount: payable,
+
+          discount,
+
+          token,
+
+          status: "success",
+
+          reference,
+
+          newBalance: latestUser?.walletBalance,
+
+         membership:
+  latestUser?.membershipLevel,
+
+lifetimeSavings:
+  latestUser?.lifetimeSavings,
+
+          transaction: transaction[0],
+
+          createdAt:
+            new Date().toISOString(),
+        },
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    session.endSession();
+
+    console.error(
+      "ELECTRICITY PURCHASE ERROR:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "Something went wrong.",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

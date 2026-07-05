@@ -13,10 +13,19 @@ export default function EducationBillPage() {
   const [quantity, setQuantity] = useState<string>("1");
   const [profileId, setProfileId] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pin, setPin] = useState("");
+ const [generatedPins, setGeneratedPins] = useState<any[]>([]);
+
+const [purchaseInfo, setPurchaseInfo] = useState<{
+  amount: number;
+  chargedAmount: number;
+  discount: number;
+  membership: string;
+} | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!provider || !profileId) {
+    if (!provider || !profileId || !pin) {
       toast.error("Validation Error", {
         description: "Please fill in all required fields before proceeding."
       });
@@ -29,7 +38,12 @@ export default function EducationBillPage() {
       const response = await fetch('/api/education/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, profileId, quantity }),
+       body: JSON.stringify({
+  provider,
+  profileId,
+  quantity,
+  pin,
+}),
       });
 
       const data = await response.json();
@@ -38,15 +52,25 @@ export default function EducationBillPage() {
         throw new Error(data.error || "Failed to process token request.");
       }
 
-      toast.success("Transaction Successful", {
-        description: `Generated ${quantity} pin(s). ID: ${data.data.transactionId}`,
-        action: {
-          label: "View Pins",
-          onClick: () => console.log(data.data.items),
-        },
-      });
-      
-      setProfileId("");
+  toast.success("Purchase Successful", {
+description: `₦${data.data.chargedAmount} deducted successfully.`,
+  action: {
+    label: "View Pins",
+    onClick: () => console.log(data.data.items),
+  },
+});
+
+    setGeneratedPins(data.data.items);
+
+setPurchaseInfo({
+  amount: data.data.amount,
+  chargedAmount: data.data.chargedAmount,
+  discount: data.data.discount,
+  membership: data.data.membership,
+});
+
+setProfileId("");
+setPin("");
     } catch (err: any) {
       toast.error("Transaction Failed", {
         description: err.message || "Connection timeout. Please check your balance.",
@@ -171,31 +195,69 @@ export default function EducationBillPage() {
               </Select>
             </div>
 
+            <div className="space-y-2">
+  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    Payment PIN
+  </label>
+
+  <Input
+    type="password"
+    maxLength={4}
+    value={pin}
+    disabled={isLoading}
+    placeholder="Enter your payment PIN"
+    onChange={(e) => setPin(e.target.value)}
+    className="h-12"
+  />
+</div>
+
             {/* SUMMARY */}
             {provider && (
-              <div className="rounded-2xl border border-border bg-muted/50 p-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Total Payable
-                  </span>
+  <div className="rounded-2xl border border-border bg-muted/50 p-4 space-y-3">
+    <div className="flex justify-between">
+      <span className="text-muted-foreground">
+        Original Amount
+      </span>
 
-                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    ₦
-                    {provider === "waec"
-                      ? 3500 * Number(quantity)
-                      : provider === "neco"
-                        ? 1200 *
-                          Number(quantity)
-                        : provider ===
-                            "nabteb"
-                          ? 3000 *
-                            Number(quantity)
-                          : 4700 *
-                            Number(quantity)}
-                  </span>
-                </div>
-              </div>
-            )}
+      <span className="font-semibold">
+        ₦
+        {provider === "waec"
+          ? 3500 * Number(quantity)
+          : provider === "neco"
+          ? 1200 * Number(quantity)
+          : provider === "nabteb"
+          ? 3000 * Number(quantity)
+          : 4700 * Number(quantity)}
+      </span>
+    </div>
+
+    {purchaseInfo && (
+      <>
+        <div className="flex justify-between text-green-600">
+          <span>Discount</span>
+
+          <span>-₦{purchaseInfo.discount}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span>Membership</span>
+
+          <span className="capitalize">
+            {purchaseInfo.membership}
+          </span>
+        </div>
+
+        <div className="border-t pt-3 flex justify-between text-lg font-bold text-blue-600 dark:text-blue-400">
+          <span>You Pay</span>
+
+          <span>
+            ₦{purchaseInfo.chargedAmount}
+          </span>
+        </div>
+      </>
+    )}
+  </div>
+)}
 
             {/* BUTTON */}
             <Button
@@ -209,7 +271,7 @@ export default function EducationBillPage() {
                   Processing...
                 </>
               ) : (
-                "Generate Token"
+                "Purchase Now"
               )}
             </Button>
 
@@ -221,6 +283,30 @@ export default function EducationBillPage() {
               </span>
             </div>
           </form>
+          {generatedPins.length > 0 && (
+  <Card className="mt-6">
+    <CardHeader>
+      <CardTitle>Generated Tokens</CardTitle>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      {generatedPins.map((item, index) => (
+        <div
+          key={index}
+          className="rounded-lg border p-4"
+        >
+          <p>
+            <strong>PIN:</strong> {item.pin}
+          </p>
+
+          <p>
+            <strong>Serial:</strong> {item.serial}
+          </p>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+)}
         </CardContent>
       </Card>
     </div>

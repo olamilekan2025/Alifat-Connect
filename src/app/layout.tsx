@@ -126,7 +126,9 @@ export default async function RootLayout({
 
               <main className="flex-1">{children}</main>
 
-              <Footer />
+              <div className="mt-auto">
+                <Footer />
+              </div>
             </div>
           </TooltipProvider>
         </Providers>
