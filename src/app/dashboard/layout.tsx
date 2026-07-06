@@ -59,7 +59,7 @@ export default function DashboardLayout({
         <DashboardNavbar />
 
         {/* PAGE CONTENT */}
-        <main className="min-h-screen bg-zinc-50 p-4 pt-20 dark:bg-black md:p-6 md:pt-24">
+        <main className="min-h-screen bg-white p-1 pt-8 dark:bg-black md:p-6 md:pt-10">
           {children}
         </main>
       </SidebarInset>
