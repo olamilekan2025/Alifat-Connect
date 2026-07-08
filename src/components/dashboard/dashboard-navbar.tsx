@@ -79,7 +79,7 @@ export function DashboardNavbar() {
 
   return (
     <>
-      <header className="sticky top-0  z-50 flex h-16 items-center justify-between border-b border-black bg-white px-4  transition-[left,width] duration-200 ease-in-out dark:border-zinc-800/60 dark:bg-black dark:border-white md:px-6 md:pl-2">
+      <header className="sticky top-0  z-50 flex h-16 items-center justify-between border-b border-black bg-white px-4  transition-[left,width] duration-200 ease-in-out dark:border-white dark:bg-black dark:border-white md:px-6 md:pl-2">
         {/* LEFT */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <SidebarTrigger className="h-10 w-10 shrink-0 rounded-xl border border-zinc-200 bg-white shadow-sm hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800" />

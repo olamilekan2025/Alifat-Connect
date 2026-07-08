@@ -2,8 +2,8 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDatabase } from "@/lib/mongodb";
-import { sendNotification } from "@/lib/notification-service";
 import AdminLoginLog from "@/models/AdminLoginLog";
+import User from "@/models/User";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -27,12 +27,14 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Email and password are required");
           }
 
-          const db = await connectToDatabase();
+         await connectToDatabase();
+
+
           const email = credentials.email.trim().toLowerCase();
 
-          const user = await db.connection.db!
-            .collection("users")
-            .findOne({ email });
+       const user = await User.findOne({ email })
+  .select("+password")
+  .lean();
 
           if (!user) {
             throw new Error("Invalid email or password");
@@ -56,45 +58,51 @@ export const authOptions: NextAuthOptions = {
           }
 
           // 🧠 LOGIN SECURITY INFO
-          const ip =
-            req?.headers?.get("x-forwarded-for") ||
-            "unknown";
+ const ip =
+  Array.isArray(req?.headers?.["x-forwarded-for"])
+    ? req.headers["x-forwarded-for"][0]
+    : req?.headers?.["x-forwarded-for"] ?? "unknown";
 
-          const userAgent =
-            req?.headers?.get("user-agent") || "";
-
-          // 🧾 LOG LOGIN ATTEMPT
-          await AdminLoginLog.create({
-            adminId: user._id,
-            ip,
-            device: "web",
-            userAgent,
-            success: true,
-          });
+const userAgent =
+  Array.isArray(req?.headers?.["user-agent"])
+    ? req.headers["user-agent"][0]
+    : req?.headers?.["user-agent"] ?? "unknown";
 
           // 🔥 UPDATE LOGIN INFO (ADMIN ONLY)
           if (user.role === "admin") {
-            await db.connection.db!.collection("users").updateOne(
-              { _id: user._id },
-              {
-                $set: {
-                  lastLoginAt: new Date(),
-                  lastLoginIp: ip,
-                  lastDevice: userAgent,
-                },
-              }
-            );
+            // 🧾 LOG LOGIN ATTEMPT (ADMIN ONLY)
+            await AdminLoginLog.create({
+              adminId: user._id,
+              ip,
+              device: "web",
+              userAgent,
+              success: true,
+            });
+
+await User.findByIdAndUpdate(
+  user._id,
+  {
+    $set: {
+      lastLoginAt: new Date(),
+      lastLoginIp: ip,
+      lastDevice: userAgent,
+    },
+  },
+  {
+    new: true,
+  }
+);
           }
 
-        return {
+ return {
   id: user._id.toString(),
   email: user.email,
   name:
     user.name ??
     `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim(),
 
-  role: user.role?.toLowerCase() ?? "user",
-  isAdmin: user.role?.toLowerCase() === "admin",
+  role: user.role,
+  isAdmin: user.role === "admin",
 };
         } catch (error) {
           console.error("AUTH ERROR:", error);
@@ -104,42 +112,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role;
-        token.isAdmin = (user as any).isAdmin ?? false;
-      }
+ callbacks: {
+  async jwt({ token, user }) {
+    if (user) {
+      token.id = user.id;
+      token.role = user.role;
+      token.isAdmin = user.isAdmin;
+    }
 
-      return token;
-    },
-
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-        (session.user as any).isAdmin = token.isAdmin;
-      }
-
-      return session;
-    },
+    return token;
   },
 
-  events: {
-    async signIn({ user }) {
-      try {
-        await sendNotification({
-          event: "login",
-          userId: user.id,
-          title: "🔐 New Login",
-          message: "You just logged in to your account",
-        });
-      } catch (err) {
-        console.error("Login notification failed:", err);
-      }
-    },
+  async session({ session, token }) {
+    if (session.user) {
+      session.user.id = token.id;
+      session.user.role = token.role;
+      session.user.isAdmin = token.isAdmin;
+    }
+
+    return session;
   },
+},
+
 
   pages: {
     signIn: "/auth/login",

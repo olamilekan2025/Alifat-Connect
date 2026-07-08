@@ -23,18 +23,19 @@ console.log({
 
 export const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // MUST be false for port 587
-  requireTLS: true,
+
+  port: 465,
+
+  secure: true,
 
   auth: {
     user: process.env.EMAIL_SERVER_USER!,
     pass: process.env.EMAIL_SERVER_PASSWORD!,
   },
 
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 60000,
 });
 
 // // VERIFY SMTP CONNECTION
@@ -67,11 +68,15 @@ export async function sendEmail(
     );
 
     return true;
-  } catch (error) {
-    console.error(
-      "❌ EMAIL SEND ERROR:",
-      error,
-    );
+  } catch (error: any) {
+  console.error({
+    code: error.code,
+    command: error.command,
+    response: error.response,
+    responseCode: error.responseCode,
+    message: error.message,
+  });
+
 
     return false;
   }

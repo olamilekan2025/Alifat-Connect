@@ -52,6 +52,7 @@ export default function ElectricityPage() {
   const [customerName, setCustomerName] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [paymentPin, setPaymentPin] = useState<string>("");
+  const [pageLoading, setPageLoading] = useState(true);
 
   // UI Engine Lifecycle States
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -80,24 +81,26 @@ export default function ElectricityPage() {
   ];
 
   // System balance retrieval mechanism
-  const loadBalance = async () => {
-    try {
-      const res = await fetch("/api/user/balance");
+ const loadBalance = async () => {
+  try {
+    const res = await fetch("/api/user/balance");
 
-      if (!res.ok) {
-        console.error("Balance endpoint not found");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data?.success) {
-        setWalletBalance(Number(data.balance || 0));
-      }
-    } catch (error) {
-      console.error("Failed to fetch balance:", error);
+    if (!res.ok) {
+      console.error("Balance endpoint not found");
+      return;
     }
-  };
+
+    const data = await res.json();
+
+    if (data?.success) {
+      setWalletBalance(Number(data.balance || 0));
+    }
+  } catch (error) {
+    console.error("Failed to fetch balance:", error);
+  } finally {
+    setPageLoading(false);
+  }
+};
 
   useEffect(() => {
     loadBalance();
@@ -245,6 +248,128 @@ export default function ElectricityPage() {
       window.print();
     }, 200);
   };
+
+  if (pageLoading) {
+  return (
+    <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
+      <header className="relative overflow-hidden border-b border-[#FFD700]/30 bg-white text-black dark:bg-gradient-to-r dark:from-zinc-950 dark:via-zinc-900 dark:to-black dark:text-white print:hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700]/5 via-transparent to-[#FFD700]/5 dark:bg-black/10" />
+
+        <div className="relative z-10 px-3 py-3 md:px-10 md:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 animate-pulse rounded-2xl bg-[#FFD700]/15 md:h-16 md:w-16" />
+
+              <div className="space-y-2">
+                <div className="h-4 w-40 animate-pulse rounded-full bg-muted md:h-5" />
+                <div className="h-3 w-32 animate-pulse rounded-full bg-muted" />
+              </div>
+            </div>
+
+            <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/5 px-4 py-2 backdrop-blur sm:w-auto sm:justify-end">
+              <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+              <div className="h-8 w-32 animate-pulse rounded-xl bg-background" />
+            </div>
+          </div>
+           </div>
+      </header>
+
+      <div className="grid min-h-[calc(100vh-5rem)] grid-cols-1 gap-6 p-4 print:hidden sm:p-8 lg:p-10 xl:grid-cols-12">
+        <section className="flex flex-col justify-between rounded-[32px] border border-border/60 bg-muted/20 p-5 shadow-sm sm:p-8 xl:col-span-5">
+          <div className="mx-auto w-full max-w-md space-y-6">
+            <div className="space-y-2">
+              <div className="h-7 w-48 animate-pulse rounded-xl bg-muted" />
+              <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+              <div className="h-4 w-72 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <div className="h-3 w-48 animate-pulse rounded-full bg-muted" />
+                <div className="h-11 animate-pulse rounded-xl bg-background" />
+              </div>
+
+              <div className="space-y-2">
+                <div className="h-3 w-36 animate-pulse rounded-full bg-muted" />
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="h-11 animate-pulse rounded-xl bg-background" />
+                  <div className="h-11 animate-pulse rounded-xl bg-background" />
+                  </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="h-3 w-40 animate-pulse rounded-full bg-muted" />
+                <div className="relative h-11 animate-pulse rounded-xl bg-background">
+                  <div className="absolute right-1.5 top-1.5 h-8 w-20 rounded-lg bg-amber-500/20" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+                  <div className="h-11 animate-pulse rounded-xl bg-background" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+                  <div className="h-11 animate-pulse rounded-xl bg-background" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mx-auto mt-8 w-full max-w-md border-t border-border/80 pt-6">
+            <div className="h-11 w-full animate-pulse rounded-xl bg-amber-500/20" />
+          </div>
+        </section>
+
+        <section className="relative flex flex-col items-center justify-center overflow-hidden rounded-[32px] border border-border/40 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 p-4 md:p-2 xl:col-span-7">
+          <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_0.5px,transparent_0.5px)] [background-size:24px_24px] opacity-10 dark:bg-[radial-gradient(#d97706_0.5px,transparent_0.5px)]" />
+
+          <div className="relative z-10 w-full max-w-md">
+            <div className="mx-auto mb-3 h-3 w-64 animate-pulse rounded-full bg-muted" />
+
+            <Card className="w-full overflow-hidden rounded-[24px] border border-border bg-card shadow-2xl">
+              <div className="relative bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 p-6 text-white">
+                <div className="absolute right-4 top-4 h-16 w-16 animate-pulse rounded-2xl bg-white/15" />
+                <div className="h-7 w-52 animate-pulse rounded-xl bg-white/20" />
+                <div className="mt-2 h-3 w-44 animate-pulse rounded-full bg-white/20" />
+              </div>
+
+              <CardContent className="space-y-4 p-2 text-xs md:p-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-border/80 bg-muted/30 p-3.5">
+                    <div className="h-3 w-20 animate-pulse rounded-full bg-muted" />
+                    <div className="mt-3 h-5 w-24 animate-pulse rounded-full bg-muted" />
+                    </div>
+
+                  <div className="rounded-2xl border border-border/80 bg-muted/30 p-3.5">
+                    <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+                    <div className="mt-3 h-5 w-20 animate-pulse rounded-full bg-muted" />
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-border/80 bg-muted/30 p-3.5">
+                  <div className="h-3 w-40 animate-pulse rounded-full bg-muted" />
+                  <div className="mt-3 h-5 w-36 animate-pulse rounded-full bg-muted" />
+                </div>
+
+                <div className="rounded-2xl border border-border/80 bg-muted/30 p-3.5">
+                  <div className="h-3 w-40 animate-pulse rounded-full bg-muted" />
+                  <div className="mt-3 h-5 w-full animate-pulse rounded-full bg-muted" />
+                </div>
+
+                <div className="rounded-2xl border border-orange-500/10 bg-gradient-to-br from-yellow-500/15 to-yellow-500/5 p-4">
+                  <div className="h-3 w-48 animate-pulse rounded-full bg-muted" />
+                  <div className="mt-3 h-10 w-44 animate-pulse rounded-xl bg-amber-500/20" />
+                </div>
+                 </CardContent>
+            </Card>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
 
   return (
   <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">

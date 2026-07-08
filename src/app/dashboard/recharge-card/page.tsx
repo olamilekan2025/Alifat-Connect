@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 
 
+
 interface GeneratedPinItem {
   id: string;
   pin: string;
@@ -47,6 +48,7 @@ export default function RechargeCardPage() {
   const [activeBatch, setActiveBatch] =
     useState<BatchTransactionResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const denominations = ["100", "200", "500", "1000"];
 
@@ -66,24 +68,25 @@ export default function RechargeCardPage() {
 
   // Reusable balance loader accessible across event handlers and lifecycles
   const loadBalance = async () => {
-    try {
-      const res = await fetch("/api/user/balance");
+  try {
+    const res = await fetch("/api/user/balance");
 
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        setWalletBalance(Number(data.balance || 0));
-      }
-    } catch (error) {
-      console.error("Failed to load wallet balance:", error);
-
-      setWalletBalance(0);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}`);
     }
-  };
+
+    const data = await res.json();
+
+    if (data.success) {
+      setWalletBalance(Number(data.balance || 0));
+    }
+  } catch (error) {
+    console.error("Failed to load wallet balance:", error);
+    setWalletBalance(0);
+  } finally {
+    setPageLoading(false);
+  }
+};
   useEffect(() => {
     loadBalance();
   }, []);
@@ -137,6 +140,176 @@ export default function RechargeCardPage() {
   };
 
   const totalCostEstimate = (Number(amount) || 0) * (Number(quantity) || 1);
+
+  if (pageLoading) {
+  return (
+    <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
+      <header className="relative overflow-hidden border-b border-[#FFD700]/30 bg-white text-black dark:bg-gradient-to-r dark:from-zinc-950 dark:via-zinc-900 dark:to-black dark:text-white print:hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700]/5 via-transparent to-[#FFD700]/5 dark:bg-black/10" />
+
+        <div className="relative z-10 px-3 py-3 md:px-10 md:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 animate-pulse rounded-2xl bg-[#FFD700]/15 md:h-16 md:w-16" />
+
+              <div className="space-y-2">
+                <div className="h-4 w-40 animate-pulse rounded-full bg-muted md:h-5" />
+                <div className="h-3 w-32 animate-pulse rounded-full bg-muted" />
+              </div>
+            </div>
+
+            <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-[#FFD700]/20 bg-[#FFD700]/5 px-4 py-2 backdrop-blur sm:w-auto sm:justify-end">
+              <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+              <div className="h-8 w-32 animate-pulse rounded-xl bg-background" />
+            </div>
+          </div>
+          </div>
+      </header>
+
+      <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 print:hidden lg:grid-cols-12">
+        <section className="bg-muted/10 p-4 lg:col-span-5 lg:p-8">
+          <div className="mx-auto w-full max-w-md space-y-6">
+            <div className="space-y-2">
+              <div className="h-7 w-44 animate-pulse rounded-xl bg-muted" />
+              <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+              <div className="h-4 w-72 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <Card className="h-full rounded-3xl border-0 shadow-xl">
+              <CardContent className="space-y-5 p-3 md:p-8">
+                <div className="space-y-2">
+                  <div className="h-3 w-36 animate-pulse rounded-full bg-muted" />
+                  <div className="grid grid-cols-4 gap-2">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="flex h-12 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-background"
+                      >
+                        <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
+                        <div className="h-3 w-10 animate-pulse rounded-full bg-muted" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="h-3 w-20 animate-pulse rounded-full bg-muted" />
+                    <div className="h-11 animate-pulse rounded-md bg-background" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="h-3 w-20 animate-pulse rounded-full bg-muted" />
+                    <div className="h-11 animate-pulse rounded-md bg-background" />
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border bg-muted/30 p-4">
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="flex justify-between">
+                        <div className="h-4 w-20 animate-pulse rounded-full bg-muted" />
+                        <div className="h-4 w-24 animate-pulse rounded-full bg-muted" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex justify-between border-t pt-3">
+                    <div className="h-5 w-16 animate-pulse rounded-full bg-muted" />
+                    <div className="h-6 w-28 animate-pulse rounded-xl bg-[#FFD700]/20" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="h-3 w-44 animate-pulse rounded-full bg-muted" />
+                  <div className="h-10 animate-pulse rounded-md bg-background" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mx-auto mt-8 w-full max-w-md space-y-4 border-t border-border pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+                <div className="h-8 w-32 animate-pulse rounded-xl bg-muted" />
+              </div>
+
+              <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <div className="h-14 w-full animate-pulse rounded-2xl bg-[#FFD700]/20" />
+          </div>
+        </section>
+
+        <section className="relative flex items-start justify-center overflow-hidden p-3 via-background to-cyan-50 dark:from-zinc-950 dark:via-background dark:to-zinc-900 md:p-12 lg:col-span-7">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#10b98115_1px,transparent_1px)] [background-size:18px_18px] opacity-30" />
+
+          <div className="relative z-10 w-full max-w-md">
+            <div className="mb-4 text-center">
+              <div className="mx-auto h-7 w-48 animate-pulse rounded-full bg-orange-500/10" />
+            </div>
+             <Card className="relative overflow-hidden rounded-[32px] border-0 border-dashed bg-white dark:bg-zinc-900">
+              <div className="absolute left-0 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
+              <div className="absolute right-0 top-1/2 h-10 w-10 translate-x-1/2 -translate-y-1/2 rounded-full bg-background" />
+
+              <CardContent className="relative border border-dashed p-0">
+                <div className="px-6 pb-5 pt-6 text-center">
+                  <div className="mx-auto h-7 w-56 animate-pulse rounded-xl bg-muted" />
+                  <div className="mx-auto mt-2 h-3 w-40 animate-pulse rounded-full bg-muted" />
+                </div>
+
+                <div className="space-y-5 px-3 pb-6 md:px-6 md:pb-8">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border bg-muted/40 p-3 text-center">
+                      <div className="mx-auto h-3 w-16 animate-pulse rounded-full bg-muted" />
+                      <div className="mx-auto mt-3 h-6 w-20 animate-pulse rounded-full bg-muted" />
+                    </div>
+
+                    <div className="rounded-2xl border bg-muted/40 p-3 text-center">
+                      <div className="mx-auto h-3 w-16 animate-pulse rounded-full bg-muted" />
+                      <div className="mx-auto mt-3 h-6 w-20 animate-pulse rounded-full bg-muted" />
+                    </div>
+                     </div>
+
+                  <div className="rounded-3xl border-2 border-dashed border-orange-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 text-center">
+                    <div className="mx-auto mb-3 h-3 w-28 animate-pulse rounded-full bg-muted" />
+                    <div className="mx-auto h-7 w-56 animate-pulse rounded-xl bg-muted" />
+                  </div>
+
+                  <div className="rounded-2xl border bg-muted/30 p-4">
+                    <div className="mx-auto mb-3 h-4 w-32 animate-pulse rounded-full bg-muted" />
+                    <div className="mx-auto h-3 w-44 animate-pulse rounded-full bg-muted" />
+                  </div>
+
+                  <div className="space-y-3 border-t pt-4">
+                    <div className="flex h-12 items-end justify-center gap-[2px]">
+                      {Array.from({ length: 28 }).map((_, index) => (
+                        <div
+                          key={index}
+                          className={`animate-pulse bg-muted ${
+                            index % 4 === 0
+                              ? "h-11 w-[4px]"
+                              : index % 2 === 0
+                                ? "h-8 w-[3px]"
+                                : "h-9 w-[1.7px]"
+                          }`}
+                           />
+                      ))}
+                    </div>
+
+                    <div className="mx-auto h-3 w-44 animate-pulse rounded-full bg-muted" />
+                    <div className="mx-auto h-5 w-40 animate-pulse rounded-full bg-[#FFD700]/20" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">

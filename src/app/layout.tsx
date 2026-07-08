@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { cache } from "react";
 import { Montserrat } from "next/font/google";
 
 import "./globals.css";
@@ -17,28 +18,30 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  let favicon = "/favicon.ico";
-
+const getBrandingSettings = cache(async () => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const res = await fetch(`${baseUrl}/api/admin/settings`, {
       cache: "no-store",
     });
 
-    if (res.ok) {
-      const data = await res.json();
-
-      const faviconUrl = data?.settings?.branding?.faviconUrl;
-
-      if (faviconUrl) {
-        favicon = faviconUrl;
-      }
+    if (!res.ok) {
+      return "/favicon.ico";
     }
+
+    const data = await res.json();
+
+    return data?.settings?.branding?.faviconUrl || "/favicon.ico";
   } catch (error) {
-    console.error("Failed to load favicon:", error);
+    console.error("Failed to load branding settings:", error);
+    return "/favicon.ico";
   }
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const favicon = await getBrandingSettings();
 
   return {
     title: {
@@ -54,68 +57,56 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  async function getSettings() {
-    try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-      const res = await fetch(`${baseUrl}/api/admin/settings`, {
-        cache: "no-store",
-      });
-
-      if (!res.ok) return null;
-
-      return res.json();
-    } catch {
-      return null;
-    }
-  }
-
-  const settings = await getSettings();
-  const faviconUrl = settings?.settings?.branding?.faviconUrl ?? "/favicon.ico";
+  const favicon = await getBrandingSettings();
 
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={montserrat.variable}
-      data-scroll-behavior="smooth"
     >
       <body
         className="
           min-h-screen
           bg-white
-          font-sans
           text-zinc-900
           antialiased
           dark:bg-black
           dark:text-white
         "
       >
-        <FaviconUpdater url={faviconUrl} />
+        <FaviconUpdater url={favicon} />
 
-        {/* Paystack */}
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
+        >{`try {
+          const theme = localStorage.getItem('theme');
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const resolvedTheme = theme || systemTheme;
+          document.documentElement.classList.add(resolvedTheme);
+        } catch (e) {}`}</Script>
+
         <Script
           id="paystack-inline"
           src="https://js.paystack.co/v1/inline.js"
           strategy="afterInteractive"
         />
 
-        {/* Tawk Live Chat */}
         {process.env.NODE_ENV === "production" && (
           <Script
             id="tawk-chat"
-            strategy="afterInteractive"
             src="https://embed.tawk.to/6a28bb8d3b75f31c2bcf6a9c/1jqnhp8a0"
+            strategy="afterInteractive"
             crossOrigin="anonymous"
           />
         )}
-
 
         <Providers>
           <TooltipProvider delayDuration={0}>
@@ -126,9 +117,7 @@ export default async function RootLayout({
 
               <main className="flex-1">{children}</main>
 
-              <div className="mt-auto">
-                <Footer />
-              </div>
+              <Footer />
             </div>
           </TooltipProvider>
         </Providers>
@@ -136,3 +125,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

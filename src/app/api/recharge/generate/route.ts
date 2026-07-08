@@ -15,6 +15,7 @@ import {
   calculateDiscount,
 } from "@/lib/membership";
 
+
 interface GeneratedPin {
   id: string;
   pin: string;
@@ -443,6 +444,8 @@ try {
     // Commit database transaction
     await session.commitTransaction();
     session.endSession();
+
+   
 
 // Update membership after a successful purchase.
 // Don't fail the purchase if membership update fails.

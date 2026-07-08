@@ -328,13 +328,96 @@ useEffect(() => {
   loadProfile();
 }, []);
 
-  if (loading && transactions.length === 0) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <div className="custom-loader" />
+ if (loading && transactions.length === 0) {
+  return (
+    <div className="space-y-6 p-1 md:pl-12">
+      <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-6 text-white md:p-8">
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-xl space-y-4">
+            <div className="h-10 w-44 animate-pulse rounded-full bg-white/10" />
+            <div className="h-12 w-64 animate-pulse rounded-2xl bg-white/10" />
+            <div className="h-4 w-full max-w-md animate-pulse rounded-full bg-white/10" />
+            <div className="h-4 w-72 max-w-full animate-pulse rounded-full bg-white/10" />
+          </div>
+
+          <div className="w-full rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur-2xl md:max-w-sm">
+            <div className="flex items-start justify-between">
+              <div className="space-y-3">
+                <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+                <div className="h-10 w-44 animate-pulse rounded-xl bg-white/10" />
+              </div>
+              <div className="h-14 w-14 animate-pulse rounded-2xl bg-white/10" />
+            </div>
+
+            <div className="mt-5 h-12 animate-pulse rounded-2xl bg-white/10" />
+          </div>
+           </div>
       </div>
-    );
-  }
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <Card className="overflow-hidden rounded-[35px] border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="p-6">
+            <div className="h-9 w-44 animate-pulse rounded-xl bg-zinc-200 dark:bg-white/10" />
+          </div>
+
+          <CardContent className="space-y-8 md:p-8">
+            <div className="space-y-3">
+              <div className="h-4 w-36 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+              <div className="flex items-center gap-2 rounded-[24px] border border-zinc-200 bg-[#f7f8fa] p-2 dark:border-white/10 dark:bg-zinc-900">
+                <div className="h-12 min-w-[90px] animate-pulse rounded-[18px] bg-zinc-200 dark:bg-white/10" />
+                <div className="h-12 flex-1 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+              </div>
+              <div className="h-4 w-40 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+            </div>
+
+            <div className="space-y-3">
+              <div className="h-4 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+              <div className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10"
+                />
+              ))}
+            </div>
+
+            <div className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden rounded-[35px] border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="flex items-center justify-between border-b border-zinc-200 p-8 dark:border-zinc-800">
+            <div className="h-8 w-56 animate-pulse rounded-xl bg-zinc-200 dark:bg-white/10" />
+            <div className="h-11 w-11 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+          </div>
+
+          <CardContent className="space-y-4 p-6">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div className="space-y-3">
+                  <div className="h-4 w-24 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                  <div className="h-4 w-32 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="ml-auto h-4 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                  <div className="h-6 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="space-y-6 p-1 md:pl-12">

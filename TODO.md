@@ -1,44 +1,28 @@
-# TODO - VTU Profit/Ledger & Refund Consistency
+# TODO (Notification Fixes)
 
-## Phase 0 - Repo discovery (done/ongoing)
-- [x] Inspect current Transaction model & admin/system wallet ledger usage
-- [x] Inspect airtime/data/electricity purchase routes and existing reports aggregation
-- [x] Identify that current routes debit wallet + write Transaction without provider cost/profit/refund
+## Step 1
+- Fix Pusher realtime wiring mismatch: bind NotificationContext to the correct event name(s) used by NotificationService. ✅
 
-## Phase 1 - Data model changes (required)
-- [ ] Extend `src/models/transaction.ts` with:
-  - userAmount
-  - providerCost
-  - platformProfit
-  - providerReference
-  - reversalOf
-  - (optionally) purchaseCategory/serviceType fields
-- [ ] Add indexes/uniqueness guidance for idempotency using `reference` or a dedicated `purchaseReference`
+## Step 2
+- Normalize notification `type` between DB model and UI. ✅
+  - Update NotificationContext.NotificationItem.type to align with `NotificationType` (signup/login/transfer/etc.) or map DB types to UI categories.
+  - Update NotificationDropdown to handle the final type values.
 
-## Phase 2 - Settlement helper (scaffold)
-- [ ] Replace scaffold in `src/lib/vtu/settlement.ts` with real logic once provider call points are identified
 
-## Phase 3 - Refactor purchase flow (required)
-- [ ] Refactor airtime purchase route to:
-  - check wallet
-  - deduct/queue debit
-  - call provider API
-  - on success: write providerCost/platformProfit
-  - on failure: refund user and write reversal
-- [ ] Refactor data purchase route similarly
-- [ ] Ensure payment/gateway webhook finalization triggers the same settlement path (idempotent)
+## Step 3
+- Ensure live notification triggers match realtime listeners. ✅
+- Implement correct emit triggers for required business events:
+  - user signup
+  - user login
+  - user purchase/transaction
+- Ensure both admin dashboard and user receive notifications as requested.
 
-## Phase 4 - Admin reporting
-- [ ] Update admin reporting endpoints to aggregate:
-  - totalRevenue = Σ(userAmount)
-  - totalProviderCost = Σ(providerCost)
-  - totalProfit = Σ(platformProfit)
+## Step 4
+- Update `/api/notifications` to return only notifications relevant to the current authenticated principal.
 
-## Phase 5 - Reconciliation safeguards
-- [ ] Ensure all webhook/payment completion handlers are idempotent by purchaseReference
-- [ ] Ensure refund postings reference the original purchase (reversalOf)
+## Step 5
+- Add/verify `/api/notifications/[id]/read` and any mark-all endpoints for the relevant principal scope.
 
-## Phase 6 - Validate
-- [ ] Run build
-- [ ] Run targeted “simulate success then simulate provider failure” checks
+## Step 6
+- Run build/lint/tests (if configured) to ensure everything compiles.
 

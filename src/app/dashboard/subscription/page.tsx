@@ -35,12 +35,15 @@ interface UserSubscriptionStatus {
 }
 
 export default function SubscriptionPage() {
+  
   // System State Configuration Management
   const [selectedPlan, setSelectedPlan] = useState<
     "monthly" | "quarterly" | "yearly"
   >("yearly");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
   const [walletBalance, setWalletBalance] = useState<number>(75000); // Track platform wallet balance
+ 
 
   // Simulated DB user membership footprint state
   const [currentSubscription, setCurrentSubscription] =
@@ -102,6 +105,11 @@ export default function SubscriptionPage() {
   const resolvedPlanDetails = deploymentPlans.find(
     (p) => p.id === selectedPlan,
   )!;
+
+    useEffect(() => {
+      // simulate initial load (remove or adjust if real data fetching is added)
+      setPageLoading(false);
+    }, []);
 const handleProcessSubscription = async () => {
   if (walletBalance < resolvedPlanDetails.price) {
     toast.error("Insufficient Balance", {
@@ -110,6 +118,8 @@ const handleProcessSubscription = async () => {
     });
     return;
   }
+
+ 
 
   try {
     setIsSubmitting(true);
@@ -188,6 +198,142 @@ const handleProcessSubscription = async () => {
     setIsSubmitting(false);
   }
 };
+
+if (pageLoading) {
+  return (
+    <main className="min-h-screen w-full bg-background pb-16 text-foreground">
+      <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-b from-amber-500/15 via-orange-500/5 to-transparent px-4 py-16 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_0.5px,transparent_0.5px)] [background-size:32px_32px] opacity-15 dark:bg-[radial-gradient(#d97706_0.5px,transparent_0.5px)]" />
+
+        <div className="relative z-10 mx-auto max-w-3xl space-y-4">
+          <div className="mx-auto h-8 w-72 max-w-full animate-pulse rounded-full bg-amber-500/20" />
+          <div className="mx-auto h-12 w-[620px] max-w-full animate-pulse rounded-2xl bg-muted" />
+          <div className="mx-auto h-12 w-[520px] max-w-full animate-pulse rounded-2xl bg-muted" />
+          <div className="mx-auto h-4 w-[560px] max-w-full animate-pulse rounded-full bg-muted" />
+          <div className="mx-auto h-4 w-96 max-w-full animate-pulse rounded-full bg-muted" />
+        </div>
+      </section>
+
+      <div className="mx-auto mt-12 grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
+        <div className="space-y-12 lg:col-span-8">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="h-3 w-44 animate-pulse rounded-full bg-muted" />
+              <div className="h-3 w-80 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="relative flex h-full flex-col justify-between rounded-3xl border border-border/80 bg-card p-5"
+                >
+                  {index === 2 && (
+                    <div className="absolute -top-2.5 left-4 h-5 w-32 animate-pulse rounded-md bg-amber-500/30" />
+                  )}
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-36 animate-pulse rounded-full bg-muted" />
+                      <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
+                    </div>
+
+                    <div className="h-8 w-32 animate-pulse rounded-xl bg-muted" />
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-4">
+                    <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+                    <div className="h-5 w-24 animate-pulse rounded-md bg-muted" />
+                      </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="h-3 w-56 animate-pulse rounded-full bg-muted" />
+              <div className="h-3 w-96 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/10 p-4"
+                >
+                  <div className="mt-0.5 h-6 w-6 shrink-0 animate-pulse rounded-lg bg-orange-500/10" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-44 animate-pulse rounded-full bg-muted" />
+                    <div className="h-3 w-full animate-pulse rounded-full bg-muted" />
+                      <div className="h-3 w-2/3 animate-pulse rounded-full bg-muted" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6 lg:col-span-4">
+          <Card className="overflow-hidden rounded-[28px] border border-border/80 bg-card shadow-md">
+            <div className="flex items-center gap-2 border-b border-border bg-muted/40 p-4">
+              <div className="h-4 w-4 animate-pulse rounded-md bg-muted" />
+              <div className="h-4 w-48 animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <CardContent className="space-y-4 p-5 text-xs">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="h-4 w-36 animate-pulse rounded-full bg-muted" />
+                  <div className="h-6 w-32 animate-pulse rounded-md bg-muted" />
+                </div>
+              ))}
+               <div className="flex items-center justify-between border-t border-dashed border-border pt-4">
+                <div className="h-4 w-40 animate-pulse rounded-full bg-muted" />
+                <div className="h-5 w-16 animate-pulse rounded-md bg-amber-500/20" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden rounded-[28px] border-2 border-[#D4AF37] bg-card shadow-xl">
+            <div className="absolute right-0 top-0 p-3 opacity-10">
+              <Sparkles className="h-20 w-20 text-[#D4AF37]" />
+            </div>
+
+            <div className="border-b border-border/40 bg-gradient-to-b from-orange-500/10 via-orange-500/5 to-transparent p-5">
+              <div className="h-5 w-56 animate-pulse rounded-full bg-muted" />
+              <div className="mt-2 h-3 w-64 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <CardContent className="space-y-4 p-5 text-xs">
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="flex justify-between">
+                    <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+                    <div className="h-4 w-36 animate-pulse rounded-full bg-muted" />
+                     </div>
+                ))}
+              </div>
+
+              <div className="space-y-3 border-t border-border/80 pt-4">
+                <div className="flex items-baseline justify-between">
+                  <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+                  <div className="h-9 w-36 animate-pulse rounded-xl bg-amber-500/20" />
+                </div>
+
+                <div className="h-11 w-full animate-pulse rounded-xl bg-amber-500/20" />
+              </div>
+
+              <div className="flex items-center justify-center gap-1.5 pt-2">
+                <div className="h-3 w-3 animate-pulse rounded-sm bg-muted" />
+                <div className="h-3 w-72 max-w-full animate-pulse rounded-full bg-muted" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </main>
+     );
+}
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground pb-16">

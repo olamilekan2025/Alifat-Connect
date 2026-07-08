@@ -1,551 +1,3 @@
-// "use client";
-
-// import { useEffect, useMemo, useState } from "react";
-
-// import { useSession } from "next-auth/react";
-
-// import {
-//   Loader2,
-//   RefreshCw,
-//   Database,
-//   CheckCircle2,
-//   AlertCircle,
-//   Sparkles,
-//   ShieldCheck,
-// } from "lucide-react";
-
-// import { toast } from "sonner";
-
-// import { Button } from "@/components/ui/button";
-
-// import { Card, CardContent } from "@/components/ui/card";
-
-// import { Input } from "@/components/ui/input";
-
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
-
-// interface DataTransaction {
-//   _id: string;
-//   network: string;
-//   phone: string;
-//   amount: number;
-//   planName: string;
-//   status: string;
-//   createdAt: string;
-// }
-
-// interface WalletData {
-//   balance: number;
-// }
-
-// interface PlanItem {
-//   plan: string;
-//   amount: number;
-//   validity?: string;
-//   cashback?: string;
-// }
-
-// const networkPrefixes: Record<string, string[]> = {
-//   MTN: [
-//     "0803",
-//     "0806",
-//     "0703",
-//     "0704",
-//     "0706",
-//     "0810",
-//     "0813",
-//     "0814",
-//     "0816",
-//     "0903",
-//     "0906",
-//     "0913",
-//     "0916",
-//     "0707",
-//   ],
-
-//   Airtel: [
-//     "0802",
-//     "0808",
-//     "0701",
-//     "0708",
-//     "0812",
-//     "0901",
-//     "0902",
-//     "0904",
-//     "0907",
-//     "0912",
-//   ],
-
-//   Glo: ["0805", "0807", "0705", "0811", "0815", "0905", "0915"],
-
-//   "9mobile": ["0809", "0817", "0818", "0908", "0909"],
-// };
-
-// const networkColors: Record<string, string> = {
-//   MTN: "from-yellow-400 to-yellow-600",
-//   Airtel: "from-red-500 to-red-700",
-//   Glo: "from-green-500 to-green-700",
-//   "9mobile": "from-emerald-400 to-emerald-700",
-// };
-
-// const dataPlans: Record<string, Record<string, PlanItem[]>> = {
-//   MTN: {
-//     Daily: [
-//       {
-//         plan: "110MB",
-//         validity: "1 Day",
-//         amount: 100,
-//         cashback: "₦3.5 Cashback",
-//       },
-
-//       {
-//         plan: "500MB",
-//         validity: "1 Day",
-//         amount: 350,
-//         cashback: "₦12.25 Cashback",
-//       },
-
-//       {
-//         plan: "2.5GB",
-//         validity: "1 Day",
-//         amount: 730,
-//         cashback: "₦100 Cashback",
-//       },
-
-//       {
-//         plan: "3.5GB",
-//         validity: "1 Day",
-//         amount: 980,
-//         cashback: "₦100 Cashback",
-//       },
-//     ],
-
-//     Weekly: [
-//       {
-//         plan: "1GB",
-//         validity: "7 Days",
-//         amount: 780,
-//         cashback: "₦100 Cashback",
-//       },
-
-//       {
-//         plan: "3.5GB",
-//         validity: "7 Days",
-//         amount: 1480,
-//         cashback: "₦100 Cashback",
-//       },
-//     ],
-
-//     Monthly: [
-//       {
-//         plan: "7GB",
-//         validity: "30 Days",
-//         amount: 3480,
-//         cashback: "₦200 Cashback",
-//       },
-
-//       {
-//         plan: "20GB",
-//         validity: "30 Days",
-//         amount: 7480,
-//         cashback: "₦500 Cashback",
-//       },
-//     ],
-
-//     Yearly: [
-//       {
-//         plan: "800GB",
-//         amount: 125000,
-//         validity: "365 Days",
-//         cashback: "₦2,000 Cashback",
-//       },
-//     ],
-//   },
-
-//   Airtel: {
-//     Daily: [
-//       {
-//         plan: "500MB",
-//         amount: 200,
-//         validity: "1 Day",
-//         cashback: "₦10 Cashback",
-//       },
-//     ],
-
-//     Weekly: [
-//       {
-//         plan: "6GB",
-//         amount: 2000,
-//         validity: "7 Days",
-//         cashback: "₦100 Cashback",
-//       },
-//     ],
-
-//     Monthly: [
-//       {
-//         plan: "15GB",
-//         amount: 5000,
-//         validity: "30 Days",
-//         cashback: "₦200 Cashback",
-//       },
-//     ],
-
-//     Yearly: [
-//       {
-//         plan: "100GB",
-//         amount: 45000,
-//         validity: "365 Days",
-//         cashback: "₦1,500 Cashback",
-//       },
-//     ],
-//   },
-
-//   Glo: {
-//     Daily: [
-//       {
-//         plan: "500MB",
-//         amount: 150,
-//         validity: "1 Day",
-//         cashback: "₦5 Cashback",
-//       },
-//     ],
-
-//     Weekly: [
-//       {
-//         plan: "7GB",
-//         amount: 2500,
-//         validity: "7 Days",
-//         cashback: "₦100 Cashback",
-//       },
-//     ],
-
-//     Monthly: [
-//       {
-//         plan: "20GB",
-//         amount: 5000,
-//         validity: "30 Days",
-//         cashback: "₦200 Cashback",
-//       },
-//     ],
-
-//     Yearly: [
-//       {
-//         plan: "90GB",
-//         amount: 40000,
-//         validity: "365 Days",
-//         cashback: "₦1,500 Cashback",
-//       },
-//     ],
-//   },
-
-//   "9mobile": {
-//     Daily: [
-//       {
-//         plan: "100MB",
-//         amount: 100,
-//         validity: "1 Day",
-//         cashback: "₦5 Cashback",
-//       },
-//     ],
-
-//     Weekly: [
-//       {
-//         plan: "5GB",
-//         amount: 2000,
-//         validity: "7 Days",
-//         cashback: "₦100 Cashback",
-//       },
-//     ],
-
-//     Monthly: [
-//       {
-//         plan: "15GB",
-//         amount: 5000,
-//         validity: "30 Days",
-//         cashback: "₦200 Cashback",
-//       },
-//     ],
-
-//     Yearly: [
-//       {
-//         plan: "120GB",
-//         amount: 60000,
-//         validity: "365 Days",
-//         cashback: "₦2,000 Cashback",
-//       },
-//     ],
-//   },
-// };
-
-// export default function DataPage() {
-//   const { status } = useSession();
-
-//   const [loading, setLoading] = useState(true);
-
-//   const [buying, setBuying] = useState(false);
-
-//   const [wallet, setWallet] = useState<WalletData>({
-//     balance: 0,
-//   });
-
-//   const [transactions, setTransactions] = useState<DataTransaction[]>([]);
-
-//   const [network, setNetwork] = useState("");
-
-//   const [phone, setPhone] = useState("");
-
-//   const [planType, setPlanType] = useState("Daily");
-
-//   const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
-
-//   const [pin, setPin] = useState("");
-
-//   const [openSummary, setOpenSummary] = useState(false);
-
-//   const [openPin, setOpenPin] = useState(false);
-
-//   const [hasPaymentPin, setHasPaymentPin] = useState(false);
-//   const [defaultPhone, setDefaultPhone] = useState("");
-
-//   useEffect(() => {
-//     if (status === "authenticated") {
-//       fetchWallet();
-
-//       fetchTransactions();
-//     }
-//   }, [status]);
-
-//   async function fetchWallet() {
-//     try {
-//       const response = await fetch("/api/wallet", {
-//         cache: "no-store",
-//       });
-
-//       const data = await response.json();
-
-//       setWallet({
-//         balance: data.wallet?.balance || 0,
-//       });
-
-//       setHasPaymentPin(data.user?.hasPaymentPin || false);
-//     } catch (error) {
-//       console.error(error);
-
-//       toast.error("Failed to load wallet");
-//     }
-//   }
-
-//   async function fetchUserProfile() {
-//   try {
-//     const res = await fetch("/api/user/profile");
-//     const data = await res.json();
-
-//     const savedPhone = data.user?.phone || "";
-
-//     setDefaultPhone(savedPhone);
-//     setPhone(savedPhone); // 👈 auto-fill input
-//   } catch (err) {
-//     console.error(err);
-//   }
-// }
-
-
-// useEffect(() => {
-//   if (status === "authenticated") {
-//     fetchWallet();
-//     fetchTransactions();
-//     fetchUserProfile(); // 👈 add this
-//   }
-// }, [status]);
-
-//   async function fetchTransactions() {
-//     try {
-//       setLoading(true);
-
-//       const response = await fetch("/api/data/history", {
-//         cache: "no-store",
-//       });
-
-//       const data = await response.json();
-
-//       setTransactions(
-//         Array.isArray(data.transactions) ? data.transactions : [],
-//       );
-//     } catch (error) {
-//       console.error(error);
-
-//       toast.error("Failed to load transactions");
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-
-//   // function detectNetwork(phoneNumber: string) {
-//   //   const cleaned = phoneNumber.replace(/\D/g, "");
-
-//   //   if (cleaned.length < 4) {
-//   //     setNetwork("");
-
-//   //     return;
-//   //   }
-
-//   //   const prefix = cleaned.slice(0, 4);
-
-//   //   let detected = "";
-
-//   //   Object.entries(networkPrefixes).forEach(([networkName, prefixes]) => {
-//   //     if (prefixes.includes(prefix)) {
-//   //       detected = networkName;
-//   //     }
-//   //   });
-
-//   //   setNetwork(detected);
-//   // }
-
-
-//   function detectNetwork(phoneNumber: string) {
-//   let cleaned = phoneNumber.replace(/\D/g, "");
-
-//   // remove Nigeria country code if present
-//   if (cleaned.startsWith("234")) {
-//     cleaned = "0" + cleaned.slice(3);
-//   }
-
-//   if (cleaned.length < 4) {
-//     setNetwork("");
-//     return;
-//   }
-
-//   const prefix = cleaned.slice(0, 4);
-
-//   let detected = "";
-
-//   for (const [networkName, prefixes] of Object.entries(networkPrefixes)) {
-//     if (prefixes.includes(prefix)) {
-//       detected = networkName;
-//       break;
-//     }
-//   }
-
-//   setNetwork(detected);
-// }
-
-//   async function handlePurchase() {
-//     try {
-//       if (!network || !phone || !selectedPlan) {
-//         toast.error("Complete all fields");
-
-//         return;
-//       }
-
-//       if (phone.length !== 11) {
-//         toast.error("Invalid phone number");
-
-//         return;
-//       }
-
-//       if (pin.trim().length !== 4) {
-//         toast.error("Enter valid payment PIN");
-
-//         return;
-//       }
-
-//       const walletBalance = Number(wallet.balance || 0);
-
-//       const planAmount = Number(selectedPlan.amount || 0);
-
-//       if (walletBalance < planAmount) {
-//         toast.error(`Insufficient balance. Wallet: ₦${walletBalance}`);
-
-//         return;
-//       }
-
-//       setBuying(true);
-
-//       const response = await fetch("/api/data/purchase", {
-//         method: "POST",
-
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-
-//         body: JSON.stringify({
-//           network: String(network),
-//           phone: String(phone),
-//           amount: Number(selectedPlan.amount),
-//           planName: String(selectedPlan.plan),
-//           pin: String(pin),
-//         }),
-//       });
-//       let data;
-
-//       try {
-//         data = await response.json();
-//       } catch (error) {
-//         console.error(error);
-
-//         toast.error("Invalid server response");
-
-//         return;
-//       }
-
-//       if (!response.ok) {
-//         toast.error(data.message || "Purchase failed");
-
-//         return;
-//       }
-
-//       toast.success("Data purchase successful");
-
-//       // UPDATE WALLET IMMEDIATELY
-//       setWallet({
-//         balance: Number(data.balance || 0),
-//       });
-
-//       // RESET FORM
-//       setPhone("");
-//       setNetwork("");
-//       setSelectedPlan(null);
-//       setPin("");
-//       setPlanType("Daily");
-
-//       // CLOSE MODALS
-//       setOpenPin(false);
-//       setOpenSummary(false);
-
-//       // REFRESH TRANSACTIONS
-//       await fetchTransactions();
-//     } catch (error) {
-//       console.error(error);
-
-//       toast.error("Something went wrong");
-//     } finally {
-//       setBuying(false);
-//     }
-//   }
-
-//   const plans = useMemo(() => {
-//     if (!network) return [];
-
-//     return dataPlans[network]?.[planType] || [];
-//   }, [network, planType]);
-
-//   if (loading && transactions.length === 0) {
-//     return (
-//       <div className="flex h-[70vh] items-center justify-center">
-//         <div className="custom-loader" />
-//       </div>
-//     );
-//   }
-
-
-
-
 
 "use client";
 
@@ -862,12 +314,95 @@ export default function DataPage() {
   /* ================= UI ================= */
 
   if (loading && transactions.length === 0) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <div className="custom-loader" />
-      </div>
-    );
-  }
+   return (
+     <div className="space-y-6 p-1 md:pl-12">
+       <div className="relative overflow-hidden rounded-[28px] bg-black px-4 py-6 text-white md:p-8">
+         <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+ 
+         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+           <div className="max-w-xl space-y-4">
+             <div className="h-10 w-44 animate-pulse rounded-full bg-white/10" />
+             <div className="h-12 w-64 animate-pulse rounded-2xl bg-white/10" />
+             <div className="h-4 w-full max-w-md animate-pulse rounded-full bg-white/10" />
+             <div className="h-4 w-72 max-w-full animate-pulse rounded-full bg-white/10" />
+           </div>
+ 
+           <div className="w-full rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur-2xl md:max-w-sm">
+             <div className="flex items-start justify-between">
+               <div className="space-y-3">
+                 <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+                 <div className="h-10 w-44 animate-pulse rounded-xl bg-white/10" />
+               </div>
+               <div className="h-14 w-14 animate-pulse rounded-2xl bg-white/10" />
+             </div>
+ 
+             <div className="mt-5 h-12 animate-pulse rounded-2xl bg-white/10" />
+           </div>
+            </div>
+       </div>
+ 
+       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+         <Card className="overflow-hidden rounded-[35px] border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
+           <div className="p-6">
+             <div className="h-9 w-44 animate-pulse rounded-xl bg-zinc-200 dark:bg-white/10" />
+           </div>
+ 
+           <CardContent className="space-y-8 md:p-8">
+             <div className="space-y-3">
+               <div className="h-4 w-36 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+               <div className="flex items-center gap-2 rounded-[24px] border border-zinc-200 bg-[#f7f8fa] p-2 dark:border-white/10 dark:bg-zinc-900">
+                 <div className="h-12 min-w-[90px] animate-pulse rounded-[18px] bg-zinc-200 dark:bg-white/10" />
+                 <div className="h-12 flex-1 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+               </div>
+               <div className="h-4 w-40 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+             </div>
+ 
+             <div className="space-y-3">
+               <div className="h-4 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+               <div className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+             </div>
+             <div className="grid grid-cols-3 gap-3">
+               {Array.from({ length: 6 }).map((_, index) => (
+                 <div
+                   key={index}
+                   className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10"
+                 />
+               ))}
+             </div>
+ 
+             <div className="h-14 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+           </CardContent>
+         </Card>
+ 
+         <Card className="overflow-hidden rounded-[35px] border border-zinc-200 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-zinc-950">
+           <div className="flex items-center justify-between border-b border-zinc-200 p-8 dark:border-zinc-800">
+             <div className="h-8 w-56 animate-pulse rounded-xl bg-zinc-200 dark:bg-white/10" />
+             <div className="h-11 w-11 animate-pulse rounded-2xl bg-zinc-200 dark:bg-white/10" />
+           </div>
+ 
+           <CardContent className="space-y-4 p-6">
+             {Array.from({ length: 5 }).map((_, index) => (
+               <div
+                 key={index}
+                 className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900"
+               >
+                 <div className="space-y-3">
+                   <div className="h-4 w-24 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                   <div className="h-4 w-32 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                 </div>
+ 
+                 <div className="space-y-3">
+                   <div className="ml-auto h-4 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                   <div className="h-6 w-20 animate-pulse rounded-full bg-zinc-200 dark:bg-white/10" />
+                 </div>
+               </div>
+             ))}
+           </CardContent>
+         </Card>
+       </div>
+     </div>
+   );
+ }
   return (
     <div className="min-h-screen bg-[#f5f7fb] dark:bg-black">
       <div className="mx-auto max-w-7xl space-y-4  px-1 pb-24 md:space-y-6 md:pl-12">

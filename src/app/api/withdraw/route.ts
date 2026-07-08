@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import { sendNotification } from '../../../lib/notification-service';
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,12 +11,6 @@ export async function POST(req: NextRequest) {
 
     // TODO: withdrawal logic here
 
-    await sendNotification({
-      event: "withdrawal",
-      userId,
-      title: "💸 Withdrawal Alert",
-      message: `You withdrew ₦${amount}`,
-    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

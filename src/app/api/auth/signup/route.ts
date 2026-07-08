@@ -12,6 +12,7 @@ import User from "@/models/User";
 import VirtualAccount from "@/models/VirtualAccount";
 import { generateReferralCode } from "@/lib/referral";
 
+
 const EMAIL_CODE_TTL_MS =
   10 * 60 * 1000;
 
@@ -173,6 +174,8 @@ export async function POST(
       String(user._id)
     );
 
+   
+   
     // CREATE MONNIFY RESERVED ACCOUNT
 
     try {

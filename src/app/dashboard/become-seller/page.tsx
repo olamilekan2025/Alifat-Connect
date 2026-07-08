@@ -93,6 +93,125 @@ export default function BecomeSellerPage() {
     }
   };
 
+  if (loadingProfile) {
+  return (
+    <main className="min-h-screen bg-background">
+      <section className="relative overflow-hidden rounded-[32px] md:pl-10">
+        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-yellow-500/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
+
+        <div className="relative overflow-hidden rounded-[32px] border border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 via-yellow-500/5 to-transparent p-6 lg:p-8">
+          <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-yellow-500/10 blur-3xl" />
+
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-4">
+              <div className="h-7 w-36 animate-pulse rounded-full bg-yellow-500/20" />
+              <div className="h-10 w-80 max-w-full animate-pulse rounded-2xl bg-muted" />
+              <div className="h-4 w-[520px] max-w-full animate-pulse rounded-full bg-muted" />
+              <div className="h-4 w-80 max-w-full animate-pulse rounded-full bg-muted" />
+            </div>
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="rounded-2xl border bg-background/80 px-5 py-4 backdrop-blur">
+                <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+                <div className="mt-3 h-8 w-32 animate-pulse rounded-xl bg-muted" />
+                </div>
+
+              <div className="rounded-2xl border bg-background/80 px-5 py-4 backdrop-blur">
+                <div className="h-3 w-20 animate-pulse rounded-full bg-muted" />
+                <div className="mt-3 h-8 w-28 animate-pulse rounded-xl bg-yellow-500/20" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-8xl px-0 py-10 md:pl-10">
+        <div className="grid gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Card className="overflow-hidden rounded-[32px] border-0 shadow-xl">
+              <CardContent className="p-1 md:p-8">
+                <div className="mb-8 flex items-center gap-3">
+                  <div className="h-12 w-12 animate-pulse rounded-2xl bg-yellow-500/10" />
+
+                  <div className="space-y-3">
+                    <div className="h-7 w-44 animate-pulse rounded-xl bg-muted" />
+                    <div className="h-4 w-56 animate-pulse rounded-full bg-muted" />
+                  </div>
+                   </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="rounded-3xl border p-5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 animate-pulse rounded-xl bg-emerald-500/10" />
+                        <div className="h-5 w-40 animate-pulse rounded-full bg-muted" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card className="overflow-hidden rounded-[32px] border-0 shadow-xl">
+              <CardContent className="p-0">
+                 <div className="bg-gradient-to-r from-yellow-500 to-amber-600 p-6 text-black">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 animate-pulse rounded-md bg-black/10" />
+                    <div className="h-5 w-32 animate-pulse rounded-full bg-black/10" />
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="h-4 w-28 animate-pulse rounded-full bg-black/10" />
+                    <div className="h-11 w-40 animate-pulse rounded-xl bg-black/10" />
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-28 animate-pulse rounded-full bg-muted" />
+                    <div className="h-7 w-20 animate-pulse rounded-full bg-muted" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+             <Card className="sticky top-24 overflow-hidden rounded-[32px] border-2 border-yellow-500/20 shadow-2xl">
+              <div className="bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 p-6 text-black">
+                <div className="flex items-center justify-between">
+                  <div className="h-7 w-40 animate-pulse rounded-xl bg-black/10" />
+                  <div className="h-6 w-6 animate-pulse rounded-md bg-black/10" />
+                </div>
+
+                <div className="mt-3 h-4 w-28 animate-pulse rounded-full bg-black/10" />
+              </div>
+
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="mx-auto h-12 w-40 animate-pulse rounded-2xl bg-yellow-500/20" />
+                  <div className="mx-auto mt-4 h-4 w-64 max-w-full animate-pulse rounded-full bg-muted" />
+                  <div className="mx-auto mt-2 h-4 w-48 max-w-full animate-pulse rounded-full bg-muted" />
+                </div>
+
+                <div className="mt-8 h-14 w-full animate-pulse rounded-2xl bg-yellow-500/20" />
+
+                <div className="mt-5 flex items-center justify-center gap-2">
+                  <div className="h-3 w-3 animate-pulse rounded-sm bg-muted" />
+                  <div className="h-3 w-56 max-w-full animate-pulse rounded-full bg-muted" />
+                </div>
+              </CardContent>
+               </Card>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
   return (
     <main className="min-h-screen bg-background">
       {/* Hero */}

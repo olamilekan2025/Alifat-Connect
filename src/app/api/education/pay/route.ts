@@ -335,6 +335,7 @@ await db.collection("wallets").updateOne(
     await session.commitTransaction();
     session.endSession();
 
+   
     // Update membership AFTER successful commit
     try {
       await updateMembership(user._id.toString());

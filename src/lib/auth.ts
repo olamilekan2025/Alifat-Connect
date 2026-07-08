@@ -249,6 +249,7 @@ if (user.role === "admin") {
             role: (
               user.role || "user"
             ).toLowerCase(),
+            isAdmin: user.role === "admin",
           };
         } catch (error) {
           console.error(
