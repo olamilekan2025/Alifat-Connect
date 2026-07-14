@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { objectId } from "../../../../../../lib/chat-utils";
+import { ObjectId } from "mongodb";
+
+const objectId = (id: string) => new ObjectId(id);
 import { requireChatUser } from "../../../../../../lib/chat-auth";
 import { Conversation } from "../../../../../../models/Conversation";
 import { Message } from "../../../../../../models/Message";

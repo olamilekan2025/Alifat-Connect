@@ -17,9 +17,9 @@ export async function requireChatUser(): Promise<ChatUser> {
   const session = await getServerSession(authOptions);
   const user = session?.user as ChatUser | undefined;
 
-  if (!user?.id) {
-    throw new Response("Unauthorized", { status: 401 });
-  }
+ if (!user?.id) {
+  throw new Error("Unauthorized");
+}
 
   return {
     id: user.id,

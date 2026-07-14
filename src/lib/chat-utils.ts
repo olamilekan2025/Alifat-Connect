@@ -85,12 +85,12 @@ export function serializeNotification(n: Record<string, unknown>): ChatNotificat
 // Keep this utility client-safe: do NOT import mongoose here.
 // Validate a MongoDB ObjectId by format (24 hex chars).
 const objectIdHexRegexp = /^[0-9a-fA-F]{24}$/;
-export function objectId(value: string) {
-  if (!objectIdHexRegexp.test(value)) {
-    throw new Response("Invalid id", { status: 400 });
-  }
-  return value;
-}
+// export function objectId(value: string) {
+//   if (!objectIdHexRegexp.test(value)) {
+//     throw new Response("Invalid id", { status: 400 });
+//   }
+//   return value;
+// }
 
 export function isAllowedUpload(file: File) {
   const allowed = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"]);
