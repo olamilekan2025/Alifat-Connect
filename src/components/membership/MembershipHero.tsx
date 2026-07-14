@@ -13,7 +13,7 @@ export default function MembershipHero({
   membership,
 }: MembershipHeroProps) {
   return (
-    <Card className="overflow-hidden border-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 text-white shadow-xl">
+    <Card className="overflow-hidden border-0 bg-[#D4AF37] via-yellow-500 to-orange-500 text-white shadow-xl">
       <CardContent className="flex flex-col gap-6 p-8 md:flex-row md:items-center md:justify-between">
         <div className="space-y-3">
           <p className="text-sm uppercase tracking-widest opacity-80">

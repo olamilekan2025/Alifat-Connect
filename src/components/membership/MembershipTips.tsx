@@ -45,9 +45,9 @@ export default function MembershipTips() {
           return (
             <div
               key={tip.title}
-              className="rounded-xl border p-5 transition-colors hover:border-amber-500"
+              className="rounded-xl border p-5 transition-colors hover:border-[#D4AF37] hover:bg-[#D4AF37]/5"
             >
-              <Icon className="mb-4 h-8 w-8 text-amber-500" />
+              <Icon className="mb-4 h-8 w-8 text-[#D4AF37]" />
 
               <h3 className="text-lg font-semibold">
                 {tip.title}

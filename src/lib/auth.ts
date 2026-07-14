@@ -160,10 +160,7 @@ const emailSent =
     otp
   );
 
-console.log(
-  "ADMIN LOGIN OTP:",
-  otp
-);
+
 
 console.log(
   "EMAIL SENT:",

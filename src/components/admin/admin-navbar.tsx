@@ -333,10 +333,16 @@ import { Input } from "@/components/ui/input";
 import LogoutModal from "@/components/admin/logout-modal";
 
 import { toast } from "sonner";
+import { MessageCircle } from "lucide-react";
 
 export default function AdminNavbar() {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
@@ -519,11 +525,11 @@ export default function AdminNavbar() {
                 dark:hover:bg-white/10
               "
             >
-              {theme === "dark" ? (
+              {mounted && (theme === "dark" ? (
                 <Sun className="h-5 w-5 text-yellow-500" />
               ) : (
                 <Moon className="h-5 w-5 text-zinc-700" />
-              )}
+              ))}
             </button>
 
             {/* PROFILE */}
@@ -586,6 +592,14 @@ export default function AdminNavbar() {
                     <Home className="h-4 w-4" />
                     Home
                   </Link>
+
+                  <Link
+  href="/admin-dashboard/chat"
+  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
+>
+  <MessageCircle className="h-4 w-4" />
+  Live Chat
+</Link>
 
                   <button
                     onClick={() => {

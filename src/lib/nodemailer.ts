@@ -1,26 +1,56 @@
 import nodemailer from "nodemailer";
 
-// VALIDATE ENV VARIABLES FIRST
+// VALIDATE ENV VARIABLES (lazily) — don’t crash dev server at import-time.
 const requiredEnv = [
   "EMAIL_SERVER_USER",
   "EMAIL_SERVER_PASSWORD",
   "FROM_EMAIL",
-];
+] as const;
 
-requiredEnv.forEach((env) => {
-  if (!process.env[env]) {
-    throw new Error(`Missing environment variable: ${env}`);
+type RequiredEnvKey = (typeof requiredEnv)[number];
+
+let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
+
+function getTransporter() {
+  if (transporter) return transporter;
+
+  const missing = requiredEnv.filter((env) => !process.env[env]);
+  if (missing.length) {
+    throw new Error(
+      `Missing environment variable(s) for email: ${missing.join(", ")}. Add them to your .env file.`
+    );
   }
-});
+
+  // CREATE TRANSPORTER
+  transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_SERVER_USER!,
+      pass: process.env.EMAIL_SERVER_PASSWORD!,
+    },
+    connectionTimeout: 60000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
+  });
+
+  return transporter;
+}
+
+// Create transporter lazily (at first send).
+export default transporter;
 
 
-console.log({
-  EMAIL_SERVER_USER: process.env.EMAIL_SERVER_USER,
-  EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD ? "SET" : "MISSING",
-  FROM_EMAIL: process.env.FROM_EMAIL,
-});
-// CREATE TRANSPORTER
+/* eslint-disable @typescript-eslint/no-unused-vars */
+export const _unusedTransporterConfig = {};
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
+export const __transporter__ = transporter;
+
+// NOTE: actual transporter is created via getTransporter() above.
+
+/*
 export const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
 
@@ -54,8 +84,8 @@ export async function sendEmail(
   options: nodemailer.SendMailOptions,
 ): Promise<boolean> {
   try {
-    const info =
-      await transporter.sendMail({
+    const t = getTransporter();
+    const info = await t.sendMail({
         from:
           process.env.FROM_EMAIL,
 

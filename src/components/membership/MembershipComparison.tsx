@@ -55,9 +55,9 @@ export default function MembershipComparison({
             return (
               <div
                 key={level.id}
-                className={`rounded-xl border p-6 transition-all ${
+                className={`rounded-xl border-2 p-6 transition-all ${
                   active
-                    ? "border-amber-500 bg-amber-50 shadow-md dark:bg-amber-950/20"
+                    ? "border-[#D4AF37] bg-amber-50 shadow-md dark:bg-amber-950/20"
                     : "border-border"
                 }`}
               >
@@ -67,7 +67,7 @@ export default function MembershipComparison({
                   </h3>
 
                   {active && (
-                    <span className="rounded-full bg-amber-500 px-2 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-[#D4AF37] px-2 py-1 text-xs font-semibold text-white">
                       Current
                     </span>
                   )}
@@ -77,7 +77,7 @@ export default function MembershipComparison({
                   {level.requirement}
                 </p>
 
-                <div className="mt-8 text-3xl font-bold text-amber-600">
+                <div className="mt-8 text-3xl font-bold text-[#D4AF37]">
                   {level.discount}
                 </div>
               </div>

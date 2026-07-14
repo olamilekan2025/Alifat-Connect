@@ -1,12 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "MONGODB_URI is missing in your environment variables."
-  );
-}
+mongoose.set("strictQuery", true);
 
 type MongooseCache = {
   conn: typeof mongoose | null;
@@ -19,7 +13,7 @@ declare global {
 }
 
 const cached =
-  global.mongooseCache ??
+  global.mongooseCache ||
   {
     conn: null,
     promise: null,
@@ -28,12 +22,20 @@ const cached =
 global.mongooseCache = cached;
 
 export async function connectToDatabase() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+
   if (cached.conn) {
     return cached.conn;
   }
 
+  if (!MONGODB_URI) {
+    throw new Error(
+      "MONGODB_URI is missing. Add it to your .env.local file."
+    );
+  }
+
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI!, {
+    cached.promise = mongoose.connect(MONGODB_URI, {
       dbName: "alifat-connect-pay",
       bufferCommands: false,
       serverSelectionTimeoutMS: 10000,
@@ -42,21 +44,14 @@ export async function connectToDatabase() {
 
   try {
     cached.conn = await cached.promise;
-
-    mongoose.set("strictQuery", true);
-
-    console.log("✅ MongoDB Connected Successfully");
-
+    console.log("✅ MongoDB Connected");
     return cached.conn;
   } catch (error) {
     cached.conn = null;
     cached.promise = null;
-
-    console.error(
-      "❌ MongoDB connection error:",
-      error
-    );
-
+    console.error("❌ MongoDB Connection Error:", error);
     throw error;
   }
 }
+
+export const connectDB = connectToDatabase;
