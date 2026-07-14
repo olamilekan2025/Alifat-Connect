@@ -362,14 +362,37 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
+        // Prevent 400s from the messages endpoint (ObjectId validation) and make logs clearer.
+        const id = String(conversation._id);
+        if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+          console.error("Invalid conversation _id for messages endpoint:", {
+            conversationId: conversation._id,
+          });
+          toast.error("Failed to load conversation messages");
+          return;
+        }
+
         const response = await fetch(
-          `/api/chat/conversations/${conversation._id}/messages`,
+          `/api/chat/conversations/${id}/messages`,
         );
 
-        const data = await response.json();
+        // Try to read response text for better prod debugging (may be JSON or plain).
+        const text = await response.text();
+
+        let data: any = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = null;
+        }
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to load messages");
+          console.error("Failed to load messages endpoint:", {
+            status: response.status,
+            conversationId: id,
+            body: data?.error || text,
+          });
+          throw new Error(data?.error || "Failed to load messages");
         }
 
         // Ignore a slow response from a previously selected conversation.
@@ -379,7 +402,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
         dispatch({
           type: "SET_MESSAGES",
-          messages: data.messages || [],
+          messages: data?.messages || [],
         });
       } catch (error) {
         console.error("Failed to load messages:", error);
@@ -436,61 +459,61 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       });
 
       return new Promise<boolean>((resolve) => {
-  let complete = false;
-  let timeoutId: number | undefined;
+        let complete = false;
+        let timeoutId: number | undefined;
 
-  const finish = (sent: boolean) => {
-    if (complete) return;
+        const finish = (sent: boolean) => {
+          if (complete) return;
 
-    complete = true;
+          complete = true;
 
-    if (timeoutId !== undefined) {
-      window.clearTimeout(timeoutId);
-    }
+          if (timeoutId !== undefined) {
+            window.clearTimeout(timeoutId);
+          }
 
-    resolve(sent);
-  };
+          resolve(sent);
+        };
 
-  timeoutId = window.setTimeout(() => {
-    dispatch({ type: "REMOVE_OPTIMISTIC", clientId });
-    toast.error("Message timed out. Please try again.");
-    finish(false);
-  }, 15_000);
+        timeoutId = window.setTimeout(() => {
+          dispatch({ type: "REMOVE_OPTIMISTIC", clientId });
+          toast.error("Message timed out. Please try again.");
+          finish(false);
+        }, 15_000);
 
-  socket.emit(
-    "message:send",
-    {
-      clientId,
-      conversationId: conversation._id,
-      message,
-      attachment,
-    },
-    (ack: any) => {
-      if (!ack?.ok || !ack.message) {
-        dispatch({ type: "REMOVE_OPTIMISTIC", clientId });
-        toast.error(ack?.error || "Failed to send message");
-        finish(false);
-        return;
-      }
+        socket.emit(
+          "message:send",
+          {
+            clientId,
+            conversationId: conversation._id,
+            message,
+            attachment,
+          },
+          (ack: any) => {
+            if (!ack?.ok || !ack.message) {
+              dispatch({ type: "REMOVE_OPTIMISTIC", clientId });
+              toast.error(ack?.error || "Failed to send message");
+              finish(false);
+              return;
+            }
 
-      dispatch({
-        type: "REPLACE_OPTIMISTIC",
-        clientId,
-        message: ack.message,
+            dispatch({
+              type: "REPLACE_OPTIMISTIC",
+              clientId,
+              message: ack.message,
+            });
+
+            if (ack.conversation) {
+              dispatch({
+                type: "UPSERT_CONVERSATION",
+                conversation: ack.conversation,
+                viewerRole: myRole,
+              });
+            }
+
+            finish(true);
+          },
+        );
       });
-
-      if (ack.conversation) {
-        dispatch({
-          type: "UPSERT_CONVERSATION",
-          conversation: ack.conversation,
-          viewerRole: myRole,
-        });
-      }
-
-      finish(true);
-    },
-  );
-});
     },
     [myId, myRole, socket, state.currentConversation],
   );
