@@ -16,11 +16,25 @@ export function useChatSocket(enabled: boolean): Socket | null {
     const socketUrl =
       process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
 
-    const instance = io(socketUrl, {
-      withCredentials: true,
-      transports: ["polling", "websocket"],
-      reconnection: true,
-    });
+  console.log("Connecting socket to:", socketUrl);
+
+const instance = io(socketUrl, {
+  withCredentials: true,
+  transports: ["websocket"],
+  reconnection: true,
+});
+
+instance.on("connect", () => {
+  console.log("SOCKET CONNECTED", instance.id);
+});
+
+instance.on("connect_error", (err) => {
+  console.error("SOCKET ERROR", err);
+});
+
+instance.on("disconnect", (reason) => {
+  console.log("SOCKET DISCONNECTED", reason);
+});
 
     setSocket(instance);
 

@@ -13,7 +13,7 @@ import { Server } from "socket.io";
 import { registerChatSocket } from "./src/lib/socket/server";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
+const hostname = "0.0.0.0";
 const port = Number(process.env.PORT || 3000);
 
 const app = next({ dev, hostname, port });
@@ -23,17 +23,20 @@ app.prepare().then(async () => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer, {
-    cors: {
-      origin:
-        process.env.NEXT_PUBLIC_APP_URL ??
-        `http://${hostname}:${port}`,
-      credentials: true,
-    },
-  });
+  cors: {
+    origin: process.env.NEXT_PUBLIC_APP_URL,
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
+});
 
   await registerChatSocket(io);
 
-  httpServer.listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
-  });
+  httpServer.listen(port, "0.0.0.0", () => {
+  console.log("================================");
+  console.log("Socket.IO Server Started");
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Port: ${port}`);
+  console.log("================================");
+});
 });

@@ -496,10 +496,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+    
+
       console.log(
-        "Fetching:",
-        `/api/chat/conversations/${id}/messages`
-      );
+  "GET",
+  `/api/chat/conversations/${id}/messages`
+);
 
       const response = await fetch(
         `/api/chat/conversations/${id}/messages`,
@@ -509,6 +511,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           cache: "no-store",
         }
       );
+
+      console.log(
+  "Response status:",
+  response.status
+);
 
       console.log("Status:", response.status);
 
