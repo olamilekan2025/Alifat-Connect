@@ -361,20 +361,72 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         socket.emit("conversation:join", conversation._id);
       }
 
+      const fail = (reason?: unknown) => {
+        if (reason) console.error("selectConversation failed:", reason);
+        toast.error("Failed to load conversation messages");
+      };
+
       try {
-        // Prevent 400s from the messages endpoint (ObjectId validation) and make logs clearer.
-        const id = String(conversation._id);
-        if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+        // Production issue guard:
+        // `/api/chat/conversations/[conversationId]/messages` rejects non-ObjectId values (400).
+        // Sometimes the conversation payload can be stale/serialized differently in production.
+        const rawId = (conversation as any)?._id;
+        const id = String(rawId);
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+        if (!isValidObjectId) {
           console.error("Invalid conversation _id for messages endpoint:", {
-            conversationId: conversation._id,
+            conversationId: rawId,
+            conversation,
           });
-          toast.error("Failed to load conversation messages");
+
+          // Retry flow: reload conversations so we can re-select with a valid id.
+          // This avoids hard-failing in prod when the client initially received a malformed payload.
+          try {
+            await fetchConversations();
+          } catch (e) {
+            console.error("Retry fetchConversations failed:", e);
+          }
+
+          const current = state.conversations.find(
+            (c) => String(c._id) === id || String((c as any)?._id) === String(rawId),
+          );
+
+          const retryId = current ? String((current as any)._id) : id;
+          if (!/^[0-9a-fA-F]{24}$/.test(retryId)) {
+            // Still invalid.
+            fail({ type: "invalid_id", id, retryId });
+            return;
+          }
+
+          const response = await fetch(
+            `/api/chat/conversations/${retryId}/messages`,
+          );
+
+          const text = await response.text();
+          let data: any = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch {
+            data = null;
+          }
+
+          if (!response.ok) {
+            console.error("Failed to load messages endpoint:", {
+              status: response.status,
+              conversationId: retryId,
+              body: data?.error || text,
+            });
+            throw new Error(data?.error || "Failed to load messages");
+          }
+
+          if (requestId !== messagesRequestRef.current) return;
+
+          dispatch({ type: "SET_MESSAGES", messages: data?.messages || [] });
           return;
         }
 
-        const response = await fetch(
-          `/api/chat/conversations/${id}/messages`,
-        );
+        const response = await fetch(`/api/chat/conversations/${id}/messages`);
 
         // Try to read response text for better prod debugging (may be JSON or plain).
         const text = await response.text();
@@ -406,10 +458,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         });
       } catch (error) {
         console.error("Failed to load messages:", error);
-        toast.error("Failed to load conversation messages");
+        fail(error);
       }
     },
-    [socket],
+    // Note: we intentionally depend on `fetchConversations` and `state.conversations`
+    // because the retry flow needs the latest conversation ids.
+    [fetchConversations, socket, state.conversations],
   );
 
   const sendMessage = useCallback(
