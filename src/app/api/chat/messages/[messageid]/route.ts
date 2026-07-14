@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { objectId } from "../../../../../lib/chat-utils";
+// objectId helper removed; use the raw message id string (Mongoose accepts string ids)
 import { requireAdmin, requireChatUser } from "../../../../../lib/chat-auth";
 import { Message } from "../../../../../models/Message";
 
@@ -15,7 +15,7 @@ export async function DELETE(
   requireAdmin(user);
 
   const { messageid } = await params;
-  const deleted = await Message.findByIdAndDelete(objectId(messageid));
+  const deleted = await Message.findByIdAndDelete(messageid);
   if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
