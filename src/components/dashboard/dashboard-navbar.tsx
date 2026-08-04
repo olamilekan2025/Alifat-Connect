@@ -34,6 +34,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dashboard/wallet": "Wallet",
@@ -106,18 +108,7 @@ export function DashboardNavbar() {
         {/* RIGHT */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* NOTIFICATION */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative h-10 w-10 rounded-2xl border border-zinc-200 bg-white/90 shadow-sm transition-all hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 sm:h-11 sm:w-11"
-          >
-            <Bell className="h-4 w-4 text-zinc-700 dark:text-zinc-200" />
-
-            <span className="absolute right-2.5 top-2.5 flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
-            </span>
-          </Button>
+          <NotificationDropdown role="user" />
 
           {/* PROFILE */}
           <DropdownMenu>

@@ -17,6 +17,7 @@ import {
   getMembershipBenefits,
   calculateDiscount,
 } from "@/lib/membership";
+import { createUserNotification } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   const session = await mongoose.startSession();
@@ -424,6 +425,25 @@ status: "success",
 // Commit database transaction
 await session.commitTransaction();
 session.endSession();
+
+// Create notification for successful airtime purchase
+try {
+  await createUserNotification(
+    user._id.toString(),
+    "airtime_purchase",
+    "Airtime Purchase Successful",
+    `Your ₦${parsedAmount.toLocaleString()} ${network} airtime purchase to ${phone} was successful.`,
+    {
+      transactionId: transaction[0]._id.toString(),
+      amount: parsedAmount,
+      network,
+      phone,
+    }
+  );
+} catch (notificationError) {
+  console.error("Notification creation error:", notificationError);
+  // Don't fail the transaction if notification fails
+}
 
 // Update membership AFTER successful commit
 try {

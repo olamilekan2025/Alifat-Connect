@@ -28,6 +28,11 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
 
+  // Use standard JWT instead of encrypted JWE for easier socket authentication
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60,
+  },
+
   pages: {
     signIn: "/auth/login",
   },
@@ -267,12 +272,11 @@ if (user.role === "admin") {
       account,
     }) {
       if (user) {
-        token.id = user.id;
-
-        token.role = String(
-          user.role || "user"
-        ).toLowerCase();
-      }
+  token.id = user.id;
+  token.name = user.name;
+  token.email = user.email;
+  token.role = String(user.role || "user").toLowerCase();
+}
 
       if (
         account?.provider ===
@@ -306,14 +310,11 @@ if (user.role === "admin") {
       token,
     }) {
       if (session.user) {
-        session.user.id = String(
-          token.id
-        );
-
-        session.user.role = String(
-          token.role
-        );
-      }
+  session.user.id = String(token.id);
+  session.user.name = String(token.name || "");
+  session.user.email = String(token.email || "");
+  session.user.role = String(token.role);
+}
 
       return session;
     },

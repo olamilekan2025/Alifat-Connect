@@ -11,6 +11,7 @@ import { getSocketUser } from "../chat-auth";
 import { Conversation } from "../../models/Conversation";
 import { Message } from "../../models/Message";
 import { Notification } from "../../models/Notification";
+import { setSocketIO } from "../notifications";
 import type { ChatAttachment, ChatUser } from "../../../types/chat";
 
 type SendMessagePayload = {
@@ -83,16 +84,45 @@ async function canAccessConversation(user: ChatUser, conversationId: string) {
 export async function registerChatSocket(io: Server) {
   await connectDB();
 
+  // Set Socket.IO instance for notification service
+  setSocketIO(io);
+
   io.use(async (socket, next) => {
-    try {
-      const user = await getSocketUser(socket);
-      if (!user?.id) return next(new Error("Unauthorized"));
-      socket.data.user = user;
-      next();
-    } catch (error) {
-      next(error as Error);
+  console.log("========== SOCKET AUTH ==========");
+
+  console.log("Cookies:");
+  console.log(socket.handshake.headers.cookie);
+
+  console.log("Auth:");
+  console.log(socket.handshake.auth);
+
+  console.log("Query:");
+  console.log(socket.handshake.query);
+
+  try {
+   console.log("Cookie:");
+console.log(socket.request.headers.cookie);
+
+const user = await getSocketUser(socket);
+
+console.log(user);
+    console.log("Resolved user:", user);
+
+    if (!user?.id) {
+      console.log("Socket unauthorized");
+      return next(new Error("Unauthorized"));
     }
-  });
+
+    socket.data.user = user;
+
+    console.log("Socket authenticated");
+
+    next();
+  } catch (e) {
+    console.error(e);
+    next(e as Error);
+  }
+});
 
   io.on("connection", async (socket: Socket) => {
     const user = socket.data.user as ChatUser;
@@ -298,4 +328,18 @@ export async function registerChatSocket(io: Server) {
       io.to("admins").emit("presence:update", { userId: user.id, online: isOnline(user.id) });
     });
   });
+
+  // Payment update events for real-time admin dashboard updates
+  // These can be called from API endpoints to notify admins of payment changes
+  return {
+    emitPaymentUpdate: (paymentData: Record<string, unknown>) => {
+      io.to("admins").emit("payment:update", paymentData);
+    },
+    emitPaymentApproved: (paymentData: Record<string, unknown>) => {
+      io.to("admins").emit("payment:approved", paymentData);
+    },
+    emitPaymentRejected: (paymentData: Record<string, unknown>) => {
+      io.to("admins").emit("payment:rejected", paymentData);
+    },
+  };
 }

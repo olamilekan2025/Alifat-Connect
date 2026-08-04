@@ -72,6 +72,7 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { DashboardNavbar } from "@/components/dashboard/dashboard-navbar";
 import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { ChatProvider } from "@/context/ChatContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 
 import {
   SidebarInset,
@@ -84,22 +85,24 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ChatProvider>
-      <SidebarProvider defaultOpen>
-        <AppSidebar />
+    <NotificationProvider>
+      <ChatProvider>
+        <SidebarProvider defaultOpen>
+          <AppSidebar />
 
-        <SidebarInset>
-          {/* FIXED NAVBAR */}
-          <DashboardNavbar />
+          <SidebarInset>
+            {/* FIXED NAVBAR */}
+            <DashboardNavbar />
 
-          {/* PAGE CONTENT */}
-          <main className="min-h-screen bg-white p-1 pt-8 dark:bg-black md:p-6 md:pt-10">
-            {children}
-          </main>
-        </SidebarInset>
+            {/* PAGE CONTENT */}
+            <main className="min-h-screen bg-white p-1 pt-8 dark:bg-black md:p-6 md:pt-10">
+              {children}
+            </main>
+          </SidebarInset>
 
-        <LiveChatWidget />
-      </SidebarProvider>
-    </ChatProvider>
+          <LiveChatWidget />
+        </SidebarProvider>
+      </ChatProvider>
+    </NotificationProvider>
   );
 }

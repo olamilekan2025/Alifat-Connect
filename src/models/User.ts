@@ -121,11 +121,11 @@ const UserSchema = new Schema<IUser>(
       trim: true,
     },
 
-    password: {
-      type: String,
-      required: true,
-      select: false,
-    },
+password: {
+  type: String,
+  required: false,
+  select: false,
+},
 
     image: {
       type: String,

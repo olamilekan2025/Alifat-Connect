@@ -24,6 +24,7 @@ import {
   CreditCard,
   Zap,
   Store,
+  Bell,
 } from "lucide-react";
 
 import {
@@ -65,19 +66,6 @@ export function AppSidebar() {
   const [utilitiesOpen, setUtilitiesOpen] = useState(false);
   const [billsOpen, setBillsOpen] = useState(false);
 
-  // Sync state cleanly with route changes
-  useEffect(() => {
-    if (isMobileGroupActive) setMobileOpen(true);
-  }, [isMobileGroupActive]);
-
-  useEffect(() => {
-    if (isUtilitiesGroupActive) setUtilitiesOpen(true);
-  }, [isUtilitiesGroupActive]);
-
-  useEffect(() => {
-    if (isBillsGroupActive) setBillsOpen(true);
-  }, [isBillsGroupActive]);
-
   useEffect(() => {
     async function loadBranding() {
       try {
@@ -97,7 +85,21 @@ export function AppSidebar() {
     loadBranding();
   }, []);
 
+  // Sync state cleanly with route changes
+  useEffect(() => {
+    if (isMobileGroupActive) setMobileOpen(true);
+  }, [isMobileGroupActive]);
+
+  useEffect(() => {
+    if (isUtilitiesGroupActive) setUtilitiesOpen(true);
+  }, [isUtilitiesGroupActive]);
+
+  useEffect(() => {
+    if (isBillsGroupActive) setBillsOpen(true);
+  }, [isBillsGroupActive]);
+
   const menuClass = (active: boolean) =>
+    
     `group relative flex h-10 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-sm font-medium transition-all duration-200 ${
       active
         ? "bg-gradient-to-r from-yellow-500/20 to-transparent text-yellow-600 dark:text-yellow-400 font-semibold"
@@ -117,37 +119,43 @@ export function AppSidebar() {
       className="w-[280px] border-r border-black bg-white backdrop-blur-md dark:border-white dark:bg-zinc-950/80 md:w-[290px]"
     >
       {/* HEADER */}
-      <SidebarHeader className="sticky top-0 z-10 border-b border-black bg-white px-4 py-3.5 backdrop-blur-md dark:border-white dark:bg-black">
-        <div className="flex items-center gap-3 overflow-hidden">
-          {/* Logo box */}
-          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-zinc-200/80 dark:border-zinc-800">
-            {branding.logoUrl ? (
-              <Image
-                src={branding.logoUrl}
-                fill
-                alt={branding.platformName}
-                sizes="36px"
-                priority
-                className="object-contain p-1"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-zinc-950">
-                {branding.platformName
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
-            )}
-          </div>
+      
+<SidebarHeader className="sticky top-0 z-10 border-b border-black bg-white px-4 py-2 backdrop-blur-md dark:border-white dark:bg-black">
+  <div className="flex items-center gap-3 overflow-hidden">
+    {/* Logo box */}
+    {branding.logoUrl ? (
+      <div className="relative h-10 w-10 lg:h-12 lg:w-12 shrink-0 overflow-hidden rounded-xl lg:rounded-2xl border border-zinc-200 dark:border-white/10">
+        <Image
+          src={branding.logoUrl}
+          fill
+          alt={branding.platformName}
+          sizes="48px"
+          priority
+          className="object-cover"
+        />
+      </div>
+    ) : (
+      <div className="flex h-10 w-10 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-xl lg:rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 text-black font-black shadow-lg">
+        {branding.platformName
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()}
+      </div>
+    )}
 
-          {/* Brand text */}
-          <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white truncate group-data-[collapsible=icon]:hidden">
-            {branding.platformName}
-          </span>
-        </div>
-      </SidebarHeader>
+    {/* Brand text */}
+    <div className="truncate group-data-[collapsible=icon]:hidden">
+      <h2 className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white truncate">
+        {branding.platformName}
+      </h2>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        Dashboard
+      </p>
+    </div>
+  </div>
+</SidebarHeader>
 
       {/* SIDEBAR SCROLLABLE CONTENT */}
       <SidebarContent className="px-3 py-4 space-y-4 bg-white dark:bg-black overflow-y-auto">
@@ -334,6 +342,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-1.5">
             <SidebarMenu className="space-y-1">
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Notifications" asChild>
+                  <Link href="/dashboard/notifications" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/notifications")}>
+                    <Bell className="h-4 w-4 shrink-0 stroke-[2.2]" />
+                    <span className="truncate group-data-[collapsible=icon]:hidden">Notifications</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Settings" asChild>
                   <Link href="/dashboard/settings" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/settings")}>

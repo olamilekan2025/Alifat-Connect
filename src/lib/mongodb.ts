@@ -38,7 +38,13 @@ export async function connectToDatabase() {
     cached.promise = mongoose.connect(MONGODB_URI, {
       dbName: "alifat-connect-pay",
       bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      retryWrites: true,
+      retryReads: true,
     });
   }
 

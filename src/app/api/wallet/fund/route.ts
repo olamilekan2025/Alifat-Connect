@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 import { connectToDatabase } from "@/lib/mongodb";
+import { createUserNotification } from "@/lib/notifications";
 
 export async function POST(
   request: Request
@@ -137,7 +138,7 @@ export async function POST(
       );
 
     // CREATE TRANSACTION
-    await db
+    const transactionResult = await db
       .collection("transactions")
       .insertOne({
         userId:
@@ -158,6 +159,23 @@ export async function POST(
         createdAt:
           new Date(),
       });
+
+    // Create notification for wallet funding
+    try {
+      await createUserNotification(
+        user._id.toString(),
+        "wallet_funded",
+        "Wallet Funded",
+        `₦${amount.toLocaleString()} has been added to your wallet.`,
+        {
+          transactionId: transactionResult.insertedId.toString(),
+          amount,
+        }
+      );
+    } catch (notificationError) {
+      console.error("Notification creation error:", notificationError);
+      // Don't fail the transaction if notification fails
+    }
 
     return NextResponse.json({
       message:

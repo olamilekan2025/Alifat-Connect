@@ -11,7 +11,7 @@ export async function DELETE(
   { params }: { params: Promise<{ messageid: string }> },
 ) {
   await connectDB();
-  const user = await requireChatUser();
+  const user = await requireChatUser(_request);
   requireAdmin(user);
 
   const { messageid } = await params;

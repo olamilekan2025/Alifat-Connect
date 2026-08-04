@@ -1,12 +1,12 @@
 import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireChatUser } from "../../../../lib/chat-auth";
 import { isAllowedUpload, messageTypeFromMime } from "../../../../lib/chat-utils";
 
-export async function POST(req: Request) {
-  await requireChatUser();
+export async function POST(req: NextRequest) {
+  await requireChatUser(req);
   const formData = await req.formData();
   const file = formData.get("file");
 

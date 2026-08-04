@@ -82,6 +82,8 @@ export default function Footer() {
     pathname === "/admin-dashboard/wallet" ||
     pathname === "/admin-dashboard/security" ||
     pathname === "/admin-dashboard/chat" ||
+    pathname === "/admin-dashboard/payments" ||
+    pathname === "/admin-dashboard/notifications" ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;
@@ -211,14 +213,15 @@ export default function Footer() {
                 );
               })}
               
-              <Button
+    <Button
   size="icon"
   variant="ghost"
-  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  onClick={() =>
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
   className="h-11 w-11 rounded-full bg-black text-white hover:bg-[#D4AF37] dark:hover:text-[#D4AF37]"
-  aria-label="Toggle theme"
 >
-  {theme === "dark" ? (
+  {!mounted ? null : theme === "dark" ? (
     <Sun className="h-5 w-5" />
   ) : (
     <Moon className="h-5 w-5" />

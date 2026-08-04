@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -9,14 +9,14 @@ import { Message } from "../../../../../../models/Message";
 import { Notification } from "../../../../../../models/Notification";
 
 export async function POST(
-  _: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   await connectDB();
 
   const { conversationId: id } = await params;
 
-  const user = await requireChatUser();
+  const user = await requireChatUser(req);
   const conversationId = objectId(id);
   const conversation = await Conversation.findById(conversationId);
 

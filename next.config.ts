@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Exclude Socket.IO from Next.js routing
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default nextConfig;

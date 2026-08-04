@@ -10,6 +10,7 @@ import {
   getMembershipBenefits,
   calculateDiscount,
 } from "@/lib/membership";
+import { createUserNotification } from "@/lib/notifications";
 
 import User from "@/models/User";
 import Transaction from "@/models/transaction";
@@ -370,6 +371,27 @@ export async function POST(request: Request) {
     // Commit database transaction
     await session.commitTransaction();
     session.endSession();
+
+    // Create notification for successful electricity purchase
+    try {
+      await createUserNotification(
+        user._id.toString(),
+        "electricity_purchase",
+        "Electricity Purchase Successful",
+        `Your electricity purchase for meter ${meterNumber} was successful.`,
+        {
+          transactionId: transaction[0]._id.toString(),
+          amount: parsedAmount,
+          provider,
+          meterNumber,
+          meterType,
+          token,
+        }
+      );
+    } catch (notificationError) {
+      console.error("Notification creation error:", notificationError);
+      // Don't fail the transaction if notification fails
+    }
 
     // Update membership AFTER successful commit
     try {

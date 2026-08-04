@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
+import { createUserNotification } from "@/lib/notifications";
 
 import User from "@/models/User";
 
@@ -121,6 +122,24 @@ export async function POST(
       expiryDate;
 
     await user.save();
+
+    // Create notification for successful subscription
+    try {
+      await createUserNotification(
+        user._id.toString(),
+        "cable_purchase",
+        "Subscription Activated",
+        `Your ${planId} subscription has been activated successfully.`,
+        {
+          amount: plan.price,
+          planId,
+          expiryDate: expiryDate?.toISOString(),
+        }
+      );
+    } catch (notificationError) {
+      console.error("Notification creation error:", notificationError);
+      // Don't fail the transaction if notification fails
+    }
 
     return NextResponse.json({
       success: true,

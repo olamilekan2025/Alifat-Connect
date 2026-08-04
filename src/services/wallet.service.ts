@@ -5,7 +5,7 @@ export async function deductWallet({
   payable,
   discount,
 }: {
-  user: any;
+  user: { walletBalance?: number; lifetimeSavings?: number; save: () => Promise<void> };
   payable: number;
   discount: number;
 }) {
@@ -26,6 +26,27 @@ export async function deductWallet({
   user.lifetimeSavings =
     Number(user.lifetimeSavings ?? 0) +
     discount;
+
+  await user.save();
+
+  return user.walletBalance;
+}
+
+export async function creditWallet({
+  userId,
+  amount,
+}: {
+  userId: string;
+  amount: number;
+}) {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const currentBalance = Number(user.walletBalance ?? 0);
+  user.walletBalance = Number((currentBalance + amount).toFixed(2));
 
   await user.save();
 

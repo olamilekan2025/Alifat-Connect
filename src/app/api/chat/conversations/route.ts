@@ -5,7 +5,7 @@ import { Conversation } from "../../../../models/Conversation";
 
 export async function GET(req: NextRequest) {
   await connectDB();
-  const user = await requireChatUser();
+  const user = await requireChatUser(req);
   const search = req.nextUrl.searchParams.get("search") || "";
   const status = req.nextUrl.searchParams.get("status");
   const page = Math.max(Number(req.nextUrl.searchParams.get("page") || 1), 1);

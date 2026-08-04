@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { serializeConversation } from "../../../../../../lib/chat-utils";
 import { requireAdmin, requireChatUser } from "../../../../../../lib/chat-auth";
 import { Conversation } from "../../../../../../models/Conversation";
 
 export async function PATCH(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   await connectDB();
 
   const { conversationId } = await params;
 
-  const user = await requireChatUser();
+  const user = await requireChatUser(req);
   requireAdmin(user);
 
   const { isPinned } = await req.json();

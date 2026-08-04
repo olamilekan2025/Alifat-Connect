@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { requireAdmin, requireChatUser } from "../../../../../lib/chat-auth";
@@ -7,14 +7,14 @@ import { Message } from "../../../../../models/Message";
 import { Notification } from "../../../../../models/Notification";
 
 export async function DELETE(
-  _: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   await connectDB();
 
   const { conversationId: id } = await params;
 
-  const user = await requireChatUser();
+  const user = await requireChatUser(req);
   requireAdmin(user);
 
   const conversationId = new ObjectId(id);

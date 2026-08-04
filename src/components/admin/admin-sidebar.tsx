@@ -47,7 +47,7 @@ const links = [
   },
   {
     name: "Notifications",
-    href: "/admin-dashboard/admin-notifications",
+    href: "/admin-dashboard/notifications",
     icon: Bell,
   },
   {

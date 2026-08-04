@@ -13,6 +13,7 @@ import {
   getMembershipBenefits,
   calculateDiscount,
 } from "@/lib/membership";
+import { createUserNotification } from "@/lib/notifications";
 
 /* =========================
    ATOMIC DATA PURCHASE
@@ -271,6 +272,26 @@ discount: discountAmount,
     // Commit database transaction
     await session.commitTransaction();
     session.endSession();
+
+    // Create notification for successful data purchase
+    try {
+      await createUserNotification(
+        user._id.toString(),
+        "data_purchase",
+        "Data Purchase Successful",
+        `Your ${planName} data purchase to ${phone} was successful.`,
+        {
+          transactionId: transaction[0]._id.toString(),
+          amount,
+          network,
+          phone,
+          plan: planName,
+        }
+      );
+    } catch (notificationError) {
+      console.error("Notification creation error:", notificationError);
+      // Don't fail the transaction if notification fails
+    }
 
     // Update membership AFTER successful commit
 try {
