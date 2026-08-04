@@ -29,5 +29,11 @@ conversationSchema.index({ isPinned: -1, lastMessageTime: -1 });
 export const Conversation =
   models.Conversation || model("Conversation", conversationSchema);
 
+  Conversation.on("index", (error) => {
+  if (error) {
+    console.error("❌ Conversation index build error:", error);
+  }
+});
+
 export type ConversationDocument = mongoose.InferSchemaType<typeof conversationSchema>;
 

@@ -31,5 +31,11 @@ messageSchema.index({ clientId: 1, senderId: 1 }, { unique: true, sparse: true }
 
 export const Message = models.Message || model("Message", messageSchema);
 
+Message.on("index", (error) => {
+  if (error) {
+    console.error("❌ Message index build error:", error);
+  }
+});
+
 export type MessageDocument = mongoose.InferSchemaType<typeof messageSchema>;
 
