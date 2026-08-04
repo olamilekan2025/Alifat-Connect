@@ -98,17 +98,34 @@ export async function GET(
 
     const messages = await Message.find(query)
       .sort({ createdAt: -1 })
-      .limit(limit + 1);
+      .limit(limit + 1)
+      .lean();
 
     const hasMore = messages.length > limit;
 
     const page = messages.slice(0, limit).reverse();
 
     return NextResponse.json({
-      messages: page.map((message) =>
-        serializeMessage(message.toObject())
-      ),
-      nextCursor: hasMore
+      messages: page.map((message) => {
+        try {
+          return serializeMessage(message);
+        } catch (error) {
+          console.error("Error serializing message:", error, message);
+          // Return a minimal valid message object if serialization fails
+          return {
+            _id: String(message._id || ""),
+            conversationId: String(message.conversationId || ""),
+            senderId: String(message.senderId || ""),
+            senderRole: "user",
+            message: "",
+            messageType: "text",
+            isRead: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+      }),
+      nextCursor: hasMore && messages[limit - 1]?.createdAt
         ? messages[limit - 1].createdAt
         : null,
     });

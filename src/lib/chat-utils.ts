@@ -7,12 +7,12 @@ export function sanitizeMessage(value: string) {
 
 export function serializeMessage(msg: Record<string, unknown>): ChatMessage {
   return {
-    _id: String(msg._id),
+    _id: msg._id ? String(msg._id) : "",
     clientId: msg.clientId as string | undefined,
-    conversationId: String(msg.conversationId),
-    senderId: String(msg.senderId),
+    conversationId: msg.conversationId ? String(msg.conversationId) : "",
+    senderId: msg.senderId ? String(msg.senderId) : "",
     receiverId: msg.receiverId ? String(msg.receiverId) : undefined,
-    senderRole: msg.senderRole as ChatMessage["senderRole"],
+    senderRole: (msg.senderRole as ChatMessage["senderRole"]) || "user",
     message: (msg.message as string) || "",
     messageType: (msg.messageType as ChatMessage["messageType"]) || "text",
     attachment: msg.attachment as ChatMessage["attachment"],
@@ -31,16 +31,16 @@ export function serializeConversation(conv: Record<string, unknown>): ChatConver
   const admin = conv.admin as Record<string, unknown> | null | undefined;
 
   return {
-    _id: String(conv._id),
+    _id: conv._id ? String(conv._id) : "",
     participants: ((conv.participants as unknown[]) || []).map((p) => String(p)),
     user: {
-      _id: String(user?._id),
+      _id: user?._id ? String(user._id) : "",
       name: user?.name as string | undefined,
       email: user?.email as string | undefined,
     },
     admin: admin
       ? {
-          _id: String(admin._id),
+          _id: admin._id ? String(admin._id) : "",
           name: admin.name as string | undefined,
           email: admin.email as string | undefined,
         }
@@ -67,7 +67,7 @@ export function serializeConversation(conv: Record<string, unknown>): ChatConver
 
 export function serializeNotification(n: Record<string, unknown>): ChatNotification {
   return {
-    _id: String(n._id),
+    _id: n._id ? String(n._id) : "",
     recipientId: n.recipientId ? String(n.recipientId) : undefined,
     recipientRole: n.recipientRole as ChatNotification["recipientRole"],
     conversationId: n.conversationId ? String(n.conversationId) : undefined,
