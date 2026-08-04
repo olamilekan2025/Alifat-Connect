@@ -41,7 +41,7 @@ const io = new Server(httpServer, {
 
   cors: {
     origin: process.env.NODE_ENV === "production"
-      ? ["https://alifat-connect-production.up.railway.app"]
+      ? (process.env.NEXT_PUBLIC_SITE_URL ? [process.env.NEXT_PUBLIC_SITE_URL] : true)
       : ["http://localhost:3000", "http://127.0.0.1:3000", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"],
     credentials: true,
   },

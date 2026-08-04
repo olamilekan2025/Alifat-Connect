@@ -29,7 +29,7 @@ export function useChatSocket(enabled: boolean): Socket | null {
     }
 
     const defaultSocketUrl = window.location.origin;
-    const envSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL?.trim();
+    const envSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
     const socketUrl =
       process.env.NODE_ENV === "production"
         ? envSocketUrl || defaultSocketUrl
@@ -47,6 +47,9 @@ export function useChatSocket(enabled: boolean): Socket | null {
     }
 
     console.log("Connecting Socket.IO:", socketUrl);
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("NEXT_PUBLIC_SOCKET_URL:", process.env.NEXT_PUBLIC_SOCKET_URL);
+    console.log("NEXT_PUBLIC_SITE_URL:", process.env.NEXT_PUBLIC_SITE_URL);
 
  const instance = io(socketUrl, {
     path: "/socket.io",
@@ -58,6 +61,10 @@ export function useChatSocket(enabled: boolean): Socket | null {
     autoConnect: true,
 
     reconnection: true,
+
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
 
     timeout: 20000,
 

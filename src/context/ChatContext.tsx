@@ -460,7 +460,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      if (!socket?.connected) {
+      if (!socket) {
+        console.error("Socket is null, attempting to reconnect...");
+        toast.error("Chat connection lost. Reconnecting...");
+        return false;
+      }
+
+      if (!socket.connected) {
+        console.error("Socket not connected, state:", socket.active, socket.connected);
         toast.error("Chat is reconnecting. Please try again.");
         return false;
       }
