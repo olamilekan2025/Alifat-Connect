@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import type { Socket } from "socket.io-client";
 
 import { useChatSocket } from "../hooks/useChatSocket";
 import { serializeMessage } from "../lib/chat-utils";
@@ -286,7 +287,36 @@ type ChatContextValue = State & {
   emitTyping: (conversationId: string, typing: boolean) => void;
 };
 
+
+
 const ChatContext = createContext<ChatContextValue | null>(null);
+
+function waitForSocketConnect(socket: Socket, timeoutMs = 4000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (socket.connected) {
+      resolve(true);
+      return;
+    }
+
+    const cleanup = () => {
+      window.clearTimeout(timer);
+      socket.off("connect", onConnect);
+    };
+
+    const onConnect = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const timer = window.setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, timeoutMs);
+
+    socket.on("connect", onConnect);
+  });
+}
+
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -466,11 +496,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      if (!socket.connected) {
-        console.error("Socket not connected, state:", socket.active, socket.connected);
-        toast.error("Chat is reconnecting. Please try again.");
-        return false;
-      }
+  if (!socket.connected) {
+  console.warn("Socket not connected, waiting briefly for reconnect...");
+  const reconnected = await waitForSocketConnect(socket, 4000);
+
+  if (!reconnected) {
+    toast.error("Chat is reconnecting. Please try again.");
+    return false;
+  }
+}
 
       const clientId = crypto.randomUUID();
 
