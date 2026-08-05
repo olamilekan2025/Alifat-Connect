@@ -24,7 +24,7 @@ const getBrandingSettings = cache(async () => {
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const res = await fetch(`${baseUrl}/api/admin/settings`, {
-      cache: "no-store",
+      next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
     if (!res.ok) {
