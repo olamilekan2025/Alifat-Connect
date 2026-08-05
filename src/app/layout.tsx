@@ -83,30 +83,11 @@ export default async function RootLayout({
       >
         <FaviconUpdater url={favicon} />
 
-        {/* <Script
-          id="theme-script"
-          strategy="beforeInteractive"
-        >{`try {
-          const theme = localStorage.getItem('theme');
-          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          const resolvedTheme = theme || systemTheme;
-          document.documentElement.classList.add(resolvedTheme);
-        } catch (e) {}`}</Script>
-
         <Script
           id="paystack-inline"
           src="https://js.paystack.co/v1/inline.js"
           strategy="afterInteractive"
         />
-
-        {process.env.NODE_ENV === "production" && (
-          <Script
-            id="tawk-chat"
-            src="https://embed.tawk.to/6a28bb8d3b75f31c2bcf6a9c/1jqnhp8a0"
-            strategy="afterInteractive"
-            crossOrigin="anonymous"
-          />
-        )} */}
 
         <Providers>
           <TooltipProvider delayDuration={0}>
