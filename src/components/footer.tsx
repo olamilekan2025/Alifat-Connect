@@ -74,6 +74,7 @@ export default function Footer() {
     pathname === "/dashboard/manage-wallet" ||
     pathname === "/dashboard/reports" ||
     pathname === "/dashboard/referral" ||
+    pathname === "/dashboard/kyc" ||
     pathname === "/dashboard/membership" ||
     pathname === "/admin-dashboard" ||
     pathname === "/admin-dashboard/users" ||
@@ -85,6 +86,9 @@ export default function Footer() {
     pathname === "/admin-dashboard/payments" ||
     pathname === "/admin-dashboard/notifications" ||
     pathname === "/admin-dashboard/referrals" ||
+    pathname === "/admin-dashboard/support" ||
+    pathname === "/admin-dashboard/kyc" ||
+    pathname.startsWith("/admin-dashboard/kyc/") ||
     pathname === "/auth/forgot-password";
 
   if (hideFooter) return null;

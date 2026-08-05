@@ -79,6 +79,10 @@ lifetimeSavings?: number;
   referralsCount?: number;
   referralEarnings?: number;
 
+  // KYC Verification
+  kycVerified?: boolean;
+  kycVerifiedAt?: Date | null;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -327,6 +331,17 @@ lifetimeSavings: {
     referralEarnings: {
       type: Number,
       default: 0,
+    },
+
+    // KYC Verification
+    kycVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    kycVerifiedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

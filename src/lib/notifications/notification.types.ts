@@ -35,7 +35,12 @@ export type NotificationType =
   | "security_alert"
   // Payment notifications
   | "payment_approved"
-  | "payment_rejected";
+  | "payment_rejected"
+  // KYC notifications
+  | "kyc_submitted"
+  | "kyc_resubmitted"
+  | "kyc_approved"
+  | "kyc_rejected";
 
 export type NotificationRecipientRole = "user" | "admin";
 

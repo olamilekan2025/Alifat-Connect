@@ -313,7 +313,7 @@ if (user.role === "admin") {
   session.user.id = String(token.id);
   session.user.name = String(token.name || "");
   session.user.email = String(token.email || "");
-  session.user.role = String(token.role);
+  session.user.role = String(token.role).toLowerCase();
 }
 
       return session;

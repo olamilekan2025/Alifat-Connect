@@ -42,6 +42,11 @@ export function getNotificationIcon(type: NotificationType): string {
     // Payment notifications
     payment_approved: "CheckCircle",
     payment_rejected: "XCircle",
+    // KYC notifications
+    kyc_submitted: "FileText",
+    kyc_resubmitted: "RefreshCw",
+    kyc_approved: "CheckCircle",
+    kyc_rejected: "XCircle",
   };
 
   return iconMap[type] || "Bell";
@@ -89,6 +94,11 @@ export function getNotificationColor(type: NotificationType): string {
     // Payment notifications
     payment_approved: "green",
     payment_rejected: "red",
+    // KYC notifications
+    kyc_submitted: "blue",
+    kyc_resubmitted: "yellow",
+    kyc_approved: "green",
+    kyc_rejected: "red",
   };
 
   return colorMap[type] || "gray";
@@ -135,6 +145,7 @@ export function getNotificationPriority(type: NotificationType): number {
     account_security: 8,
     transaction_failed: 7,
     withdrawal_request: 6,
+    kyc_rejected: 6,
     // Medium priority
     new_user: 5,
     new_transaction: 4,
@@ -145,6 +156,9 @@ export function getNotificationPriority(type: NotificationType): number {
     wallet_funded: 3,
     payment_approved: 4,
     payment_rejected: 5,
+    kyc_submitted: 4,
+    kyc_resubmitted: 4,
+    kyc_approved: 3,
     // Low priority
     new_message: 2,
     admin_reply: 2,

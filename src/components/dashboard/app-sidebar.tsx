@@ -25,6 +25,7 @@ import {
   Zap,
   Store,
   Bell,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -342,6 +343,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-1.5">
             <SidebarMenu className="space-y-1">
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="KYC Verification" asChild>
+                  <Link href="/dashboard/kyc" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/kyc")}>
+                    <ShieldCheck className="h-4 w-4 shrink-0 stroke-[2.2]" />
+                    <span className="truncate group-data-[collapsible=icon]:hidden">KYC Verification</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Notifications" asChild>
                   <Link href="/dashboard/notifications" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/notifications")}>
