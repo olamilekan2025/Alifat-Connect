@@ -15,6 +15,8 @@ import {
   Eye,
   Settings,
   Award,
+  UserCheck,
+  UserPlus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -247,6 +250,93 @@ function AdminReferralsContent() {
       toast.error("Failed to update settings");
     }
   };
+  
+function SectionHeader({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+  return (
+    <div className="mb-2 flex items-center gap-1.5">
+      <Icon className="h-3.5 w-3.5 text-zinc-400" />
+      <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        {label}
+      </h3>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  mono,
+  emphasize,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  emphasize?: boolean;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{label}</p>
+      <p
+        className={cn(
+          "text-sm text-zinc-900 dark:text-white",
+          mono && "font-mono text-[13px]",
+          emphasize && "font-semibold"
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: React.ReactNode;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+      <span className="text-sm text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span
+        className={cn(
+          "text-right text-sm text-zinc-900 dark:text-white",
+          mono && "font-mono text-[13px]"
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  active: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
+  qualified: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
+  rewarded: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+  pending: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  cancelled: "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400",
+  expired: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
+};
+
+function StatusBadge({ value, size = "md" }: { value?: string; size?: "sm" | "md" }) {
+  if (!value) return null;
+  const key = value.toLowerCase();
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full font-medium capitalize",
+        size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs",
+        STATUS_STYLES[key] || "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+      )}
+    >
+      {value}
+    </span>
+  );
+}
 
   const filteredReferrals = referrals.filter((referral) => {
     if (!search) return true;
@@ -669,94 +759,166 @@ function AdminReferralsContent() {
         </div>
       </div>
 
+      
+
       {/* Referral Details Modal */}
-      {selectedReferral && (
-        <Dialog open={!!selectedReferral} onOpenChange={() => setSelectedReferral(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Referral Details</DialogTitle>
-            </DialogHeader>
+{selectedReferral && (
+  <Dialog open={!!selectedReferral} onOpenChange={() => setSelectedReferral(null)}>
+    <DialogContent className="max-w-2xl gap-0 p-0">
+      <DialogHeader className="border-b border-zinc-100 px-6 py-5 dark:border-zinc-800">
+        <div className="flex items-center justify-between pr-6">
+          <DialogTitle className="text-lg font-semibold">
+            Referral Details
+          </DialogTitle>
+          <div className="flex gap-2">
+            <StatusBadge value={selectedReferral.status} />
+          </div>
+        </div>
+      </DialogHeader>
 
-            <div className="space-y-6">
-              {/* Referrer Information */}
-              {selectedReferral.referrer && (
-                <div>
-                  <h3 className="mb-3 font-semibold">Referrer Information</h3>
-                  <div className="grid gap-2 text-sm">
-                    <DetailRow label="Name" value={selectedReferral.referrer.name || "-"} />
-                    <DetailRow label="Email" value={selectedReferral.referrer.email} />
-                    <DetailRow label="Referral Code" value={selectedReferral.referrer.referralCode} />
-                    <DetailRow label="Total Referrals" value={String(selectedReferral.referrer.referralsCount || 0)} />
-                    <DetailRow label="Total Earnings" value={`₦${Number(selectedReferral.referrer.referralEarnings || 0).toLocaleString()}`} />
-                    <DetailRow
-                      label="Registration Date"
-                      value={selectedReferral.referrer.createdAt ? new Date(selectedReferral.referrer.createdAt).toLocaleDateString() : "-"}
-                    />
-                  </div>
+      <div className="max-h-[70vh] space-y-6 overflow-y-auto px-6 py-5">
+        {/* Referrer Information */}
+        {selectedReferral.referrer && (
+          <section>
+            <SectionHeader icon={UserCheck} label="Referrer" />
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white dark:bg-white dark:text-zinc-900">
+                  {(selectedReferral.referrer.name || selectedReferral.referrer.email || "?")
+                    .charAt(0)
+                    .toUpperCase()}
                 </div>
-              )}
-
-              {/* Referred User Information */}
-              {selectedReferral.referredUser && (
                 <div>
-                  <h3 className="mb-3 font-semibold">Referred User Information</h3>
-                  <div className="grid gap-2 text-sm">
-                    <DetailRow label="Name" value={selectedReferral.referredUser.name || "-"} />
-                    <DetailRow label="Email" value={selectedReferral.referredUser.email} />
-                    <DetailRow
-                      label="Registration Date"
-                      value={selectedReferral.referredUser.createdAt ? new Date(selectedReferral.referredUser.createdAt).toLocaleDateString() : "-"}
-                    />
-                    <DetailRow label="Account Status" value={selectedReferral.referredUser.isSuspended ? "Suspended" : "Active"} />
-                  </div>
-                </div>
-              )}
-
-              {/* Referral Information */}
-              <div>
-                <h3 className="mb-3 font-semibold">Referral Information</h3>
-                <div className="grid gap-2 text-sm">
-                  <DetailRow label="Referral ID" value={selectedReferral._id} />
-                  <DetailRow label="Referral Code" value={selectedReferral.referralCode} />
-                  <DetailRow label="Status" value={selectedReferral.status} />
-                  <DetailRow label="Qualification Status" value={selectedReferral.qualificationStatus} />
-                  <DetailRow label="Reward Amount" value={`₦${Number(selectedReferral.rewardAmount).toLocaleString()}`} />
-                  <DetailRow label="Reward Type" value={selectedReferral.rewardType} />
-                  <DetailRow label="Reference" value={selectedReferral.reference || "-"} />
-                  <DetailRow label="Transaction ID" value={selectedReferral.transactionId || "-"} />
-                  <DetailRow label="Qualification Condition" value={selectedReferral.qualificationCondition || "-"} />
-                  <DetailRow label="Qualification Amount" value={selectedReferral.qualificationAmount ? `₦${Number(selectedReferral.qualificationAmount).toLocaleString()}` : "-"} />
-                  <DetailRow
-                    label="Created"
-                    value={selectedReferral.createdAt ? new Date(selectedReferral.createdAt).toLocaleString() : "-"}
-                  />
-                  {selectedReferral.qualifiedAt && (
-                    <DetailRow
-                      label="Qualified"
-                      value={new Date(selectedReferral.qualifiedAt).toLocaleString()}
-                    />
-                  )}
-                  {selectedReferral.rewardedAt && (
-                    <DetailRow
-                      label="Rewarded"
-                      value={new Date(selectedReferral.rewardedAt).toLocaleString()}
-                    />
-                  )}
-                  {selectedReferral.cancelledAt && (
-                    <DetailRow
-                      label="Cancelled"
-                      value={new Date(selectedReferral.cancelledAt).toLocaleString()}
-                    />
-                  )}
-                  {selectedReferral.cancellationReason && (
-                    <DetailRow label="Cancellation Reason" value={selectedReferral.cancellationReason} />
-                  )}
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                    {selectedReferral.referrer.name || "Unnamed"}
+                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {selectedReferral.referrer.email}
+                  </p>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+                <Stat label="Referral code" value={selectedReferral.referrer.referralCode} mono />
+                <Stat label="Total referrals" value={String(selectedReferral.referrer.referralsCount || 0)} />
+                <Stat
+                  label="Total earnings"
+                  value={`₦${Number(selectedReferral.referrer.referralEarnings || 0).toLocaleString()}`}
+                  emphasize
+                />
+                <Stat
+                  label="Joined"
+                  value={
+                    selectedReferral.referrer.createdAt
+                      ? new Date(selectedReferral.referrer.createdAt).toLocaleDateString()
+                      : "-"
+                  }
+                />
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </section>
+        )}
+
+        {/* Referred User Information */}
+        {selectedReferral.referredUser && (
+          <section>
+            <SectionHeader icon={UserPlus} label="Referred user" />
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">
+                    {(selectedReferral.referredUser.name || selectedReferral.referredUser.email || "?")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                      {selectedReferral.referredUser.name || "Unnamed"}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {selectedReferral.referredUser.email}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
+                    selectedReferral.referredUser.isSuspended
+                      ? "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                      : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+                  )}
+                >
+                  {selectedReferral.referredUser.isSuspended ? "Suspended" : "Active"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+                <Stat
+                  label="Joined"
+                  value={
+                    selectedReferral.referredUser.createdAt
+                      ? new Date(selectedReferral.referredUser.createdAt).toLocaleDateString()
+                      : "-"
+                  }
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Referral Information */}
+        <section>
+          <SectionHeader icon={Gift} label="Referral" />
+          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/60 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">Reward</span>
+              <span className="text-base font-semibold text-zinc-900 dark:text-white">
+                ₦{Number(selectedReferral.rewardAmount).toLocaleString()}
+                <span className="ml-1.5 text-xs font-normal text-zinc-400">
+                  {selectedReferral.rewardType}
+                </span>
+              </span>
+            </div>
+
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+              <Row label="Referral ID" value={selectedReferral._id} mono />
+              <Row label="Referral code" value={selectedReferral.referralCode} mono />
+              <Row
+                label="Qualification status"
+                value={<StatusBadge value={selectedReferral.qualificationStatus} size="sm" />}
+              />
+              <Row label="Reference" value={selectedReferral.reference || "-"} mono />
+              <Row label="Transaction ID" value={selectedReferral.transactionId || "-"} mono />
+              <Row label="Qualification condition" value={selectedReferral.qualificationCondition || "-"} />
+              <Row
+                label="Qualification amount"
+                value={
+                  selectedReferral.qualificationAmount
+                    ? `₦${Number(selectedReferral.qualificationAmount).toLocaleString()}`
+                    : "-"
+                }
+              />
+              <Row
+                label="Created"
+                value={selectedReferral.createdAt ? new Date(selectedReferral.createdAt).toLocaleString() : "-"}
+              />
+              {selectedReferral.qualifiedAt && (
+                <Row label="Qualified" value={new Date(selectedReferral.qualifiedAt).toLocaleString()} />
+              )}
+              {selectedReferral.rewardedAt && (
+                <Row label="Rewarded" value={new Date(selectedReferral.rewardedAt).toLocaleString()} />
+              )}
+              {selectedReferral.cancelledAt && (
+                <Row label="Cancelled" value={new Date(selectedReferral.cancelledAt).toLocaleString()} />
+              )}
+              {selectedReferral.cancellationReason && (
+                <Row label="Cancellation reason" value={selectedReferral.cancellationReason} />
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+    </DialogContent>
+  </Dialog>
+)}
 
       {/* Settings Dialog */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>

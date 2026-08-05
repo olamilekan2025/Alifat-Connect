@@ -87,6 +87,7 @@ export default function Footer() {
     pathname === "/admin-dashboard/notifications" ||
     pathname === "/admin-dashboard/referrals" ||
     pathname === "/admin-dashboard/support" ||
+    pathname === "/admin-dashboard/reports" ||
     pathname === "/admin-dashboard/kyc" ||
     pathname.startsWith("/admin-dashboard/kyc/") ||
     pathname === "/auth/forgot-password";
