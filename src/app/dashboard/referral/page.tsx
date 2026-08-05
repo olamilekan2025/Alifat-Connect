@@ -4,24 +4,26 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Users, Gift, Trophy, Star } from "lucide-react";
+import { Copy, Users, Gift, Trophy, Star, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
 type LeaderboardUser = {
+  rank: number;
   name: string;
   referrals: number;
   earnings: number;
+  referralCode: string;
 };
 
 export default function ReferralPage() {
-  const [referralCode, setReferralCode] = useState("");
   const [referralLink, setReferralLink] = useState("");
-  const [userId, setUserId] = useState(""); // MUST be set from auth/session
 
   const [loading, setLoading] = useState(true);
   const [earnings, setEarnings] = useState(0);
   const [referrals, setReferrals] = useState(0);
+  const [successfulReferrals, setSuccessfulReferrals] = useState(0);
+  const [pendingReferrals, setPendingReferrals] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
 
  const { data: session } = useSession();
@@ -37,12 +39,13 @@ useEffect(() => {
       const data = await res.json();
 
       if (data.success) {
-        setReferralCode(data.data.referralCode);
         setReferrals(data.data.referrals);
+        setSuccessfulReferrals(data.data.successfulReferrals || 0);
+        setPendingReferrals(data.data.pendingReferrals || 0);
         setEarnings(data.data.earnings);
 
         setReferralLink(
-          `${window.location.origin}/register?ref=${data.data.referralCode}`
+          `${window.location.origin}/auth/signup?ref=${data.data.referralCode}`
         );
       }
     } catch (err) {
@@ -97,7 +100,7 @@ useEffect(() => {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
           <Card>
             <CardContent className="p-5">
@@ -111,17 +114,27 @@ useEffect(() => {
           <Card>
             <CardContent className="p-5">
               <Gift className="mb-2 text-green-500" />
-              <p className="text-xs text-muted-foreground">Earnings</p>
-              {loading ? <Skeleton className="h-6 w-24 mt-2" /> :
-                <p className="text-2xl font-black">₦{earnings}</p>}
+              <p className="text-xs text-muted-foreground">Successful</p>
+              {loading ? <Skeleton className="h-6 w-16 mt-2" /> :
+                <p className="text-2xl font-black">{successfulReferrals}</p>}
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-5">
-              <Trophy className="mb-2 text-yellow-500" />
-              <p className="text-xs text-muted-foreground">Rank</p>
-              <p className="text-2xl font-black">#1,245</p>
+              <Clock className="mb-2 text-yellow-500" />
+              <p className="text-xs text-muted-foreground">Pending</p>
+              {loading ? <Skeleton className="h-6 w-16 mt-2" /> :
+                <p className="text-2xl font-black">{pendingReferrals}</p>}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-5">
+              <Trophy className="mb-2 text-emerald-500" />
+              <p className="text-xs text-muted-foreground">Earnings</p>
+              {loading ? <Skeleton className="h-6 w-24 mt-2" /> :
+                <p className="text-2xl font-black">₦{earnings}</p>}
             </CardContent>
           </Card>
         </div>
@@ -164,16 +177,21 @@ useEffect(() => {
               </div>
             ) : (
               <div className="space-y-3">
-                {leaderboard.map((user, i) => (
+                {leaderboard.map((user) => (
                   <div
-                    key={i}
+                    key={user.rank}
                     className="flex justify-between items-center border rounded-xl p-3"
                   >
-                    <div>
-                      <p className="font-bold">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user.referrals} referrals
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500/10 font-bold text-yellow-600">
+                        {user.rank}
+                      </div>
+                      <div>
+                        <p className="font-bold">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user.referrals} referrals
+                        </p>
+                      </div>
                     </div>
                     <p className="font-bold text-green-500">
                       ₦{user.earnings}

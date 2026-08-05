@@ -10,6 +10,11 @@ export default withAuth({
     authorized: ({ token, req }) => {
       const pathname = req.nextUrl.pathname;
 
+      // Skip middleware for API routes - they handle their own auth
+      if (pathname.startsWith("/api")) {
+        return true;
+      }
+
       // ❌ No token = block
       if (!token) return false;
 
@@ -43,4 +48,6 @@ export const config = {
     "/admin/:path*",
     "/moderator/:path*",
   ],
+  // Exclude API routes from middleware - they handle their own auth
+  // This is done by not matching /api/* paths
 };

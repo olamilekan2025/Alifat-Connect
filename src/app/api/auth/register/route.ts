@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import { generateReferralCode } from "@/lib/referral";
+import { processReferral } from "@/lib/referral-tracking";
 
 export async function POST(req: Request) {
   try {
@@ -18,49 +19,28 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-  // FIND INVITER
-let inviter = null;
+    // CREATE USER FIRST
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      referralCode: generateReferralCode(name),
+    });
 
-if (referralCode) {
-  inviter = await User.findOne({ referralCode });
-}
+    // PROCESS REFERRAL
+    if (referralCode) {
+      const referralResult = await processReferral(
+        String(user._id),
+        referralCode
+      );
 
-// CREATE USER FIRST
-const user = await User.create({
-  name,
-  email,
-  password: hashedPassword,
-  referralCode: generateReferralCode(name),
-  referredBy: inviter ? inviter.referralCode : null,
-});
-
-// ❌ PREVENT SELF REFERRAL
-if (inviter && inviter._id.toString() === user._id.toString()) {
-  return NextResponse.json(
-    { error: "Self-referral not allowed" },
-    { status: 400 }
-  );
-}
-
-// HANDLE REFERRAL REWARD
-if (inviter) {
-  const reward = 500;
-
-  inviter.referralsCount = (inviter.referralsCount || 0) + 1;
-  inviter.referralEarnings = (inviter.referralEarnings || 0) + reward;
-  inviter.walletBalance = (inviter.walletBalance || 0) + reward;
-
-  // referralHistory may not be defined on the TS type for inviter; handle safely
-  const referralHistory = (inviter as any).referralHistory || [];
-  referralHistory.push({
-    userId: user._id.toString(),
-    name: user.name,
-    reward,
-  });
-  (inviter as any).referralHistory = referralHistory;
-
-  await inviter.save();
-}
+      if (referralResult.success) {
+        console.log("REFERRAL PROCESSED:", referralResult);
+      } else {
+        console.log("REFERRAL PROCESSING FAILED:", referralResult.message);
+        // Don't fail registration if referral processing fails
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -69,9 +49,9 @@ if (inviter) {
         referralCode: user.referralCode,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err.message || "Server error" },
+      { error: err instanceof Error ? err.message : "Server error" },
       { status: 500 }
     );
   }

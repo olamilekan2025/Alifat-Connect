@@ -11,6 +11,7 @@ import { createReservedAccount } from "@/lib/monnify";
 import User from "@/models/User";
 import VirtualAccount from "@/models/VirtualAccount";
 import { generateReferralCode } from "@/lib/referral";
+import { processReferral } from "@/lib/referral-tracking";
 
 
 const EMAIL_CODE_TTL_MS =
@@ -40,6 +41,9 @@ export async function POST(
 
     const password =
       body?.password?.trim();
+
+    const referralCode =
+      body?.referralCode?.trim();
 
     // VALIDATION
 
@@ -174,8 +178,21 @@ export async function POST(
       String(user._id)
     );
 
-   
-   
+    // PROCESS REFERRAL
+    if (referralCode) {
+      const referralResult = await processReferral(
+        String(user._id),
+        referralCode
+      );
+
+      if (referralResult.success) {
+        console.log("REFERRAL PROCESSED:", referralResult);
+      } else {
+        console.log("REFERRAL PROCESSING FAILED:", referralResult.message);
+        // Don't fail signup if referral processing fails
+      }
+    }
+
     // CREATE MONNIFY RESERVED ACCOUNT
 
     try {

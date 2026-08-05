@@ -89,6 +89,17 @@ export type AdminSettingsDocument = {
     enableDepositAlerts?: boolean;
   };
 
+  referral?: {
+    enabled?: boolean;
+    rewardType?: "fixed" | "percentage";
+    fixedRewardAmount?: number;
+    percentageReward?: number;
+    minimumQualificationAmount?: number;
+    maximumReward?: number;
+    autoCreditReward?: boolean;
+    qualificationCondition?: string;
+  };
+
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -198,6 +209,17 @@ const AdminSettingsSchema = new Schema<AdminSettingsDocument>(
       enableLoginAlerts: { type: Boolean, default: true },
       enableWithdrawalAlerts: { type: Boolean, default: true },
       enableDepositAlerts: { type: Boolean, default: true },
+    },
+
+    referral: {
+      enabled: { type: Boolean, default: false },
+      rewardType: { type: String, enum: ["fixed", "percentage"], default: "fixed" },
+      fixedRewardAmount: { type: Number, default: 0, min: 0 },
+      percentageReward: { type: Number, default: 0, min: 0, max: 100 },
+      minimumQualificationAmount: { type: Number, default: 0, min: 0 },
+      maximumReward: { type: Number, default: 0, min: 0 },
+      autoCreditReward: { type: Boolean, default: true },
+      qualificationCondition: { type: String, default: "first_transaction" },
     },
   },
   { timestamps: true }
