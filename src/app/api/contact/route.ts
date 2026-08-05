@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Contact from "@/models/Contact";
 import { connectToDatabase } from "@/lib/mongodb";
 import { generateAutoReply } from "@/lib/support-bot";
+import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
 
 function getString(
   formData: FormData,
@@ -108,6 +109,17 @@ export async function POST(
 
     const ticketId = `SUP-${Date.now()}`;
 
+    // Upload file to Cloudinary if present
+    let attachmentUrl = "";
+    if (file && file instanceof File && file.size > 0) {
+      try {
+        const result: any = await uploadToCloudinary(file);
+        attachmentUrl = result.secure_url;
+      } catch (uploadError) {
+        console.error("CLOUDINARY ERROR:", uploadError);
+      }
+    }
+
     const contactData = {
       ticketId,
       name,
@@ -117,6 +129,7 @@ export async function POST(
       subject,
       message,
       status: "Open",
+      attachment: attachmentUrl,
     } as any;
 
     const contact = await Contact.create(contactData);

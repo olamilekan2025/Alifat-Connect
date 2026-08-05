@@ -83,7 +83,7 @@ export default async function RootLayout({
       >
         <FaviconUpdater url={favicon} />
 
-        <Script
+        {/* <Script
           id="theme-script"
           strategy="beforeInteractive"
         >{`try {
@@ -106,7 +106,7 @@ export default async function RootLayout({
             strategy="afterInteractive"
             crossOrigin="anonymous"
           />
-        )}
+        )} */}
 
         <Providers>
           <TooltipProvider delayDuration={0}>

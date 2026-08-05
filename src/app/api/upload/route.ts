@@ -1,16 +1,12 @@
-import { writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
-import path from "path";
+import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
 
 export async function POST(
   request: Request
 ) {
   try {
-    const formData =
-      await request.formData();
-
-    const file =
-      formData.get("file") as File;
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
 
     if (!file) {
       return NextResponse.json(
@@ -19,30 +15,15 @@ export async function POST(
       );
     }
 
-    const bytes =
-      await file.arrayBuffer();
-
-    const buffer =
-      Buffer.from(bytes);
-
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const uploadPath = path.join(
-      process.cwd(),
-      "public/uploads",
-      fileName
-    );
-
-    await writeFile(
-      uploadPath,
-      buffer
-    );
+    const result: any = await uploadToCloudinary(file);
+    const url = result.secure_url;
 
     return NextResponse.json({
       success: true,
-      url: `/uploads/${fileName}`,
+      url,
     });
-  } catch {
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
     return NextResponse.json(
       {
         error: "Upload failed",

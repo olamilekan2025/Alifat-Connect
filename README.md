@@ -1,5 +1,22 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+### Cloudinary Configuration (Required for image uploads)
+```
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### Other Required Variables
+- MongoDB connection string
+- NextAuth configuration
+- Email service (Resend) configuration
+- Other service-specific API keys
+
 ## Getting Started
 
 First, run the development server:
