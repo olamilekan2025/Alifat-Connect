@@ -83,8 +83,8 @@ export default function ReviewSubmissionPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-black">
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-0 lg:py-0">
+    <div className="min-h-screen bg-white dark:bg-black">
+      <div className="mx-auto w-full max-w-7xl px-3 py-0 sm:px-6 lg:pl-9 lg:pr-0">
         {/* Back */}
         <button
           type="button"
@@ -159,7 +159,7 @@ export default function ReviewSubmissionPage({
                           className="group rounded-xl p-2 transition-all duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
                         >
                           <Star
-                            className={`h-9 w-9 transition-all duration-200 sm:h-10 sm:w-10 ${
+                            className={`h-5 w-5 transition-all duration-200 sm:h-10 sm:w-10 ${
                               isActive
                                 ? "fill-[#D4AF37] text-[#D4AF37] drop-shadow-[0_3px_8px_rgba(212,175,55,0.3)]"
                                 : "text-slate-300 group-hover:text-[#D4AF37] dark:text-zinc-700"
@@ -214,7 +214,7 @@ export default function ReviewSubmissionPage({
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="What did you like about Alifat Connect? How was your experience with our services?"
                   maxLength={1000}
-                  className="min-h-[190px] resize-none rounded-2xl border-slate-200 bg-white px-5 py-4 text-[15px] leading-7 shadow-none transition-all placeholder:text-slate-400 focus-visible:border-[#D4AF37] focus-visible:ring-[#D4AF37]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:placeholder:text-zinc-600"
+                  className="min-h-[190px] resize-none rounded-2xl border-slate-200 bg-white px-2 py-4 text-[9px] leading-7 shadow-none transition-all placeholder:text-slate-400 focus-visible:border-[#D4AF37] focus-visible:ring-[#D4AF37]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:placeholder:text-zinc-600 md:px-5 md:text-[15px]"
                 />
 
                 {/* Character progress */}

@@ -88,8 +88,8 @@ useEffect(() => {
   };
 
   return (
-    <main className="min-h-screen bg-background p-6 space-y-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <main className="min-h-screen bg-background p-4  space-y-6 md:pl-9 md:pr-0">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER */}
         <div className="text-center space-y-2">

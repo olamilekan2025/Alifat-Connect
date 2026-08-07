@@ -365,7 +365,7 @@ export default function KYCPage() {
 
   // Not started - show form
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 px-4 pt-2 md:pl-9 md:pr-0">
       <Card>
         <CardHeader>
           <CardTitle>KYC Verification</CardTitle>

@@ -76,6 +76,7 @@ export default function Footer() {
     pathname === "/dashboard/reports" ||
     pathname === "/dashboard/referral" ||
     pathname === "/dashboard/reviews" ||
+    pathname === "/dashboard/notifications" ||
     pathname === "/dashboard/kyc" ||
     pathname === "/dashboard/membership" ||
     pathname === "/admin-dashboard" ||

@@ -34,7 +34,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pl-9">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
 
       {/* Notifications List */}
       {loading ? (
-        <div className="space-y-2">
+        <div className="space-y-2 ">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="flex gap-3 p-4 border border-zinc-200 rounded-xl">
               <Skeleton className="h-10 w-10 rounded-full" />
