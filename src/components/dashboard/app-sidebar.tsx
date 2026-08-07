@@ -27,6 +27,7 @@ import {
   Bell,
   ShieldCheck,
   Star,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -52,9 +53,20 @@ export function AppSidebar() {
     platformName: "Alifat Connect",
     logoUrl: "",
   });
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLinkClick = () => {
     setOpenMobile(false);
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut({ callbackUrl: "/auth/login" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      setIsLoggingOut(false);
+    }
   };
 
   const isMobileGroupActive = pathname === "/dashboard/airtime" || pathname === "/dashboard/data";
@@ -71,13 +83,13 @@ export function AppSidebar() {
   useEffect(() => {
     async function loadBranding() {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch("/api/public/branding");
         const data = await res.json();
 
         if (data?.success) {
           setBranding({
-            platformName: data.settings?.platformName || "Alifat Connect",
-            logoUrl: data.settings?.branding?.logoUrl || "",
+            platformName: data.branding?.platformName || "Alifat Connect",
+            logoUrl: data.branding?.logoUrl || "",
           });
         }
       } catch (error) {
@@ -409,11 +421,18 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex h-10 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-sm font-semibold text-red-500/90 transition-all duration-200 hover:bg-red-500/10 dark:hover:bg-red-500/20"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex h-10 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-sm font-semibold text-red-500/90 transition-all duration-200 hover:bg-red-500/10 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LogOut className="h-4 w-4 shrink-0 stroke-[2.2]" />
-              <span className="truncate group-data-[collapsible=icon]:hidden">Logout Terminal</span>
+              {isLoggingOut ? (
+                <Loader2 className="h-4 w-4 shrink-0 stroke-[2.2] animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4 shrink-0 stroke-[2.2]" />
+              )}
+              <span className="truncate group-data-[collapsible=icon]:hidden">
+                {isLoggingOut ? "Logging out..." : "Logout Terminal"}
+              </span>
             </button>
           </SidebarMenuItem>
         </SidebarMenu>

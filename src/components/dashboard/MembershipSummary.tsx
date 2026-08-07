@@ -83,7 +83,7 @@ const spendingProgress = Math.min(
 );
 
   return (
-    <Card className="overflow-hidden rounded-3xl border border-black bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-lg dark:border-white dark:bg-black">
+    <Card className="overflow-hidden rounded-3xl border border-black bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-lg dark:border-white/10 dark:bg-black">
       <CardHeader>
         <CardTitle>
           Membership Progress

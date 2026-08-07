@@ -165,7 +165,7 @@ function SignupForm() {
     "
         />
       </svg>
-      <Card className="w-full max-w-md border dark:border-white">
+      <Card className="w-full max-w-md border ">
         <CardHeader className="text-center space-y-2 dark:text-white px-6 pt-10 ">
           <CardTitle className="text-2xl">Create Account</CardTitle>
         </CardHeader>

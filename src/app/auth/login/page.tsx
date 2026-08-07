@@ -10,7 +10,7 @@ import { signIn, getSession } from "next-auth/react";
 
 import { toast } from "sonner";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Home } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -25,8 +25,6 @@ import {
 } from "@/components/ui/card";
 
 import { Separator } from "@/components/ui/separator";
-
-import { Checkbox } from "@/components/ui/checkbox";
 
 import GoogleIcon from "@/components/icons/google-icon";
 
@@ -43,8 +41,6 @@ function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -54,11 +50,6 @@ function LoginForm() {
 
     if (!email || !password) {
       toast.error("Email and password are required");
-      return;
-    }
-
-    if (!acceptedTerms) {
-      toast.error("Please accept Terms & Privacy Policy");
       return;
     }
 
@@ -190,12 +181,6 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
   }
 
   async function handleGoogleLogin() {
-    if (!acceptedTerms) {
-      toast.error("Accept Terms & Privacy Policy first");
-
-      return;
-    }
-
     try {
       setGoogleLoading(true);
 
@@ -270,9 +255,12 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
       {/* CARD */}
       <Card className="relative z-10 w-full max-w-md rounded-3xl border border-black/10 dark:border-white/10 bg-white/10   backdrop-blur-2xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold text-black dark:text-white">
-            Welcome Back
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-3xl font-bold text-black dark:text-white">
+              Welcome Back
+            </CardTitle>
+           
+          </div>
 
           <CardDescription className="text-zinc-500 dark:text-zinc-400">
             Login to continue to your dashboard
@@ -333,36 +321,10 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
               </Link>
             </div>
 
-            {/* TERMS */}
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="terms"
-                checked={acceptedTerms}
-                onCheckedChange={(val) => setAcceptedTerms(!!val)}
-              />
-
-              <label
-                htmlFor="terms"
-                className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-300"
-              >
-                I agree to the{" "}
-                <Link href="/terms" className="text-yellow-400 hover:underline">
-                  Terms
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="/privacy"
-                  className="text-yellow-400 hover:underline"
-                >
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
-
             {/* LOGIN BUTTON */}
             <Button
               type="submit"
-              disabled={loading || !acceptedTerms}
+              disabled={loading}
               className="h-10 w-full rounded-2xl bg-yellow-500 font-semibold text-black transition hover:bg-yellow-400"
             >
               {loading ? "Logging in..." : "Login"}
@@ -383,7 +345,7 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
             type="button"
             variant="outline"
             onClick={handleGoogleLogin}
-            disabled={googleLoading || !acceptedTerms}
+            disabled={googleLoading}
             className="h-10 w-full rounded-2xl border-black dark:border-white/10 bg-white/5 dark:text-white transition hover:bg-white/10"
           >
             <GoogleIcon />
@@ -394,15 +356,31 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
           </Button>
 
           {/* FOOTER */}
+
+          <div className=" flex justify-between items-center "> 
+
           <div className="mt-6 text-center text-sm text-zinc-400">
             Don’t have an account?{" "}
             <Link
               href="/auth/signup"
               className="font-medium text-yellow-400 hover:underline"
-            >
+              >
               Sign up
             </Link>
+
+            
           </div>
+<div className=" mt-6 items-center justify-center"> 
+
+           <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-zinc-500 hover:text-yellow-500 transition-colors"
+              >
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+              </div>
+              </div>
         </CardContent>
       </Card>
     </div>
