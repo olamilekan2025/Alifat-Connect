@@ -83,7 +83,7 @@ export default function FAQ() {
             size="lg"
             className="rounded-full bg-black px-8 text-white hover:bg-[#D4AF37] hover:text-black dark:bg-[#D4AF37] dark:text-black dark:hover:bg-white"
           >
-            <Link href="/faq">
+            <Link href="/FAQ">
               View All FAQs
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

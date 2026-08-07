@@ -21,6 +21,7 @@ import {
   LogOut,
   Menu,
   X,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,11 @@ const links = [
     name: "Referrals",
     href: "/admin-dashboard/referrals",
     icon: Gift,
+  },
+  {
+    name: "Reviews",
+    href: "/admin-dashboard/reviews",
+    icon: Star,
   },
   {
     name: "Audit Logs",

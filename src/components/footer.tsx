@@ -23,6 +23,7 @@ const quickLinks = [
   { name: "Testimonials", href: "/testimonials" },
   { name: "Contact", href: "/contact" },
   { name: "FAQ", href: "/FAQ" },
+  { name: "Users Review", href: "/customer-reviews" },
 ];
 
 const services = [
@@ -74,6 +75,7 @@ export default function Footer() {
     pathname === "/dashboard/manage-wallet" ||
     pathname === "/dashboard/reports" ||
     pathname === "/dashboard/referral" ||
+    pathname === "/dashboard/reviews" ||
     pathname === "/dashboard/kyc" ||
     pathname === "/dashboard/membership" ||
     pathname === "/admin-dashboard" ||
@@ -88,6 +90,7 @@ export default function Footer() {
     pathname === "/admin-dashboard/referrals" ||
     pathname === "/admin-dashboard/support" ||
     pathname === "/admin-dashboard/reports" ||
+    pathname === "/admin-dashboard/reviews" ||
     pathname === "/admin-dashboard/kyc" ||
     pathname.startsWith("/admin-dashboard/kyc/") ||
     pathname === "/auth/forgot-password";
@@ -286,14 +289,14 @@ export default function Footer() {
               <div className="flex items-start gap-3">
                 <Mail className="mt-1 h-5 w-5 shrink-0 text-[#D4AF37]" />
                 <p className="text-gray-500 dark:text-slate-400">
-                  support@alifatconnect.com
+                  jelilioladunjoye04@gmail.com
                 </p>
               </div>
 
               <div className="flex items-start gap-3">
                 <Phone className="mt-1 h-5 w-5 shrink-0 text-[#D4AF37]" />
                 <p className="text-gray-500 dark:text-slate-400">
-                  +234 800 000 0000
+                  +234 7074052461
                 </p>
               </div>
 

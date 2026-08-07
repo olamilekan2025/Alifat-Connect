@@ -64,38 +64,35 @@ export default function HowItWorks() {
           {/* Connecting Line */}
           <div className="absolute left-0 top-20 hidden w-full border-t border-dashed border-black lg:block" />
 
-          {steps.map((step, index) => {
-            const Icon = step.icon;
+        {steps.map((step, index) => {
+  const Icon = step.icon;
 
-            return (
-              <div
-                key={step.title}
-                className="group relative"
-              >
-                {/* Step Number */}
-                <div className="absolute left-8 top-0 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[#FAFAFA] bg-black text-sm font-bold text-[#D4AF37] dark:border-slate-950 dark:bg-white dark:text-black">
-                  0{index + 1}
-                </div>
+  return (
+    <div key={step.title} className="group relative h-full">
+      {/* Step Number */}
+      <div className="absolute left-8 top-0 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[#FAFAFA] bg-black text-sm font-bold text-[#D4AF37] dark:border-slate-950 dark:bg-white dark:text-black">
+        0{index + 1}
+      </div>
 
-                <Card className="relative z-10 rounded-3xl border border-black bg-white pt-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white dark:bg-black dark:hover:border-[#D4AF37]">
-                  <CardHeader>
-                    {/* Icon */}
-                    <div className="mb-6 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] transition-all duration-300 group-hover:bg-[#D4AF37] group-hover:text-black">
-                      <Icon className="h-5 w-5" />
-                    </div>
+      <Card className="relative z-10 flex h-full flex-col rounded-3xl border border-black bg-white pt-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37] hover:shadow-2xl dark:border-white dark:bg-black dark:hover:border-[#D4AF37]">
+        <CardHeader className="flex h-full flex-col">
+          {/* Icon */}
+          <div className="mb-6 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] transition-all duration-300 group-hover:bg-[#D4AF37] group-hover:text-black">
+            <Icon className="h-5 w-5" />
+          </div>
 
-                    <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {step.title}
-                    </CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+            {step.title}
+          </CardTitle>
 
-                    <CardDescription className="pt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300">
-                      {step.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </div>
-            );
-          })}
+          <CardDescription className="pt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300">
+            {step.description}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+})}
         </div>
       </div>
     </section>

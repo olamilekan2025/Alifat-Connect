@@ -238,7 +238,7 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500">
       
      {/* HEADER */}
-<div className="relative overflow-hidden rounded-3xl border border-black bg-gradient-to-br from-white via-white to-amber-50/40 p-8 shadow-sm dark:border-white dark:hover:border-white/20 dark:from-zinc-950 dark:via-zinc-950 dark:to-amber-950/10">
+<div className="relative overflow-hidden rounded-3xl border border-black bg-gradient-to-br from-white via-white to-amber-50/40 p-8 shadow-sm dark:border-white/10 dark:hover:border-white/20 dark:from-zinc-950 dark:via-zinc-950 dark:to-amber-950/10">
   {/* Background Glow */}
   <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
   <div className="absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-yellow-400/5 blur-3xl" />
@@ -304,7 +304,7 @@ export default function DashboardPage() {
 <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-stretch">
   
   {/* PREMIUM WALLET COMPONENT */}
-  <Card className="relative overflow-hidden rounded-[2.5rem] border border-black dark:border-white bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black text-white shadow-2xl shadow-zinc-950/50 group flex flex-col justify-between transition-all duration-300 hover:shadow-emerald-950/10  dark:hover:border-white/10">
+  <Card className="relative overflow-hidden rounded-[2.5rem] border border-black dark:border-white/10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black text-white shadow-2xl shadow-zinc-950/50 group flex flex-col justify-between transition-all duration-300 hover:shadow-emerald-950/10  dark:hover:border-white/10">
     {/* Ambient Glow Emitter */}
     <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-emerald-500/10 blur-[60px] transition-all duration-500 group-hover:bg-emerald-500/15 group-hover:scale-110 pointer-events-none" />
     
@@ -370,7 +370,7 @@ export default function DashboardPage() {
   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
     
     {/* STAT CARD: TOTAL TRANSACTIONS */}
-    <Card className="rounded-[2rem] border border-black dark:border-white bg-gradient-to-b from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-950/40 shadow-sm transition-all duration-300 hover:shadow-md  dark:hover:border-zinc-800 group/stat">
+    <Card className="rounded-[2rem] border border-black dark:border-white/10 bg-gradient-to-b from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-950/40 shadow-sm transition-all duration-300 hover:shadow-md  dark:hover:border-zinc-800 group/stat">
       <CardContent className="flex items-center justify-between p-6 h-full">
         <div className="space-y-1.5">
           <p className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
@@ -387,7 +387,7 @@ export default function DashboardPage() {
     </Card>
 
     {/* STAT CARD: SUCCESS RATE */}
-    <Card className="rounded-[2rem] border border-black dark:border-white bg-gradient-to-b from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-950/40 shadow-sm transition-all duration-300 hover:shadow-md  dark:hover:border-zinc-800 group/stat">
+    <Card className="rounded-[2rem] border border-black dark:border-white/10 bg-gradient-to-b from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-950/40 shadow-sm transition-all duration-300 hover:shadow-md  dark:hover:border-zinc-800 group/stat">
       <CardContent className="flex items-center justify-between p-6 h-full">
         <div className="space-y-1.5">
           <p className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
@@ -417,7 +417,7 @@ export default function DashboardPage() {
       </div>
 
       {/* QUICK ACTIONS SECTION */}
-      <Card className="rounded-[2.5rem] border border-black dark:border-white bg-white dark:bg-zinc-950 shadow-sm">
+      <Card className="rounded-[2.5rem] border border-black dark:border-white/10 bg-white dark:bg-zinc-950 shadow-sm">
         <CardHeader className="px-6 pt-6 pb-2 sm:px-8">
           <CardTitle className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
             Quick Utilities
@@ -454,7 +454,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* TRANSACTIONS SYSTEM ARCHIVE */}
-      <Card className="rounded-[2.5rem] border border-black dark:border-white bg-white dark:bg-zinc-950 shadow-sm">
+      <Card className="rounded-[2.5rem] border border-black dark:border-white/10 bg-white dark:bg-zinc-950 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between px-6 pt-6 pb-2 sm:px-8">
           <div>
             <CardTitle className="text-lg font-bold tracking-tight text-black dark:text-white">

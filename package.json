@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "cross-env NODE_ENV=production tsx server.ts",
     "create-admin": "tsx scripts/create-admin.ts",
+    "seed-reviews": "tsx script/seed-reviews.ts",
     "lint": "eslint"
   },
   "dependencies": {

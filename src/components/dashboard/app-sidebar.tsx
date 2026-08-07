@@ -26,6 +26,7 @@ import {
   Store,
   Bell,
   ShieldCheck,
+  Star,
 } from "lucide-react";
 
 import {
@@ -117,11 +118,11 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="w-[280px] border-r border-black bg-white backdrop-blur-md dark:border-white dark:bg-zinc-950/80 md:w-[290px]"
+      className="w-[280px] border-r border-black bg-white backdrop-blur-md dark:border-white/30 dark:bg-zinc-950/80 md:w-[290px]"
     >
       {/* HEADER */}
       
-<SidebarHeader className="sticky top-0 z-10 border-b border-black bg-white px-4 py-2 backdrop-blur-md dark:border-white dark:bg-black">
+<SidebarHeader className="sticky top-0 z-10 border-b border-black bg-white px-4 py-2 backdrop-blur-md dark:border-white/30 dark:bg-black">
   <div className="flex items-center gap-3 overflow-hidden">
     {/* Logo box */}
     {branding.logoUrl ? (
@@ -380,6 +381,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-1.5">
             <SidebarMenu className="space-y-1">
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Reviews" asChild>
+                  <Link href="/dashboard/reviews" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/reviews")}>
+                    <Star className="h-4 w-4 shrink-0 stroke-[2.2]" />
+                    <span className="truncate group-data-[collapsible=icon]:hidden">Write a Review</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Referral" asChild>
                   <Link href="/dashboard/referral" onClick={handleLinkClick} className={menuClass(pathname === "/dashboard/referral")}>

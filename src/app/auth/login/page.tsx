@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { signIn, getSession } from "next-auth/react";
 
@@ -30,8 +30,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import GoogleIcon from "@/components/icons/google-icon";
 
-export default function LoginPage() {
+import { Suspense } from "react";
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const [email, setEmail] = useState("");
 
@@ -157,7 +161,17 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
 
       // NOTE: middleware enforces adminVerified step-up for /admin.
       // Admins will be redirected to /auth/login if not verified.
-      if (role === "admin") {
+      
+      // Handle callbackUrl for redirect after login
+      if (callbackUrl === "/customer-reviews") {
+        // User came from customer-reviews page clicking "Write a Review"
+        // Redirect to appropriate review page based on role
+        if (role === "admin") {
+          router.replace("/admin-dashboard/reviews");
+        } else {
+          router.replace("/dashboard/reviews");
+        }
+      } else if (role === "admin") {
         router.replace("/admin");
       } else if (role === "moderator") {
         router.replace("/moderator");
@@ -392,5 +406,13 @@ if (result.error === "ADMIN_VERIFICATION_REQUIRED") {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -277,7 +277,7 @@ export default function PricingPlans() {
                 }`}
               >
                 {plan.highlight && (
-                  <Badge className="absolute -top-3 left-6 rounded-full bg-[#D4AF37] px-4 py-1 text-xs font-medium text-white shadow-sm border-0">
+                  <Badge className="absolute -top-1 left-6 rounded-full bg-[#D4AF37] px-4 py-1 text-xs font-medium text-white shadow-sm border-0">
                     <Sparkles className="mr-1 h-3.5 w-3.5 fill-white/20" />
                     Most Popular
                   </Badge>
@@ -286,10 +286,10 @@ export default function PricingPlans() {
                 <CardHeader className="p-8 pb-0 text-left">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
                     plan.highlight 
-                      ? "bg-amber-500/10 border-[#D4AF37] text-amber-600 dark:text-amber-400" 
+                      ? "bg-white border-[#D4AF37] text-amber-600 dark:text-amber-400" 
                       : "bg-black dark:bg-zinc-800 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300"
                   }`}>
-                    <Icon className="h-6 w-6 text-white" />
+                    <Icon className="h-6 w-6 text-[#D4AF37]" />
                   </div>
 
                   <h3 className="mt-5 text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
