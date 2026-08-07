@@ -164,10 +164,10 @@ export default function TestimonialsGrid() {
           </CarouselContent>
 
           {/* Navigation */}
-          <div className="mt-10 flex items-center justify-center gap-4">
+          {/* <div className="mt-10 flex items-center justify-center gap-4">
             <CarouselPrevious className="static h-12 w-12 translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
             <CarouselNext className="static h-12 w-12 translate-y-0 rounded-full border-gray-300 bg-white hover:bg-[#D4AF37] hover:text-black dark:bg-white dark:hover:bg-[#D4AF37] dark:text-black dark:hover:text-white" />
-          </div>
+          </div> */}
         </Carousel>
 
         {/* View All Reviews Button */}
