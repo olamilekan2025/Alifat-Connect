@@ -22,11 +22,11 @@ export function LiveChatWidget() {
       <Button
         type="button"
         size="lg"
-        className="fixed bottom-5 right-5 z-50 h-14 gap-2 rounded-full px-5 shadow-lg"
+        className="fixed bottom-5 right-5 z-50 w-15 h-15 gap-2 rounded-full lg:px-5 shadow-lg lg:h-14 lg:w-30  "
         onClick={() => setOpen(true)}
       >
-        <MessageCircle className="h-5 w-5" />
-        Live Chat
+        <MessageCircle className="h-15 w-15 lg:h-5 lg:w-5 " />
+        <span className="hidden md:block">Live Chat</span>
         {unreadTotal > 0 && (
           <span className="ml-1 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
             {unreadTotal}

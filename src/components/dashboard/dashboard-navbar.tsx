@@ -12,6 +12,7 @@ import {
   User,
   Settings,
   LogOut,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,8 +53,12 @@ export function DashboardNavbar() {
   const router = useRouter();
   const { data: session } = useSession();
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
+  
+  const [isLoggingOut, setIsLoggingOut] =
+  useState(false);
 
   const title = pageTitles[pathname] || "Dashboard";
+
 
   // USER DATA
   const user = {
@@ -73,11 +78,21 @@ export function DashboardNavbar() {
 
   // LOGOUT
   const handleLogout = async () => {
+  if (isLoggingOut) return;
+
+  setIsLoggingOut(true);
+
+  try {
     await signOut({
       redirect: false,
     });
+
     router.push("/");
-  };
+  } catch (error) {
+    console.error("Logout failed:", error);
+    setIsLoggingOut(false);
+  }
+};
 
   return (
     <>
@@ -205,21 +220,36 @@ export function DashboardNavbar() {
           </DialogHeader>
 
           <DialogFooter className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setOpenLogoutModal(false)}
-              className="h-11 w-full rounded-2xl sm:w-auto"
-            >
-              No
-            </Button>
+  <Button
+    type="button"
+    variant="outline"
+    disabled={isLoggingOut}
+    onClick={() =>
+      setOpenLogoutModal(false)
+    }
+    className="h-11 w-full rounded-2xl sm:w-auto"
+  >
+    No
+  </Button>
 
-            <Button
-              onClick={handleLogout}
-              className="h-11 w-full rounded-2xl bg-red-500 text-white hover:bg-red-600 sm:w-auto"
-            >
-              Yes, Logout
-            </Button>
-          </DialogFooter>
+  <Button
+    type="button"
+    disabled={isLoggingOut}
+    onClick={handleLogout}
+    className="h-11 w-full rounded-2xl bg-red-500 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+  >
+    {isLoggingOut ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      </>
+    ) : (
+      <>
+        <LogOut className="mr-2 h-4 w-4" />
+        Yes, Logout
+      </>
+    )}
+  </Button>
+</DialogFooter>
         </DialogContent>
       </Dialog>
     </>
