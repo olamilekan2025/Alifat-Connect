@@ -1,3 +1,607 @@
+// "use client";
+
+// import {
+//   Suspense,
+//   useEffect,
+//   useRef,
+//   useState,
+// } from "react";
+
+// import {
+//   useRouter,
+//   useSearchParams,
+// } from "next/navigation";
+
+// import { toast } from "sonner";
+
+// import {
+//   Eye,
+//   EyeOff,
+// } from "lucide-react";
+
+// import { Button } from "@/components/ui/button";
+
+// import { Input } from "@/components/ui/input";
+
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card";
+
+// function ResetPasswordContent() {
+//   const router = useRouter();
+
+//   const searchParams =
+//     useSearchParams();
+
+//   const email =
+//     searchParams.get("email") ||
+//     "";
+
+//   const [codes, setCodes] =
+//     useState([
+//       "",
+//       "",
+//       "",
+//       "",
+//       "",
+//       "",
+//     ]);
+
+//   const [newPassword, setNewPassword] =
+//     useState("");
+
+//   const [loading, setLoading] =
+//     useState(false);
+
+//   const [resending, setResending] =
+//     useState(false);
+
+//   const [countdown, setCountdown] =
+//     useState(0);
+
+//   const [showPassword, setShowPassword] =
+//     useState(false);
+
+//   const inputsRef = useRef<
+//     Array<HTMLInputElement | null>
+//   >([]);
+
+//   useEffect(() => {
+//     if (!email) {
+//       toast.error(
+//         "Invalid reset link"
+//       );
+
+//       router.replace(
+//         "/auth/forgot-password"
+//       );
+//     }
+//   }, [email, router]);
+
+//   useEffect(() => {
+//     if (countdown <= 0) return;
+
+//     const timer = setInterval(() => {
+//       setCountdown((prev) => prev - 1);
+//     }, 1000);
+
+//     return () =>
+//       clearInterval(timer);
+//   }, [countdown]);
+
+//   const code = codes.join("");
+
+//   function handleChange(
+//     value: string,
+//     index: number
+//   ) {
+//     if (!/^\d*$/.test(value))
+//       return;
+
+//     const newCodes = [...codes];
+
+//     newCodes[index] =
+//       value.slice(-1);
+
+//     setCodes(newCodes);
+
+//     if (value && index < 5) {
+//       inputsRef.current[
+//         index + 1
+//       ]?.focus();
+//     }
+//   }
+
+//   function handleKeyDown(
+//     e: React.KeyboardEvent<HTMLInputElement>,
+//     index: number
+//   ) {
+//     if (e.key === "Backspace") {
+//       if (codes[index]) {
+//         const newCodes = [
+//           ...codes,
+//         ];
+
+//         newCodes[index] = "";
+
+//         setCodes(newCodes);
+
+//         return;
+//       }
+
+//       if (index > 0) {
+//         inputsRef.current[
+//           index - 1
+//         ]?.focus();
+//       }
+//     }
+
+//     if (e.key === "ArrowLeft") {
+//       if (index > 0) {
+//         inputsRef.current[
+//           index - 1
+//         ]?.focus();
+//       }
+//     }
+
+//     if (e.key === "ArrowRight") {
+//       if (index < 5) {
+//         inputsRef.current[
+//           index + 1
+//         ]?.focus();
+//       }
+//     }
+//   }
+
+//   function handlePaste(
+//     e: React.ClipboardEvent<HTMLInputElement>
+//   ) {
+//     e.preventDefault();
+
+//     const pastedData =
+//       e.clipboardData
+//         .getData("text")
+//         .replace(/\D/g, "")
+//         .slice(0, 6);
+
+//     if (!pastedData) return;
+
+//     const newCodes = [...codes];
+
+//     pastedData
+//       .split("")
+//       .forEach(
+//         (char, index) => {
+//           if (index < 6) {
+//             newCodes[index] =
+//               char;
+//           }
+//         }
+//       );
+
+//     setCodes(newCodes);
+
+//     const focusIndex =
+//       Math.min(
+//         pastedData.length,
+//         5
+//       );
+
+//     inputsRef.current[
+//       focusIndex
+//     ]?.focus();
+//   }
+
+//   async function handleResendCode() {
+//     if (!email) return;
+
+//     try {
+//       setResending(true);
+
+//       const res = await fetch(
+//         "/api/auth/forgot-password",
+//         {
+//           method: "POST",
+
+//           headers: {
+//             "Content-Type":
+//               "application/json",
+//           },
+
+//           body: JSON.stringify({
+//             email,
+//           }),
+//         }
+//       );
+
+//       const data = await res
+//         .json()
+//         .catch(() => ({}));
+
+//       if (!res.ok) {
+//         toast.error(
+//           data?.error ||
+//             "Failed to resend code"
+//         );
+
+//         return;
+//       }
+
+//       toast.success(
+//         "Verification code resent"
+//       );
+
+//       setCountdown(60);
+//     } catch {
+//       toast.error(
+//         "Failed to resend code"
+//       );
+//     } finally {
+//       setResending(false);
+//     }
+//   }
+
+//   async function onSubmit(
+//     e: React.FormEvent
+//   ) {
+//     e.preventDefault();
+
+//     if (code.length !== 6) {
+//       toast.error(
+//         "Enter the 6-digit verification code"
+//       );
+
+//       return;
+//     }
+
+//     const passwordChecks = {
+//       length:
+//         newPassword.length >= 6,
+
+//       uppercase:
+//         /[A-Z]/.test(
+//           newPassword
+//         ),
+
+//       number:
+//         /\d/.test(newPassword),
+
+//       symbol:
+//         /[\W_]/.test(
+//           newPassword
+//         ),
+//     };
+
+//     if (
+//       !passwordChecks.length ||
+//       !passwordChecks.uppercase ||
+//       !passwordChecks.number ||
+//       !passwordChecks.symbol
+//     ) {
+//       toast.error(
+//         "Password does not meet requirements"
+//       );
+
+//       return;
+//     }
+
+//     setLoading(true);
+
+//     try {
+//       const res = await fetch(
+//         "/api/auth/reset-password",
+//         {
+//           method: "POST",
+
+//           headers: {
+//             "Content-Type":
+//               "application/json",
+//           },
+
+//           body: JSON.stringify({
+//             email,
+//             code,
+//             password:
+//               newPassword,
+//           }),
+//         }
+//       );
+
+//       const data = await res
+//         .json()
+//         .catch(() => ({}));
+
+//       if (!res.ok) {
+//         toast.error(
+//           data?.error ||
+//             "Reset failed"
+//         );
+
+//         return;
+//       }
+
+//       toast.success(
+//         "Password reset successful"
+//       );
+
+//       router.push(
+//         "/auth/login"
+//       );
+//     } catch {
+//       toast.error(
+//         "Reset failed"
+//       );
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   const passwordChecks = {
+//     length:
+//       newPassword.length >= 6,
+
+//     uppercase:
+//       /[A-Z]/.test(
+//         newPassword
+//       ),
+
+//     number:
+//       /\d/.test(newPassword),
+
+//     symbol:
+//       /[\W_]/.test(
+//         newPassword
+//       ),
+//   };
+
+//   return (
+//     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+//       <svg
+//         className="absolute left-0 top-0 h-25 w-full"
+//         xmlns="http://www.w3.org/2000/svg"
+//         viewBox="0 0 1440 320"
+//         preserveAspectRatio="none"
+//       >
+//         <defs>
+//           <linearGradient id="topGlow" x1="0" x2="1">
+//             <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.95" />
+
+//             <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
+//           </linearGradient>
+//         </defs>
+
+//         <path
+//           fill="url(#topGlow)"
+//           d="
+//             M0,160
+//             C240,260 480,40 720,160
+//             C960,260 1200,60 1440,160
+//             L1440,0
+//             L0,0
+//             Z
+//           "
+//         />
+//       </svg>
+
+//       {/* BOTTOM GLOW */}
+//       <svg
+//         className="absolute bottom-0 left-0 h-25 w-full"
+//         xmlns="http://www.w3.org/2000/svg"
+//         viewBox="0 0 1440 320"
+//         preserveAspectRatio="none"
+//       >
+//         <defs>
+//           <linearGradient id="bottomGlow" x1="1" x2="0">
+//             <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.92" />
+
+//             <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
+//           </linearGradient>
+//         </defs>
+
+//         <path
+//           fill="url(#bottomGlow)"
+//           d="
+//             M0,160
+//             C240,60 480,280 720,160
+//             C960,40 1200,240 1440,160
+//             L1440,320
+//             L0,320
+//             Z
+//           "
+//         />
+//       </svg>
+//       <Card className="w-full max-w-md shadow-lg">
+//         <CardHeader className="space-y-2 text-center">
+//           <CardTitle className="text-2xl font-bold">
+//             Reset Password
+//           </CardTitle>
+
+//           <CardDescription>
+//             Enter the verification
+//             code and your new
+//             password
+//           </CardDescription>
+
+//           <p className="break-all text-sm font-medium text-primary">
+//             {email}
+//           </p>
+//         </CardHeader>
+
+//         <CardContent>
+//   <form
+//     onSubmit={onSubmit}
+//     className="space-y-6"
+//   >
+//     <div className="space-y-3">
+//       {/* <label className="text-sm font-medium">
+//         Verification Code
+//       </label> */}
+
+//       <div className="flex justify-center gap-2">
+//         {codes.map(
+//           (digit, index) => (
+//             <Input
+//               key={index}
+//               ref={(el) => {
+//                 inputsRef.current[
+//                   index
+//                 ] = el;
+//               }}
+//               type="text"
+//               inputMode="numeric"
+//               maxLength={1}
+//               value={digit}
+//               onChange={(e) =>
+//                 handleChange(
+//                   e.target.value,
+//                   index
+//                 )
+//               }
+//               onKeyDown={(e) =>
+//                 handleKeyDown(
+//                   e,
+//                   index
+//                 )
+//               }
+//               onPaste={
+//                 handlePaste
+//               }
+//               className="h-12 w-12 text-center text-lg font-bold"
+//             />
+//           )
+//         )}
+//       </div>
+//     </div>
+
+//     <div className="space-y-3">
+//       <label className="text-sm font-medium">
+//         New Password
+//       </label>
+
+//       <div className="relative">
+//         <Input
+//           type={
+//             showPassword
+//               ? "text"
+//               : "password"
+//           }
+//           value={newPassword}
+//           onChange={(e) =>
+//             setNewPassword(
+//               e.target.value
+//             )
+//           }
+//           placeholder="Enter new password"
+//           className="pr-10"
+//         />
+
+//         <button
+//           type="button"
+//           onClick={() =>
+//             setShowPassword(
+//               !showPassword
+//             )
+//           }
+//           className="absolute right-3 top-1/2 -translate-y-1/2"
+//         >
+//           {showPassword ? (
+//             <EyeOff className="h-4 w-4 text-muted-foreground" />
+//           ) : (
+//             <Eye className="h-4 w-4 text-muted-foreground" />
+//           )}
+//         </button>
+//       </div>
+
+//       <div className="space-y-1 text-xs">
+//         <p
+//           className={
+//             passwordChecks.length
+//               ? "text-green-500"
+//               : "text-red-500"
+//           }
+//         >
+//           ✓ At least 6 characters
+//         </p>
+
+//         <p
+//           className={
+//             passwordChecks.uppercase
+//               ? "text-green-500"
+//               : "text-red-500"
+//           }
+//         >
+//           ✓ One uppercase letter
+//         </p>
+
+//         <p
+//           className={
+//             passwordChecks.number
+//               ? "text-green-500"
+//               : "text-red-500"
+//           }
+//         >
+//           ✓ One number
+//         </p>
+
+//         <p
+//           className={
+//             passwordChecks.symbol
+//               ? "text-green-500"
+//               : "text-red-500"
+//           }
+//         >
+//           ✓ One special character
+//         </p>
+//       </div>
+//     </div>
+
+//     <Button
+//       type="submit"
+//       className="w-full"
+//       disabled={loading}
+//     >
+//       {loading
+//         ? "Resetting..."
+//         : "Reset Password"}
+//     </Button>
+
+//     <Button
+//       type="button"
+//       variant="outline"
+//       className=" justify-end"
+//       disabled={
+//         resending ||
+//         countdown > 0
+//       }
+//       onClick={
+//         handleResendCode
+//       }
+//     >
+//       {resending
+//         ? "Sending..."
+//         : countdown > 0
+//         ? `Resend in ${countdown}s`
+//         : "Resend Code"}
+//     </Button>
+//   </form>
+// </CardContent>
+//       </Card>
+//     </div>
+//   );
+// }
+
+// export default function ResetPasswordPage() {
+//   return (
+//     <Suspense fallback={null}>
+//       <ResetPasswordContent />
+//     </Suspense>
+//   );
+// }
+
 "use client";
 
 import {
@@ -6,23 +610,15 @@ import {
   useRef,
   useState,
 } from "react";
-
 import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-
 import { toast } from "sonner";
-
-import {
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import {
   Card,
   CardContent,
@@ -31,54 +627,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"
+).replace(/\/+$/, "");
+
 function ResetPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = (searchParams.get("email") || "").trim().toLowerCase();
 
-  const searchParams =
-    useSearchParams();
+  const [codes, setCodes] = useState(["", "", "", "", "", ""]);
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const email =
-    searchParams.get("email") ||
-    "";
-
-  const [codes, setCodes] =
-    useState([
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-
-  const [newPassword, setNewPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [resending, setResending] =
-    useState(false);
-
-  const [countdown, setCountdown] =
-    useState(0);
-
-  const [showPassword, setShowPassword] =
-    useState(false);
-
-  const inputsRef = useRef<
-    Array<HTMLInputElement | null>
-  >([]);
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
     if (!email) {
-      toast.error(
-        "Invalid reset link"
-      );
-
-      router.replace(
-        "/auth/forgot-password"
-      );
+      toast.error("Invalid reset link");
+      router.replace("/auth/forgot-password");
     }
   }, [email, router]);
 
@@ -89,30 +659,27 @@ function ResetPasswordContent() {
       setCountdown((prev) => prev - 1);
     }, 1000);
 
-    return () =>
-      clearInterval(timer);
+    return () => clearInterval(timer);
   }, [countdown]);
 
   const code = codes.join("");
 
-  function handleChange(
-    value: string,
-    index: number
-  ) {
-    if (!/^\d*$/.test(value))
-      return;
+  const passwordChecks = {
+    length: newPassword.length >= 6,
+    uppercase: /[A-Z]/.test(newPassword),
+    number: /\d/.test(newPassword),
+    symbol: /[\W_]/.test(newPassword),
+  };
 
-    const newCodes = [...codes];
+  function handleChange(value: string, index: number) {
+  if (!/^\d*$/.test(value)) return;
 
-    newCodes[index] =
-      value.slice(-1);
-
-    setCodes(newCodes);
+    const updated = [...codes];
+    updated[index] = value.slice(-1);
+    setCodes(updated);
 
     if (value && index < 5) {
-      inputsRef.current[
-        index + 1
-      ]?.focus();
+      inputsRef.current[index + 1]?.focus();
     }
   }
 
@@ -122,159 +689,88 @@ function ResetPasswordContent() {
   ) {
     if (e.key === "Backspace") {
       if (codes[index]) {
-        const newCodes = [
-          ...codes,
-        ];
-
-        newCodes[index] = "";
-
-        setCodes(newCodes);
-
+        const updated = [...codes];
+        updated[index] = "";
+        setCodes(updated);
         return;
       }
 
       if (index > 0) {
-        inputsRef.current[
-          index - 1
-        ]?.focus();
+        inputsRef.current[index - 1]?.focus();
       }
     }
 
-    if (e.key === "ArrowLeft") {
-      if (index > 0) {
-        inputsRef.current[
-          index - 1
-        ]?.focus();
-      }
+    if (e.key === "ArrowLeft" && index > 0) {
+      inputsRef.current[index - 1]?.focus();
     }
 
-    if (e.key === "ArrowRight") {
-      if (index < 5) {
-        inputsRef.current[
-          index + 1
-        ]?.focus();
-      }
+    if (e.key === "ArrowRight" && index < 5) {
+      inputsRef.current[index + 1]?.focus();
     }
   }
 
-  function handlePaste(
-    e: React.ClipboardEvent<HTMLInputElement>
-  ) {
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
     e.preventDefault();
 
-    const pastedData =
-      e.clipboardData
-        .getData("text")
-        .replace(/\D/g, "")
-        .slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
-    if (!pastedData) return;
+    if (!pasted) return;
 
-    const newCodes = [...codes];
+    const updated = ["", "", "", "", "", ""];
 
-    pastedData
-      .split("")
-      .forEach(
-        (char, index) => {
-          if (index < 6) {
-            newCodes[index] =
-              char;
-          }
-        }
-      );
+    pasted.split("").forEach((digit, index) => {
+      updated[index] = digit;
+    });
 
-    setCodes(newCodes);
-
-    const focusIndex =
-      Math.min(
-        pastedData.length,
-        5
-      );
-
-    inputsRef.current[
-      focusIndex
-    ]?.focus();
+    setCodes(updated);
+    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
   }
 
   async function handleResendCode() {
-    if (!email) return;
+    if (!email || resending || countdown > 0) return;
 
     try {
       setResending(true);
 
-      const res = await fetch(
-        "/api/auth/forgot-password",
-        {
-          method: "POST",
+      const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      const data = await res.json().catch(() => ({}));
 
-          body: JSON.stringify({
-            email,
-          }),
-        }
-      );
-
-      const data = await res
-        .json()
-        .catch(() => ({}));
-
-      if (!res.ok) {
+      if (!res.ok || data.success === false) {
         toast.error(
-          data?.error ||
-            "Failed to resend code"
+          data.message || data.error || "Failed to resend code"
         );
-
         return;
       }
 
-      toast.success(
-        "Verification code resent"
-      );
-
+      toast.success(data.message || "Verification code resent");
+      setCodes(["", "", "", "", "", ""]);
       setCountdown(60);
-    } catch {
-      toast.error(
-        "Failed to resend code"
-      );
+      inputsRef.current[0]?.focus();
+    } catch (error) {
+      console.error("Resend reset code error:", error);
+      toast.error("Failed to resend code. Please try again.");
     } finally {
       setResending(false);
     }
   }
 
-  async function onSubmit(
-    e: React.FormEvent
-  ) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (code.length !== 6) {
-      toast.error(
-        "Enter the 6-digit verification code"
-      );
-
+      toast.error("Enter the 6-digit verification code");
       return;
     }
-
-    const passwordChecks = {
-      length:
-        newPassword.length >= 6,
-
-      uppercase:
-        /[A-Z]/.test(
-          newPassword
-        ),
-
-      number:
-        /\d/.test(newPassword),
-
-      symbol:
-        /[\W_]/.test(
-          newPassword
-        ),
-    };
 
     if (
       !passwordChecks.length ||
@@ -282,84 +778,45 @@ function ResetPasswordContent() {
       !passwordChecks.number ||
       !passwordChecks.symbol
     ) {
-      toast.error(
-        "Password does not meet requirements"
-      );
-
+      toast.error("Password does not meet requirements");
       return;
     }
 
-    setLoading(true);
-
     try {
-      const res = await fetch(
-        "/api/auth/reset-password",
-        {
-          method: "POST",
+      setLoading(true);
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          code,
+          password: newPassword,
+        }),
+      });
 
-          body: JSON.stringify({
-            email,
-            code,
-            password:
-              newPassword,
-          }),
-        }
-      );
+      const data = await res.json().catch(() => ({}));
 
-      const data = await res
-        .json()
-        .catch(() => ({}));
-
-      if (!res.ok) {
-        toast.error(
-          data?.error ||
-            "Reset failed"
-        );
-
+      if (!res.ok || data.success === false) {
+        toast.error(data.message || data.error || "Reset failed");
         return;
       }
 
-      toast.success(
-        "Password reset successful"
-      );
-
-      router.push(
-        "/auth/login"
-      );
-    } catch {
-      toast.error(
-        "Reset failed"
-      );
+      toast.success(data.message || "Password reset successful");
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Reset password error:", error);
+      toast.error("Unable to connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  const passwordChecks = {
-    length:
-      newPassword.length >= 6,
-
-    uppercase:
-      /[A-Z]/.test(
-        newPassword
-      ),
-
-    number:
-      /\d/.test(newPassword),
-
-    symbol:
-      /[\W_]/.test(
-        newPassword
-      ),
-  };
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+      {/* TOP GLOW */}
       <svg
         className="absolute left-0 top-0 h-25 w-full"
         xmlns="http://www.w3.org/2000/svg"
@@ -369,21 +826,13 @@ function ResetPasswordContent() {
         <defs>
           <linearGradient id="topGlow" x1="0" x2="1">
             <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.95" />
-
             <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
           </linearGradient>
         </defs>
 
         <path
           fill="url(#topGlow)"
-          d="
-            M0,160
-            C240,260 480,40 720,160
-            C960,260 1200,60 1440,160
-            L1440,0
-            L0,0
-            Z
-          "
+          d="M0,160 C240,260 480,40 720,160 C960,260 1200,60 1440,160 L1440,0 L0,0 Z"
         />
       </svg>
 
@@ -397,33 +846,24 @@ function ResetPasswordContent() {
         <defs>
           <linearGradient id="bottomGlow" x1="1" x2="0">
             <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.92" />
-
             <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.35" />
           </linearGradient>
         </defs>
 
         <path
           fill="url(#bottomGlow)"
-          d="
-            M0,160
-            C240,60 480,280 720,160
-            C960,40 1200,240 1440,160
-            L1440,320
-            L0,320
-            Z
-          "
+          d="M0,160 C240,60 480,280 720,160 C960,40 1200,240 1440,160 L1440,320 L0,320 Z"
         />
       </svg>
-      <Card className="w-full max-w-md shadow-lg">
+
+      <Card className="relative z-10 w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">
             Reset Password
           </CardTitle>
 
           <CardDescription>
-            Enter the verification
-            code and your new
-            password
+            Enter the verification code and your new password
           </CardDescription>
 
           <p className="break-all text-sm font-medium text-primary">
@@ -432,163 +872,102 @@ function ResetPasswordContent() {
         </CardHeader>
 
         <CardContent>
-  <form
-    onSubmit={onSubmit}
-    className="space-y-6"
-  >
-    <div className="space-y-3">
-      {/* <label className="text-sm font-medium">
-        Verification Code
-      </label> */}
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex justify-center gap-2">
+                {codes.map((digit, index) => (
+                  <Input
+                    key={index}
+                    ref={(el) => {
+                      inputsRef.current[index] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? "one-time-code" : "off"}
+                    maxLength={1}
+                    value={digit}
+                    aria-label={`Reset code digit ${index + 1}`}
+                    onChange={(e) =>
+                      handleChange(e.target.value, index)
+                    }
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    onPaste={handlePaste}
+                    className="h-12 w-12 text-center text-lg font-bold"
+                  />
+                ))}
+              </div>
+            </div>
 
-      <div className="flex justify-center gap-2">
-        {codes.map(
-          (digit, index) => (
-            <Input
-              key={index}
-              ref={(el) => {
-                inputsRef.current[
-                  index
-                ] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) =>
-                handleChange(
-                  e.target.value,
-                  index
-                )
-              }
-              onKeyDown={(e) =>
-                handleKeyDown(
-                  e,
-                  index
-                )
-              }
-              onPaste={
-                handlePaste
-              }
-              className="h-12 w-12 text-center text-lg font-bold"
-            />
-          )
-        )}
-      </div>
-    </div>
+            <div className="space-y-3">
+              <label className="text-sm font-medium">
+                New Password
+              </label>
 
-    <div className="space-y-3">
-      <label className="text-sm font-medium">
-        New Password
-      </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  autoComplete="new-password"
+                  className="pr-10"
+                />
 
-      <div className="relative">
-        <Input
-          type={
-            showPassword
-              ? "text"
-              : "password"
-          }
-          value={newPassword}
-          onChange={(e) =>
-            setNewPassword(
-              e.target.value
-            )
-          }
-          placeholder="Enter new password"
-          className="pr-10"
-        />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            setShowPassword(
-              !showPassword
-            )
-          }
-          className="absolute right-3 top-1/2 -translate-y-1/2"
-        >
-          {showPassword ? (
-            <EyeOff className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          )}
-        </button>
-      </div>
+              <div className="space-y-1 text-xs">
+                <p className={passwordChecks.length ? "text-green-500" : "text-red-500"}>
+                  ✓ At least 6 characters
+                </p>
+                <p className={passwordChecks.uppercase ? "text-green-500" : "text-red-500"}>
+                  ✓ One uppercase letter
+                </p>
+                <p className={passwordChecks.number ? "text-green-500" : "text-red-500"}>
+                  ✓ One number
+                </p>
+                <p className={passwordChecks.symbol ? "text-green-500" : "text-red-500"}>
+                  ✓ One special character
+                </p>
+              </div>
+            </div>
 
-      <div className="space-y-1 text-xs">
-        <p
-          className={
-            passwordChecks.length
-              ? "text-green-500"
-              : "text-red-500"
-          }
-        >
-          ✓ At least 6 characters
-        </p>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || resending}
+            >
+              {loading ? "Resetting..." : "Reset Password"}
+            </Button>
 
-        <p
-          className={
-            passwordChecks.uppercase
-              ? "text-green-500"
-              : "text-red-500"
-          }
-        >
-          ✓ One uppercase letter
-        </p>
-
-        <p
-          className={
-            passwordChecks.number
-              ? "text-green-500"
-              : "text-red-500"
-          }
-        >
-          ✓ One number
-        </p>
-
-        <p
-          className={
-            passwordChecks.symbol
-              ? "text-green-500"
-              : "text-red-500"
-          }
-        >
-          ✓ One special character
-        </p>
-      </div>
-    </div>
-
-    <Button
-      type="submit"
-      className="w-full"
-      disabled={loading}
-    >
-      {loading
-        ? "Resetting..."
-        : "Reset Password"}
-    </Button>
-
-    <Button
-      type="button"
-      variant="outline"
-      className=" justify-end"
-      disabled={
-        resending ||
-        countdown > 0
-      }
-      onClick={
-        handleResendCode
-      }
-    >
-      {resending
-        ? "Sending..."
-        : countdown > 0
-        ? `Resend in ${countdown}s`
-        : "Resend Code"}
-    </Button>
-  </form>
-</CardContent>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={resending || loading || countdown > 0}
+              onClick={handleResendCode}
+            >
+              {resending
+                ? "Sending..."
+                : countdown > 0
+                  ? `Resend in ${countdown}s`
+                  : "Resend Code"}
+            </Button>
+          </form>
+        </CardContent>
       </Card>
     </div>
   );

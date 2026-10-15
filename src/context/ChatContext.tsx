@@ -501,7 +501,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const reconnected = await waitForSocketConnect(socket, 4000);
 
   if (!reconnected) {
-    toast.error("Chat is reconnecting. Please try again.");
+    toast.error("Unable to connect to chat. Please refresh the page.");
     return false;
   }
 }

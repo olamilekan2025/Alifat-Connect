@@ -1,20 +1,26 @@
+
+import { randomInt } from "node:crypto";
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { sendLoginVerificationCode } from "@/lib/nodemailer";
 
-const LOGIN_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const LOGIN_CODE_TTL_MS = 5 * 60 * 1000;
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
 
-    const normalizedEmail = String(body?.email ?? "")
+    const email = String(body?.email ?? "")
       .trim()
       .toLowerCase();
 
-    if (!normalizedEmail) {
+    if (
+      !email ||
+      email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
       return NextResponse.json(
-        { error: "Missing email" },
+        { error: "Please provide a valid email address." },
         { status: 400 }
       );
     }
@@ -26,105 +32,86 @@ export async function POST(req: Request) {
       "loginVerificationCodes"
     );
 
-    // Find user
-    const user = await users.findOne({
-      email: normalizedEmail,
-    });
+    const user = await users.findOne({ email });
 
-    // Prevent email enumeration
+    // Avoid revealing whether a particular email has an account.
     if (!user) {
       return NextResponse.json({
-        ok: true,
+        success: true,
         message:
-          "If the account exists, a verification code has been sent.",
+          "If the account is eligible, a verification code will be sent.",
       });
     }
 
-    // Admin only
-    if (String(user.role || "").toLowerCase() !== "admin") {
+    if (String(user.role ?? "").toLowerCase() !== "admin") {
       return NextResponse.json(
-        {
-          error:
-            "Only administrators can request a login verification code.",
-        },
+        { error: "This account cannot request an admin login code." },
         { status: 403 }
       );
     }
 
-    // Email must already be verified
-    if (!user.emailVerified) {
+    if (user.emailVerified !== true) {
       return NextResponse.json(
-        {
-          error:
-            "Please verify your email address first.",
-        },
+        { error: "Please verify your email address first." },
         { status: 403 }
       );
     }
 
-    // Generate new 6-digit code
-    const code = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    // Generate a cryptographically secure six-digit code.
+    const code = randomInt(100000, 1000000).toString();
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + LOGIN_CODE_TTL_MS);
 
-    const expiresAt = new Date(
-      Date.now() + LOGIN_CODE_TTL_MS
+    // Invalidate previous unused codes for this login flow.
+    await loginCodes.updateMany(
+      {
+        email,
+        purpose: "verify-login",
+        usedAt: null,
+      },
+      {
+        $set: { usedAt: now },
+      }
     );
 
-    // Remove previous login codes
-    await loginCodes.deleteMany({
-      email: normalizedEmail,
-      purpose: "verify-login",
-    });
-
-    // Save new code
-    await loginCodes.insertOne({
-      email: normalizedEmail,
+    const inserted = await loginCodes.insertOne({
+      email,
       userId: user._id,
       code,
       purpose: "verify-login",
+      createdAt: now,
       expiresAt,
-      createdAt: new Date(),
       usedAt: null,
     });
 
-    // Send email
-    const emailSent =
-      await sendLoginVerificationCode(
-        normalizedEmail,
-        code
-      );
+    const emailSent = await sendLoginVerificationCode(email, code);
 
     if (!emailSent) {
-      console.error(
-        `Failed to send login verification email to ${normalizedEmail}`
+      // Do not leave a usable code behind if email delivery fails.
+      await loginCodes.updateOne(
+        { _id: inserted.insertedId, usedAt: null },
+        { $set: { usedAt: new Date() } }
       );
 
       return NextResponse.json(
         {
           error:
-            "Unable to send verification email. Please try again later.",
+            "Unable to send the verification email. Please try again later.",
         },
         { status: 500 }
       );
     }
 
+    // Never log the OTP itself.
     return NextResponse.json({
-      ok: true,
-      message:
-        "Login verification code sent successfully.",
+      success: true,
+      message: "A new login verification code has been sent.",
     });
   } catch (error) {
-    console.error(
-      "RESEND LOGIN CODE ERROR:",
-      error
-    );
+    console.error("RESEND LOGIN CODE ERROR:", error);
 
     return NextResponse.json(
-      {
-        error:
-          "Failed to resend login verification code.",
-      },
+      { error: "Failed to resend the login verification code." },
       { status: 500 }
     );
   }

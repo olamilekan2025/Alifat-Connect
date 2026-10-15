@@ -1,23 +1,107 @@
-import type { NextAuthOptions } from "next-auth";
+
+
+import type { NextAuthOptions, User as NextAuthUser } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import {
+  createHash,
+  randomBytes,
+  randomInt,
+} from "node:crypto";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import AdminLoginLog from "@/models/AdminLoginLog";
-import {
-  sendLoginVerificationCode,
-} from "@/lib/nodemailer";
+import { sendLoginVerificationCode } from "@/lib/nodemailer";
 
-function generateReferralCode() {
+const OTP_TTL_MS = 5 * 60 * 1000;
+const GRANT_TTL_MS = 2 * 60 * 1000;
+
+type AppUser = NextAuthUser & {
+  role?: string;
+  isAdmin?: boolean;
+};
+
+function generateReferralCode(): string {
   return (
     "REF" +
-    Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase()
+    randomBytes(6).toString("hex").substring(0, 6).toUpperCase()
   );
+}
+
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function getHeader(
+  value: string | string[] | undefined,
+): string {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
+function normalizeEmail(value: unknown): string {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function normalizeRole(value: unknown): string {
+  return typeof value === "string" && value.trim()
+    ? value.trim().toLowerCase()
+    : "user";
+}
+
+function getUserName(user: {
+  name?: string | null;
+  firstname?: string | null;
+  lastname?: string | null;
+}): string {
+  const fullName =
+    `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim();
+
+  return user.name?.trim() || fullName || "User";
+}
+
+function getDatabaseUserId(user: {
+  _id?: { toString(): string };
+  id?: string;
+}): string {
+  if (user._id) return user._id.toString();
+  return typeof user.id === "string" ? user.id : "";
+}
+
+function getRequestIp(
+  headers: Record<string, string | string[] | undefined>,
+): string {
+  const forwardedFor = getHeader(headers["x-forwarded-for"]);
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim() || "unknown";
+  }
+
+  return getHeader(headers["x-real-ip"]) || "unknown";
+}
+
+async function logAdminLogin(data: {
+  adminId: unknown;
+  ip: string;
+  userAgent: string;
+  success: boolean;
+}): Promise<void> {
+  try {
+    await AdminLoginLog.create({
+      adminId: data.adminId,
+      ip: data.ip,
+      device: "web",
+      userAgent: data.userAgent,
+      success: data.success,
+    });
+  } catch (error) {
+    console.error(
+      "Failed to record admin login attempt:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -28,7 +112,6 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
 
-  // Use standard JWT instead of encrypted JWE for easier socket authentication
   jwt: {
     maxAge: 30 * 24 * 60 * 60,
   },
@@ -40,340 +123,327 @@ export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret:
-        process.env.GOOGLE_CLIENT_SECRET || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
 
     CredentialsProvider({
       name: "Credentials",
 
-     credentials: {
-  email: {
-    label: "Email",
-    type: "email",
-  },
-
-  password: {
-    label: "Password",
-    type: "password",
-  },
-
-  adminVerified: {
-    label: "Admin Verified",
-    type: "text",
-  },
-},
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+        adminLoginGrant: {
+          label: "Admin login grant",
+          type: "text",
+        },
+      },
 
       async authorize(credentials, req) {
-        try {
-          if (
-            !credentials?.email ||
-            !credentials?.password
-          ) {
-            throw new Error(
-              "Email and password are required"
-            );
-          }
+        const email = normalizeEmail(credentials?.email);
+        const password = String(credentials?.password ?? "");
 
-          await connectToDatabase();
-
-          const email = credentials.email
-            .trim()
-            .toLowerCase();
-
-  const user = await User.findOne({
-  email,
-}).select("+password");
-
-          console.log(
-            "========== LOGIN DEBUG =========="
-          );
-          console.log("EMAIL:", email);
-          console.log(
-            "USER FOUND:",
-            !!user
-          );
-
-          if (!user) {
-            throw new Error(
-              "Invalid email or password"
-            );
-          }
-
-          console.log(
-            "ROLE:",
-            user.role
-          );
-
-          console.log(
-            "EMAIL VERIFIED:",
-            user.emailVerified
-          );
-
-        console.log("HAS PASSWORD:", Boolean(user.password));
-
-if (
-  typeof user.password !== "string" ||
-  user.password.length === 0
-) {
-  throw new Error(
-    "Your account does not have a valid password. Please reset it or contact an administrator."
-  );
-}
-
-         if (!user.emailVerified) {
-  throw new Error("EMAIL_VERIFICATION_REQUIRED");
-}
-
-         
-
-          const role =
-            user.role
-              ? String(user.role).toLowerCase()
-              : "user";
-
-          if (
-  user.role === "admin" &&
-  credentials.adminVerified !== "true"
-) {
-  const otp = Math.floor(
-    100000 + Math.random() * 900000
-  ).toString();
-
-const db =
-  await connectToDatabase();
-
-await db.connection
-  .collection(
-    "loginVerificationCodes"
-  )
-  .insertOne({
-    email: user.email,
-    code: otp,
-    purpose: "verify-login",
-    createdAt: new Date(),
-    expiresAt: new Date(
-      Date.now() +
-        10 * 60 * 1000
-    ),
-    usedAt: null,
-  });
-
-const emailSent =
-  await sendLoginVerificationCode(
-    user.email,
-    otp
-  );
-
-
-
-console.log(
-  "EMAIL SENT:",
-  emailSent
-);
-
-if (!emailSent) {
-  throw new Error(
-    "Failed to send verification code"
-  );
-}
-
-throw new Error(
-  "ADMIN_VERIFICATION_REQUIRED"
-);
-}
-
-          const isPasswordValid =
-            await bcrypt.compare(
-              credentials.password,
-              user.password
-            );
-
-          console.log(
-            "PASSWORD MATCH:",
-            isPasswordValid
-          );
-
-         if (!isPasswordValid) {
-  // Log failed login attempt for admin
-  if (user.role === "admin") {
-    const ip = req?.headers?.["x-forwarded-for"] || "unknown";
-    const userAgent = req?.headers?.["user-agent"] || "";
-    try {
-      await AdminLoginLog.create({
-        adminId: user._id,
-        ip,
-        device: "web",
-        userAgent,
-        success: false,
-      });
-    } catch (logError) {
-      console.error("Failed to log login attempt:", logError);
-    }
-  }
-  throw new Error("Invalid email or password");
-}
-
-// Update login information
-user.lastLoginAt = new Date();
-user.sessionCreatedAt = new Date();
-
-await user.save();
-
-// Log successful login attempt for admin
-if (user.role === "admin") {
-  const ip = req?.headers?.["x-forwarded-for"] || "unknown";
-  const userAgent = req?.headers?.["user-agent"] || "";
-  try {
-    await AdminLoginLog.create({
-      adminId: user._id,
-      ip,
-      device: "web",
-      userAgent,
-      success: true,
-    });
-  } catch (logError) {
-    console.error("Failed to log login attempt:", logError);
-  }
-}
-
-          return {
-            id: user._id.toString(),
-            name:
-              user.name ||
-              `${user.firstname || ""} ${
-                user.lastname || ""
-              }`.trim() ||
-              "User",
-            email: user.email,
-            image:
-              user.image ?? undefined,
-            role: (
-              user.role || "user"
-            ).toLowerCase(),
-            isAdmin: user.role === "admin",
-          };
-        } catch (error) {
-          console.error(
-            "AUTH ERROR:",
-            error
-          );
-
-          throw error;
+        if (!email || !password) {
+          throw new Error("Email and password are required");
         }
+
+        if (!process.env.NEXTAUTH_SECRET) {
+          console.error("NEXTAUTH_SECRET is not configured");
+          throw new Error("Authentication is not configured");
+        }
+
+        await connectToDatabase();
+
+        const user = await User.findOne({ email }).select("+password");
+
+        if (!user) {
+          throw new Error("Invalid email or password");
+        }
+
+        if (
+          typeof user.password !== "string" ||
+          !user.password
+        ) {
+          throw new Error(
+            "Your account does not have a valid password. Please reset it or contact an administrator.",
+          );
+        }
+
+        if (!user.emailVerified) {
+          throw new Error("EMAIL_VERIFICATION_REQUIRED");
+        }
+
+        const passwordValid = await bcrypt.compare(
+          password,
+          user.password,
+        );
+
+        const role = normalizeRole(user.role);
+        const isAdmin = role === "admin";
+
+        const headers = (req?.headers ?? {}) as Record<
+          string,
+          string | string[] | undefined
+        >;
+
+        const ip = getRequestIp(headers);
+        const userAgent = getHeader(headers["user-agent"]);
+
+        if (!passwordValid) {
+          if (isAdmin) {
+            await logAdminLogin({
+              adminId: user._id,
+              ip,
+              userAgent,
+              success: false,
+            });
+          }
+
+          throw new Error("Invalid email or password");
+        }
+
+        if (isAdmin) {
+          const db = await connectToDatabase();
+          const loginCodes = db.connection.collection(
+            "loginVerificationCodes",
+          );
+          const grants = db.connection.collection("adminLoginGrants");
+
+          const grantToken = String(
+            credentials?.adminLoginGrant ?? "",
+          ).trim();
+
+          if (!grantToken) {
+            const now = new Date();
+
+            await loginCodes.updateMany(
+              {
+                email,
+                purpose: "verify-login",
+                usedAt: null,
+              },
+              {
+                $set: { usedAt: now },
+              },
+            );
+
+            const code = randomInt(100000, 1000000).toString();
+
+            await loginCodes.insertOne({
+              email,
+              userId: user._id,
+              code,
+              purpose: "verify-login",
+              createdAt: now,
+              expiresAt: new Date(now.getTime() + OTP_TTL_MS),
+              usedAt: null,
+            });
+
+            const emailSent = await sendLoginVerificationCode(
+              email,
+              code,
+            );
+
+            if (!emailSent) {
+              await loginCodes.updateOne(
+                {
+                  email,
+                  code,
+                  purpose: "verify-login",
+                  usedAt: null,
+                },
+                {
+                  $set: { usedAt: new Date() },
+                },
+              );
+
+              throw new Error(
+                "Unable to send the verification code. Please try again.",
+              );
+            }
+
+            throw new Error("ADMIN_VERIFICATION_REQUIRED");
+          }
+
+          const tokenHash = hashToken(grantToken);
+          const now = new Date();
+
+          const grant = await grants.findOne({
+            tokenHash,
+            email,
+            userId: user._id,
+            purpose: "admin-login",
+            usedAt: null,
+            expiresAt: { $gt: now },
+          });
+
+          if (!grant) {
+            throw new Error("ADMIN_VERIFICATION_REQUIRED");
+          }
+
+          const consumedAt = new Date();
+
+          const consumed = await grants.updateOne(
+            {
+              _id: grant._id,
+              tokenHash,
+              email,
+              userId: user._id,
+              purpose: "admin-login",
+              usedAt: null,
+              expiresAt: { $gt: consumedAt },
+            },
+            {
+              $set: { usedAt: consumedAt },
+            },
+          );
+
+          if (consumed.modifiedCount !== 1) {
+            throw new Error(
+              "Your verification has expired or already been used. Please try again.",
+            );
+          }
+        }
+
+        const databaseUserId = getDatabaseUserId(user);
+
+        if (!databaseUserId) {
+          throw new Error("Unable to identify your account");
+        }
+
+        user.lastLoginAt = new Date();
+        user.sessionCreatedAt = new Date();
+        await user.save();
+
+        if (isAdmin) {
+          await logAdminLogin({
+            adminId: user._id,
+            ip,
+            userAgent,
+            success: true,
+          });
+        }
+
+        return {
+          id: databaseUserId,
+          name: getUserName(user),
+          email: normalizeEmail(user.email),
+          image: user.image ?? undefined,
+          role,
+          isAdmin,
+        } as AppUser;
       },
     }),
   ],
 
   callbacks: {
-    async jwt({
-      token,
-      user,
-      account,
-    }) {
+    async jwt({ token, user, account }) {
       if (user) {
-  token.id = user.id;
-  token.name = user.name;
-  token.email = user.email;
-  token.role = String(user.role || "user").toLowerCase();
-}
+        const appUser = user as AppUser;
 
-      if (
-        account?.provider ===
-          "google" &&
-        token.email
-      ) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.role = normalizeRole(appUser.role);
+        token.isAdmin = token.role === "admin";
+      }
+
+      if (account?.provider === "google") {
+        const email = normalizeEmail(token.email);
+
+        if (!email) {
+          throw new Error("Google account does not provide an email address");
+        }
+
         await connectToDatabase();
 
-        const existingUser =
-          await User.findOne({
-            email: token.email
-              .trim()
-              .toLowerCase(),
-          });
+        const existingUser = await User.findOne({ email });
 
-        if (existingUser) {
-          token.id =
-            existingUser._id.toString();
-
-          token.role = String(
-            existingUser.role || "user"
-          ).toLowerCase();
+        if (!existingUser) {
+          throw new Error("Google account could not be linked to a database user");
         }
+
+        const databaseUserId = getDatabaseUserId(existingUser);
+
+        if (!databaseUserId) {
+          throw new Error("Unable to identify your Google account");
+        }
+
+        token.id = databaseUserId;
+        token.name = getUserName(existingUser);
+        token.email = email;
+        token.role = normalizeRole(existingUser.role);
+        token.isAdmin = token.role === "admin";
       }
+
+      // Fallback for older JWTs containing `sub` but not `id`.
+      if (!token.id && token.sub) {
+        token.id = token.sub;
+      }
+
+      if (!token.role) {
+        token.role = "user";
+      }
+
+      // Always derive the admin flag from the role claim.
+      token.isAdmin = token.role === "admin";
 
       return token;
     },
 
-    async session({
-      session,
-      token,
-    }) {
+    async session({ session, token }) {
       if (session.user) {
-  session.user.id = String(token.id);
-  session.user.name = String(token.name || "");
-  session.user.email = String(token.email || "");
-  session.user.role = String(token.role).toLowerCase();
-}
+        const id =
+          typeof token.id === "string"
+            ? token.id
+            : typeof token.sub === "string"
+              ? token.sub
+              : "";
+
+        session.user.id = id;
+        session.user.name =
+          typeof token.name === "string" ? token.name : "";
+        session.user.email =
+          typeof token.email === "string" ? token.email : "";
+        session.user.role = normalizeRole(token.role);
+        session.user.isAdmin = session.user.role === "admin";
+      }
 
       return session;
     },
 
-    async signIn({
-      user,
-      account,
-    }) {
+    async signIn({ user, account }) {
       try {
-        if (
-          account?.provider ===
-          "google"
-        ) {
-          await connectToDatabase();
+        if (account?.provider !== "google") {
+          return true;
+        }
 
-          const email =
-            user.email
-              ?.trim()
-              .toLowerCase();
+        await connectToDatabase();
 
-          if (!email) {
-            return false;
-          }
+        const email = normalizeEmail(user.email);
 
-          let existingUser =
-            await User.findOne({
-              email,
-            });
+        if (!email) {
+          return false;
+        }
 
-          if (!existingUser) {
-            existingUser =
-              await User.create({
-                name:
-                  user.name ||
-                  "Google User",
+        let existingUser = await User.findOne({ email });
 
-                email,
-
-                image:
-                  user.image ||
-                  undefined,
-
-                emailVerified: true,
-
-                role: "user",
-
-                walletBalance: 0,
-
-                referralCode:
-                  generateReferralCode(),
-              });
-          }
+        if (!existingUser) {
+          existingUser = await User.create({
+            name: user.name || "Google User",
+            email,
+            image: user.image || undefined,
+            emailVerified: true,
+            role: "user",
+            walletBalance: 0,
+            referralCode: generateReferralCode(),
+          });
         }
 
         return true;
       } catch (error) {
         console.error(
-          "SIGN IN ERROR:",
-          error
+          "Google sign-in failed:",
+          error instanceof Error ? error.message : "Unknown error",
         );
 
         return false;

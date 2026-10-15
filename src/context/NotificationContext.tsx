@@ -6,15 +6,14 @@ import {
   useContext,
   useEffect,
   useReducer,
-  useRef,
 } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { io, Socket } from "socket.io-client";
 import type {
   NotificationResponse,
   NotificationRecipientRole,
 } from "@/lib/notifications/client";
+import { useSocket } from "@/hooks/useSocket";
 
 type State = {
   notifications: NotificationResponse[];
@@ -152,7 +151,7 @@ const NotificationContext = createContext<NotificationContextValue | null>(
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [state, dispatch] = useReducer(reducer, initialState);
-  const socketRef = useRef<Socket | null>(null);
+  const socket = useSocket(true);
 
   const enabled = status === "authenticated";
   const userRole = (session?.user?.role as NotificationRecipientRole) || "user";
@@ -200,32 +199,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     refreshNotifications();
   }, [enabled, userId, userRole, refreshNotifications]);
 
-  // Initialize Socket.IO connection for notifications
+  // Listen for new notifications via shared socket
   useEffect(() => {
-    if (!enabled || !userId) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+    if (!socket || !enabled) {
       return;
     }
 
-    // Create Socket.IO connection
-    const socketIO = io(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000", {
-      path: "/socket.io",
-      transports: ["websocket", "polling"],
-    });
-
-    socketIO.on("connect", () => {
-      console.log("Notification socket connected");
-    });
-
-    socketIO.on("disconnect", () => {
-      console.log("Notification socket disconnected");
-    });
-
-    // Listen for new notifications
-    socketIO.on("notification:new", (notification: NotificationResponse) => {
+    const handleNewNotification = (notification: NotificationResponse) => {
       dispatch({ type: "ADD_NOTIFICATION", notification });
 
       // Show toast for new notification
@@ -233,17 +213,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         description: notification.body,
         icon: "🔔",
       });
-    });
+    };
 
-    socketRef.current = socketIO;
+    socket.on("notification:new", handleNewNotification);
 
     return () => {
-      socketIO.off("notification:new");
-      socketIO.off("connect");
-      socketIO.off("disconnect");
-      socketIO.disconnect();
+      socket.off("notification:new", handleNewNotification);
     };
-  }, [enabled, userId]);
+  }, [socket, enabled]);
 
   const markAsRead = useCallback(async (notificationId: string) => {
     if (!userId || !userRole) return;

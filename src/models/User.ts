@@ -1,8 +1,5 @@
-import { Schema, model, models, Model } from "mongoose";
+import { Schema, model, models, type Model } from "mongoose";
 
-/**
- * USER INTERFACE
- */
 export interface IUser {
   name?: string;
   firstname?: string;
@@ -15,27 +12,19 @@ export interface IUser {
   image?: string;
 
   role: "admin" | "user" | "moderator";
-
   accountType: "user" | "seller";
 
- membershipLevel?: "starter" | "premium" | "enterprise";
+  membershipLevel?: "starter" | "premium" | "enterprise";
+  membershipHistory?: {
+    level: "starter" | "premium" | "enterprise";
+    achievedAt: Date;
+  }[];
 
-membershipHistory?: {
-  level: "starter" | "premium" | "enterprise";
-  achievedAt: Date;
-}[];
-
-/**
- * Total amount saved through membership discounts
- */
-lifetimeSavings?: number;
-
+  lifetimeSavings?: number;
   walletBalance: number;
-
   isSuspended: boolean;
 
   sellerSince?: Date | null;
-
   lastPasswordChange?: Date | null;
   lastLoginAt?: Date | null;
   lastLoginIp?: string | null;
@@ -56,6 +45,10 @@ lifetimeSavings?: number;
 
   // EMAIL VERIFICATION
   emailVerified?: boolean;
+  emailVerificationCode?: string | null;
+  emailVerificationExpires?: Date | null;
+
+  // EXISTING LOGIN VERIFICATION
   loginVerificationCode?: string | null;
   loginVerificationExpires?: Date | null;
 
@@ -70,16 +63,13 @@ lifetimeSavings?: number;
   adminLoginVerified?: boolean;
   adminLoginVerifiedAt?: Date | null;
 
-  // =========================
   // REFERRAL SYSTEM
-  // =========================
   referralCode: string;
   referredBy?: string | null;
-
   referralsCount?: number;
   referralEarnings?: number;
 
-  // KYC Verification
+  // KYC VERIFICATION
   kycVerified?: boolean;
   kycVerifiedAt?: Date | null;
 
@@ -87,9 +77,6 @@ lifetimeSavings?: number;
   updatedAt?: Date;
 }
 
-/**
- * USER SCHEMA
- */
 const UserSchema = new Schema<IUser>(
   {
     name: {
@@ -125,11 +112,11 @@ const UserSchema = new Schema<IUser>(
       trim: true,
     },
 
-password: {
-  type: String,
-  required: false,
-  select: false,
-},
+    password: {
+      type: String,
+      required: false,
+      select: false,
+    },
 
     image: {
       type: String,
@@ -153,36 +140,33 @@ password: {
       default: "starter",
     },
 
-
     membershipHistory: {
-  type: [
-    {
-      level: {
-        type: String,
-        enum: ["starter", "premium", "enterprise"],
-        required: true,
-      },
-
-      achievedAt: {
-        type: Date,
-        default: Date.now,
-      },
+      type: [
+        {
+          level: {
+            type: String,
+            enum: ["starter", "premium", "enterprise"],
+            required: true,
+          },
+          achievedAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      default: [
+        {
+          level: "starter",
+          achievedAt: new Date(),
+        },
+      ],
     },
-  ],
 
-  default: [
-    {
-      level: "starter",
-      achievedAt: new Date(),
+    lifetimeSavings: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
-  ],
-},
-
-lifetimeSavings: {
-  type: Number,
-  default: 0,
-  min: 0,
-},
 
     walletBalance: {
       type: Number,
@@ -261,6 +245,20 @@ lifetimeSavings: {
       default: false,
     },
 
+    // Dedicated email verification fields.
+    emailVerificationCode: {
+      type: String,
+      default: undefined,
+      select: false,
+    },
+
+    emailVerificationExpires: {
+      type: Date,
+      default: undefined,
+      select: false,
+    },
+
+    // Preserve the existing login verification fields.
     loginVerificationCode: {
       type: String,
       default: null,
@@ -306,10 +304,7 @@ lifetimeSavings: {
       default: null,
     },
 
-    // =========================
     // REFERRAL SYSTEM
-    // =========================
-
     referralCode: {
       type: String,
       required: true,
@@ -333,7 +328,7 @@ lifetimeSavings: {
       default: 0,
     },
 
-    // KYC Verification
+    // KYC VERIFICATION
     kycVerified: {
       type: Boolean,
       default: false,
@@ -346,14 +341,11 @@ lifetimeSavings: {
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-/**
- * SAFE MODEL EXPORT
- */
 const User: Model<IUser> =
-  models.User ||
+  (models.User as Model<IUser>) ||
   model<IUser>("User", UserSchema);
 
 export default User;
